@@ -1,0 +1,29 @@
+{
+  "//": "follows https://medium.com/@l1ambda/browserifying-a-spring-boot-app-8190cf32334f",
+  "name": "account-rpt-gen",
+  "version": "1.0.0",
+  "description": "account report generation",
+  "main": "main.js",
+  "scripts": {
+    "prebuild": "npm install",
+    "build": "browserify app/main.js --debug | exorcist ./src/main/resources/static/bundle.js.map > ./src/main/resources/static/bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ketonemaniac/AccountRptGenCLoud.git"
+  },
+  "author": "ketone",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ketonemaniac/AccountRptGenCLoud/issues"
+  },
+  "homepage": "https://github.com/ketonemaniac/AccountRptGenCLoud#readme",
+  "private": true,
+  "dependencies": {
+    "browserify": "^14.5.0",
+    "dateformat": "^3.0.2",
+    "exorcist": "^1.0.0",
+    "spin": "0.0.1",
+    "watchify": "^3.9.0"
+  }
+}
