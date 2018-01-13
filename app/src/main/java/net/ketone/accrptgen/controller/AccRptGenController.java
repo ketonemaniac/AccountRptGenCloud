@@ -2,7 +2,7 @@ package net.ketone.accrptgen.controller;
 
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.dto.DownloadFileDto;
-import net.ketone.accrptgen.gen.AccountData;
+import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.gen.GenerationService;
 import net.ketone.accrptgen.gen.ParsingService;
 import net.ketone.accrptgen.store.StorageService;
@@ -12,9 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;

@@ -2,6 +2,7 @@ package net.ketone.accrptgen.store;
 
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.InputStreamResource;
@@ -34,6 +35,7 @@ public class GCloudStorageService implements StorageService {
 
     @Override
     public String store(XWPFDocument doc, String filename) throws IOException {
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         doc.write(out);
         String contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -73,5 +75,10 @@ public class GCloudStorageService implements StorageService {
     @Override
     public void delete(String filename) {
 
+    }
+
+    @Override
+    public XSSFWorkbook getTemplate(String templateName) throws IOException {
+        return null;
     }
 }

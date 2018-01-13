@@ -1,22 +1,18 @@
 package net.ketone.accrptgen.gen;
 
+import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.store.StorageService;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.Header;
+import org.apache.poi.wp.usermodel.Paragraph;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.*;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText;
+import org.apache.xmlbeans.XmlCursor;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 
 /**
  * Try http://www.javatechblog.com/java/create-header-and-footer-for-word-documents-using-docx4j/
@@ -43,15 +39,43 @@ public class GenerationServiceApachePOI implements GenerationService {
 
         for(XWPFHeader hdr : document.getHeaderList()) {
             for(XWPFParagraph para : hdr.getParagraphs()) {
-                for(XWPFRun run : para.getRuns()) {
-                    System.out.println(run.text());
-                }
+//                for(XWPFRun run : para.getRuns()) {
+//                    System.out.println(run.text());
+//                }
                 XWPFRun run2 = para.createRun();
                 run2.addCarriageReturn();
                 run2.setText(data.companyName);
                 run2.setBold(true);
             }
         }
+
+        int i = 0;
+        XWPFParagraph section1Pgh = null;
+        for(XWPFParagraph pgh : document.getParagraphs()) {
+            for(XWPFRun run : pgh.getRuns()) {
+                if(run.text().startsWith("SECTION1")) {
+                    section1Pgh = pgh;
+                }
+            }
+
+            CTPPr ctPPr = pgh.getCTP().getPPr();
+            if(ctPPr != null) {
+
+                // Get the CTSectPr object that contains the information
+                // about the document section and strip (some of) the
+                // information from it.
+                CTSectPr sectPr = ctPPr.getSectPr();
+                // this.discoverSectionInfo(sectPr, formatter);
+                System.out.println("****************** Section Information. ******************" + i++);
+            }
+        }
+
+        // System.out.println("[" + run.text() + "]");
+
+        String[] paragraphs = { "Are you sleeping?", "Brother John", "Morning bells are ringing" } ;
+        createParagraphs(section1Pgh, paragraphs);
+
+
 /*
         XWPFParagraph title = document.createParagraph();
         title.setAlignment(ParagraphAlignment.CENTER);
@@ -104,6 +128,27 @@ public class GenerationServiceApachePOI implements GenerationService {
         }
         return filename;
     }
+
+    private void createParagraphs(XWPFParagraph p, String[] paragraphs) {
+        if (p != null) {
+            XWPFDocument doc = p.getDocument();
+            XmlCursor cursor = p.getCTP().newCursor();
+            for (int i = 0; i < paragraphs.length; i++) {
+                XWPFParagraph newP = doc.createParagraph();
+                newP.getCTP().setPPr(p.getCTP().getPPr());
+                XWPFRun newR = newP.createRun();
+                newR.getCTR().setRPr(p.getRuns().get(0).getCTR().getRPr());
+                newR.setText(paragraphs[i]);
+                XmlCursor c2 = newP.getCTP().newCursor();
+                c2.moveXml(cursor);
+                c2.dispose();
+            }
+            cursor.removeXml(); // Removes replacement text paragraph
+            cursor.dispose();
+        }
+    }
+
+
 
     private void genHeaderFooter(XWPFDocument document) {
         CTSectPr sectPr = document.getDocument().getBody().addNewSectPr();

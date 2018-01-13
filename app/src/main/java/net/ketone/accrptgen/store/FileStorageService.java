@@ -1,7 +1,6 @@
 package net.ketone.accrptgen.store;
 
-import net.ketone.accrptgen.controller.AccRptGenController;
-import net.ketone.accrptgen.gen.ParsingService;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,18 +8,13 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Component
 @Profile("local")
@@ -28,12 +22,12 @@ public class FileStorageService implements StorageService {
 
     private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
     private static final String STORAGE_FOLDER = "files" + File.separator + "in" + File.separator;
+    private static final String TEMPLATE_FOLDER = "files" + File.separator + "template" + File.separator;
     List<String> filenames = new ArrayList<>();
 
     @Override
     public String store(XWPFDocument doc, String filename) throws IOException {
         File output= new File(STORAGE_FOLDER + filename);
-
         FileOutputStream out = new FileOutputStream(output);
         doc.write(out);
         out.close();
@@ -89,6 +83,12 @@ public class FileStorageService implements StorageService {
     @Override
     public void delete(String filename) {
 
+    }
+
+    @Override
+    public XSSFWorkbook getTemplate(String templateName) throws IOException {
+        XSSFWorkbook xlsx = new XSSFWorkbook(TEMPLATE_FOLDER + templateName);
+        return xlsx;
     }
 
 }

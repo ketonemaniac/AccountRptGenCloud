@@ -1,5 +1,7 @@
 package net.ketone.accrptgen.gen;
 
+import net.ketone.accrptgen.entity.AccountData;
+
 import java.text.SimpleDateFormat;
 
 public interface GenerationService {

@@ -73,11 +73,11 @@
 			<artifactId>spring-cloud-gcp-starter-sql</artifactId>
 			<version>${spring-starter-gcp.version}</version>
 		</dependency -->
-		<dependency>
+		<!-- dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-gcp-starter-storage</artifactId>
 			<version>${spring-starter-gcp.version}</version>
-		</dependency>
+		</dependency -->
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-1.0-sdk</artifactId>
