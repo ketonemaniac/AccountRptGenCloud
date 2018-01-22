@@ -10,6 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ResourceUtils;
 
 import java.io.*;
+import java.util.Date;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("local")
@@ -18,15 +19,25 @@ public class ParserTest {
 
     @Autowired
     private ParsingService svc;
+    @Autowired
+    private GenerationService genSvc;
 
     @Test
     public void testPreParse() throws IOException {
-        File file = ResourceUtils.getFile(this.getClass().getResource("/program (plain).xlsm"));
-        System.out.println(file.getAbsolutePath());
-        ByteArrayOutputStream os = svc.preParse(new FileInputStream(file));
+//        File file = ResourceUtils.getFile(this.getClass().getResource("/program (plain).xlsm"));
+//        System.out.println(file.getAbsolutePath());
+        InputStream inputStream = this.getClass().getResourceAsStream("/program (plain).xlsm");
+        ByteArrayOutputStream os = svc.preParse(inputStream);
 
         InputStream is = new ByteArrayInputStream(os.toByteArray());
         AccountData data = svc.readFile(is);
-        System.out.println(data.companyName);
+        System.out.println(data.getCompanyName());
+
+        data.setGenerationTime(new Date());
+
+        genSvc.generate(data);
     }
+
+
+
 }

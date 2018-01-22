@@ -33,12 +33,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<exclusions>
+			<!-- exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-tomcat</artifactId>
 				</exclusion>
-			</exclusions>
+			</exclusions -->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -99,6 +99,12 @@
 			<artifactId>google-cloud</artifactId>
 			<!-- version>1.14.0</version -->
 			<version>0.32.0-alpha</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.16.20</version>
+			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>

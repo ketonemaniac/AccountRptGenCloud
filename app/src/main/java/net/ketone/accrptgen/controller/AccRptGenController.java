@@ -52,15 +52,15 @@ public class AccRptGenController {
         InputStream is = new ByteArrayInputStream(file.getBytes());
         AccountData data = parsingService.readFile(is);
 
-        data.generationTime = new Date();
+        data.setGenerationTime(new Date());
 
         String filename = generationService.generate(data);
 
         AccountFileDto dto = new AccountFileDto();
-        dto.setCompany(data.companyName);
+        dto.setCompany(data.getCompanyName());
         dto.setFilename(filename);
         dto.setPassword(PasswordUtils.generatePassword(8));
-        dto.setGenerationTime(data.generationTime);
+        dto.setGenerationTime(data.getGenerationTime());
         return dto;
     }
 

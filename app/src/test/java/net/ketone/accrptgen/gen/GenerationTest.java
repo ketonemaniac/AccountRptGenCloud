@@ -1,6 +1,8 @@
 package net.ketone.accrptgen.gen;
 
 import net.ketone.accrptgen.entity.AccountData;
+import net.ketone.accrptgen.entity.Paragraph;
+import net.ketone.accrptgen.entity.Section;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.junit.Before;
@@ -59,8 +61,19 @@ public class GenerationTest {
     @Test
     public void testGeneration() {
         AccountData data = new AccountData();
-        data.companyName = "KEITH ENTERPRISES LTD";
-        data.generationTime = new Date();
+        data.setCompanyName("KEITH ENTERPRISES LTD");
+        data.setGenerationTime(new Date());
+
+        Section s = new Section();
+        data.addSection(s);
+        s.setName("SECTION1");
+        Paragraph p = new Paragraph();
+        p.setText("This is line 1");
+        Paragraph p2 = new Paragraph();
+        p2.setText("This is line 2");
+        s.addParagraph(p);
+        s.addParagraph(p2);
+
         svc.generate(data);
 
     }

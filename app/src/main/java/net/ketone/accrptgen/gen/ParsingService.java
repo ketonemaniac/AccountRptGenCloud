@@ -1,6 +1,8 @@
 package net.ketone.accrptgen.gen;
 
 import net.ketone.accrptgen.entity.AccountData;
+import net.ketone.accrptgen.entity.Paragraph;
+import net.ketone.accrptgen.entity.Section;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.ss.formula.eval.FunctionEval;
 import org.apache.poi.ss.formula.functions.DateDifFunc;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.util.HashMap;
@@ -87,21 +90,6 @@ public class ParsingService {
                             case FORMULA:
                                 templateCell.setCellFormula(cell.getCellFormula());
                                 count++;
-//                                CellValue cellValue = evaluator.evaluate(cell);
-//                                switch (cellValue.getCellTypeEnum()) {
-//                                    case BOOLEAN:
-//                                        value = "formula: " + cellValue.getBooleanValue();
-//                                        break;
-//                                    case NUMERIC:
-//                                        value = "formula: " + cellValue.getNumberValue();
-//                                        break;
-//                                    case STRING:
-//                                        value = "formula: " + cellValue.getStringValue();
-//                                        break;
-//                                    case BLANK:
-//                                    case ERROR:
-//                                        break;
-//                                }
                                 break;
                             case BLANK:
                             case ERROR:
@@ -123,7 +111,7 @@ public class ParsingService {
         evaluator.clearAllCachedResultValues();
         evaluator.evaluateAll();
 
-                ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
         templateWb.write(os);
         // templateWb.close();  // Don't do this. You dun wanna save it.
         return os;
@@ -134,13 +122,67 @@ public class ParsingService {
 
         AccountData data = new AccountData();
         Workbook workbook = new XSSFWorkbook(excelFile);
-        Sheet datatypeSheet = workbook.getSheet("Control");
 
+
+        Sheet metadataSheet = workbook.getSheet("Metadata");
+
+        int secIdx = 1;
+        for(String sheetName : AccountData.SECTION_LIST) {
+            int itemIdx = 1;
+            Section section = new Section();
+            section.setName(sheetName);
+            section.setFontSize((int) metadataSheet.getRow(itemIdx++).getCell(secIdx).getNumericCellValue());
+            char ctlChar = metadataSheet.getRow(itemIdx++).getCell(secIdx).getStringCellValue().charAt(0);
+            section.setControlColumn(charToIdx(ctlChar));
+            char yesNoChar = metadataSheet.getRow(itemIdx++).getCell(secIdx).getStringCellValue().charAt(0);
+            section.setYesNoColumn(charToIdx(yesNoChar));
+
+            parseSection(workbook, section);
+            data.addSection(section);
+            secIdx++;
+        }
+
+        Sheet controlSheet = workbook.getSheet("Control");
         // this is D5, put as Row 5 Column D (0 = A1)
-        String companyName = datatypeSheet.getRow(1).getCell(3).getStringCellValue();
+        String companyName = controlSheet.getRow(1).getCell(3).getStringCellValue();
         System.out.println(companyName);
-        data.companyName = companyName;
+        data.setCompanyName(companyName);
+
+
+
+
         return data;
     }
+
+    private int charToIdx(char ctlChar) {
+        return Character.getNumericValue(ctlChar) - Character.getNumericValue('A');
+    }
+
+    private void parseSection(Workbook workbook, Section section) {
+        Sheet sectionSheet = workbook.getSheet(section.getName());
+
+        System.out.println("section: " + section.getName() + " Control:" + section.getControlColumn());
+        for(int i = 0; ; i++) {
+            Cell cell = sectionSheet.getRow(i).getCell(section.getControlColumn());
+            if(cell != null) {
+                String control = cell.getStringCellValue();
+                if(control.equals(Paragraph.END)) {
+                    System.out.println("end is line " + i);
+                    break;
+                }
+            }
+            Cell dataCell = sectionSheet.getRow(i).getCell(0);
+            if(dataCell != null)
+                try {
+                    String s = dataCell.getStringCellValue();
+                    System.out.println(s);
+                    Paragraph p = new Paragraph();
+                    p.setText(s);
+                    section.addParagraph(p);
+                } catch (Exception e) {}
+        }
+
+    }
+
 
 }

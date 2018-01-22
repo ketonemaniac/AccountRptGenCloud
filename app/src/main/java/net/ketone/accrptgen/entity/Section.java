@@ -1,24 +1,29 @@
 package net.ketone.accrptgen.entity;
 
+import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Describes one section of the report
+ */
+@Data
 public class Section {
 
-    private Header header;
+    private String name;
+    private int fontSize;
+    private int controlColumn;
+    private int yesNoColumn;
 
-    private Body body;
+    private List<Paragraph> paragraphs;
 
-    public Header getHeader() {
-        return header;
+    public void addParagraph(Paragraph p) {
+        if(paragraphs == null) {
+            paragraphs = new ArrayList<>();
+        }
+        paragraphs.add(p);
     }
 
-    public void setHeader(Header header) {
-        this.header = header;
-    }
 
-    public Body getBody() {
-        return body;
-    }
-
-    public void setBody(Body body) {
-        this.body = body;
-    }
 }
