@@ -79,6 +79,9 @@ public class GCloudStorageService implements StorageService {
 
     @Override
     public XSSFWorkbook getTemplate(String templateName) throws IOException {
-        return null;
+        BlobId blobId = BlobId.of(BUCKET_NAME, templateName);
+        Blob blob = storage.get(blobId);
+        byte[] content = blob.getContent();
+        return new XSSFWorkbook(new ByteArrayInputStream(content));
     }
 }

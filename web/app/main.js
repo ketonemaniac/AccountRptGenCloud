@@ -1,4 +1,4 @@
-var Spinner = require('spin');
+// var Spinner = require('spin');
 var DateFormat = require('dateformat');
 
 + function ($) {
@@ -37,6 +37,7 @@ var DateFormat = require('dateformat');
 
                 // add the files to formData object for the data payload
                 formData.append('file', file, file.name);
+                var spinHandle = loadingOverlay().activate();
                 $.ajax({
                     url: '/uploadFile',
                     type: 'POST',
@@ -45,6 +46,7 @@ var DateFormat = require('dateformat');
                     contentType: false,
                     success: function (data) {
                         console.log('done');
+                        loadingOverlay().cancel(spinHandle);
                         histTable.row.add( [
                             data.company,    
                             DateFormat(new Date(data.generationTime), "yyyy-mm-dd HH:MM:ss"),
@@ -61,6 +63,7 @@ var DateFormat = require('dateformat');
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         console.log('error');
+                        loadingOverlay().cancel(spinHandle);
                         $("#modalTitle").text("Upload Error");
                         $("#modalText").text("See Server logs for details. textStatus=" + textStatus + " errorThrown=" + errorThrown);
                         $("#myModal").modal("show");

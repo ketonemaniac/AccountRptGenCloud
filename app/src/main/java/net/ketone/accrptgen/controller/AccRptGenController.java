@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -50,7 +51,9 @@ public class AccRptGenController {
 
 
         InputStream is = new ByteArrayInputStream(file.getBytes());
-        AccountData data = parsingService.readFile(is);
+        ByteArrayOutputStream os = parsingService.preParse(is);
+        InputStream is2 = new ByteArrayInputStream(os.toByteArray());
+        AccountData data = parsingService.readFile(is2);
 
         data.setGenerationTime(new Date());
 

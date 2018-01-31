@@ -16,13 +16,13 @@ public class Section {
     private int controlColumn;
     private int yesNoColumn;
 
-    private List<Paragraph> paragraphs;
+    private List<SectionElement> elements;
 
-    public void addParagraph(Paragraph p) {
-        if(paragraphs == null) {
-            paragraphs = new ArrayList<>();
+    public void addSectionElement(SectionElement ele) {
+        if(elements == null) {
+            elements = new ArrayList<>();
         }
-        paragraphs.add(p);
+        elements.add(ele);
     }
 
 

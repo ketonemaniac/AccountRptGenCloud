@@ -1,19 +1,25 @@
 package net.ketone.accrptgen.gen;
 
-import net.ketone.accrptgen.entity.AccountData;
-import net.ketone.accrptgen.entity.Section;
+import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.store.StorageService;
-import org.apache.poi.wp.usermodel.Paragraph;
+import org.apache.poi.ss.formula.eval.FunctionEval;
+import org.apache.poi.ss.formula.functions.DateDifFunc;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.*;
-import org.apache.xmlbeans.XmlCursor;
+import org.apache.xmlbeans.*;
+import org.apache.xmlbeans.xml.stream.XMLInputStream;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.Node;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.ext.LexicalHandler;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import javax.annotation.PostConstruct;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -27,6 +33,18 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     @Autowired
     private StorageService storageService;
+
+    @PostConstruct
+    public void init() {
+        try {
+            FunctionEval.registerFunction("DATEDIF", new DateDifFunc());
+        } catch (IllegalArgumentException e) {
+            // skip error: POI already implememts DATEDIF for duplicate registers in the JVM
+        }
+    }
+
+
+    XWPFParagraph currPgh = null;
 
     public String generate(AccountData data) {
 
@@ -55,11 +73,18 @@ public class GenerationServiceApachePOI implements GenerationService {
         }
 
         for(Section currSection : data.getSections()) {
-            XWPFParagraph section1Pgh = null;
+
+            // TODO: remove this.
+            if(!currSection.getName().equals("Section1")) {
+                continue;
+            }
+
+            findCurrPgh:
             for(XWPFParagraph pgh : document.getParagraphs()) {
                 for(XWPFRun run : pgh.getRuns()) {
                     if(run.text().startsWith(currSection.getName())) {
-                        section1Pgh = pgh;
+                        currPgh = pgh;
+                        break findCurrPgh;
                     }
                 }
 
@@ -73,10 +98,19 @@ public class GenerationServiceApachePOI implements GenerationService {
                     // this.discoverSectionInfo(sectPr, formatter);
                 }
             }
-            createParagraphs(section1Pgh, currSection.getParagraphs());
+            for(SectionElement element : currSection.getElements()) {
+                if(element instanceof Paragraph) {
+                    write((Paragraph) element);
+                } else if(element instanceof Table) {
+                    write((Table) element);
+                }
+            }
+            endSection();
+//            createParagraphs(section1Pgh, currSection.getParagraphs());
             // System.out.println("[" + run.text() + "]");
 
-
+            // TODO: remove this, or save for every section since getting XmlValueDisconnectedException
+            break;
         }
 
 
@@ -89,12 +123,83 @@ public class GenerationServiceApachePOI implements GenerationService {
         return filename;
     }
 
-    void generateSectionData(XWPFDocument document, Section section) {
+    @Override
+    public void write(Paragraph paragraph) {
+        if(currPgh != null) {
+            XWPFDocument doc = currPgh.getDocument();
+            XmlCursor cursor = currPgh.getCTP().newCursor();
 
-        
+            XWPFParagraph newP = doc.createParagraph();
+            newP.getCTP().setPPr(currPgh.getCTP().getPPr());
+            XWPFRun newR = newP.createRun();
+            newR.getCTR().setRPr(currPgh.getRuns().get(0).getCTR().getRPr());
+            newR.setText(paragraph.getText());
+            XmlCursor c2 = newP.getCTP().newCursor();
+            c2.moveXml(cursor);
+            c2.dispose();
+        }
     }
 
-    private void createParagraphs(XWPFParagraph p, List<net.ketone.accrptgen.entity.Paragraph> paragraphs) {
+    @Override
+    public void write(Table table) {
+        if(currPgh != null) {
+            int cols = table.getColumnWidths().size();
+            int rows = table.getCells().size();
+
+            XWPFDocument doc = currPgh.getDocument();
+            XmlCursor cursor = currPgh.getCTP().newCursor();
+
+            //create table
+            XWPFTable xwpfTable = doc.createTable(rows, cols);
+
+            // REMOVE ALL BORDERS
+            CTTblPr tblpro = xwpfTable.getCTTbl().getTblPr();
+            CTTblBorders borders = tblpro.getTblBorders();
+            borders.getBottom().setVal(STBorder.NONE);
+            borders.getLeft().setVal(STBorder.NONE);
+            borders.getRight().setVal(STBorder.NONE);
+            borders.getTop().setVal(STBorder.NONE);
+            //also inner borders
+            borders.getInsideH().setVal(STBorder.NONE);
+            borders.getInsideV().setVal(STBorder.NONE);
+
+            // column widths
+            // MS Word
+            XWPFTableRow tableRowOne = xwpfTable.getRow(0);
+            for(int i=0; i < table.getColumnWidths().size(); i++) {
+                tableRowOne.getCell(i).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(table.getColumnWidths().get(i)));
+            }
+
+            for(int i=0; i < rows; i++) {
+                for(int j=0; j < cols; j++) {
+                    XWPFTableRow tableRow = xwpfTable.getRow(i);
+                    Table.Cell cell = table.getCells().get(i).get(j);
+                    tableRow.getCell(j).setText(cell.getText());
+
+                    CTTcPr tcPr = tableRow.getCell(j).getCTTc().addNewTcPr();
+
+                    CTTcBorders border = tcPr.addNewTcBorders();
+
+                    border.addNewBottom().setVal(STBorder.DOUBLE);
+                }
+            }
+            XmlCursor c3 = xwpfTable.getCTTbl().newCursor();
+            c3.moveXml(cursor);
+            c3.dispose();
+
+        }
+    }
+
+
+    public void endSection() {
+        if(currPgh != null) {
+            XmlCursor cursor = currPgh.getCTP().newCursor();
+            cursor.removeXml(); // Removes replacement text paragraph
+            cursor.dispose();
+        }
+    }
+/*
+    private void createParagraphs(XWPFParagraph p, List<Paragraph> paragraphs) {
         if (p != null) {
             XWPFDocument doc = p.getDocument();
             XmlCursor cursor = p.getCTP().newCursor();
@@ -111,36 +216,74 @@ public class GenerationServiceApachePOI implements GenerationService {
 
 
             //create table
-            XWPFTable table = doc.createTable();
+            XWPFTable table = doc.createTable(1, 3);
+
+            // REMOVE ALL BORDERS
+            CTTblPr tblpro = table.getCTTbl().getTblPr();
+            CTTblBorders borders = tblpro.getTblBorders();
+            borders.getBottom().setVal(STBorder.NONE);
+            borders.getLeft().setVal(STBorder.NONE);
+            borders.getRight().setVal(STBorder.NONE);
+            borders.getTop().setVal(STBorder.NONE);
+            //also inner borders
+            borders.getInsideH().setVal(STBorder.NONE);
+            borders.getInsideV().setVal(STBorder.NONE);
+
+//            table.getCTTbl().addNewTblGrid().addNewGridCol().setW(BigInteger.valueOf(6000));
+//            table.getCTTbl().getTblGrid().addNewGridCol().setW(BigInteger.valueOf(2000));
+
+            // MS Word
+            XWPFTableRow tableRowOne = table.getRow(0);
+            tableRowOne.getCell(0).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(2200));
+            tableRowOne.getCell(1).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(1100));
+            // tableRowOne.getCell(2).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(8000));
+
+            // OpenOffice
+            CTTblWidth width = table.getCTTbl().addNewTblPr().addNewTblW();
+            width.setType(STTblWidth.DXA);
+            width.setW(BigInteger.valueOf(8500));
 
             //create first row
-            XWPFTableRow tableRowOne = table.getRow(0);
-            tableRowOne.getCell(0).setText("col one, row one");
-            tableRowOne.addNewTableCell().setText("col two, row one");
-            tableRowOne.addNewTableCell().setText("col three, row one");
+
+            tableRowOne.getCell(0).setText("1A");
+            CTTcPr tcPr = tableRowOne.getCell(0).getCTTc().addNewTcPr();
+
+            CTTcBorders border = tcPr.addNewTcBorders();
+
+            border.addNewBottom().setVal(STBorder.DOUBLE);
+            border.addNewRight().setVal(STBorder.NONE);
+            border.addNewLeft().setVal(STBorder.NONE);
+            border.addNewTop().setVal(STBorder.SINGLE);
+
+            tableRowOne.getCell(1).setText("2A");
+            tableRowOne.getCell(2).setText("3A");
 
             //create second row
             XWPFTableRow tableRowTwo = table.createRow();
-            tableRowTwo.getCell(0).setText("col one, row two");
-            tableRowTwo.getCell(1).setText("col two, row two");
-            tableRowTwo.getCell(2).setText("col three, row two");
+            tableRowTwo.getCell(0).setText("1B");
+            tableRowTwo.getCell(1).setText("2B");
+            tableRowTwo.getCell(2).setText("3B");
 
             //create third row
             XWPFTableRow tableRowThree = table.createRow();
-            tableRowThree.getCell(0).setText("col one, row three");
-            tableRowThree.getCell(1).setText("col two, row three");
-            tableRowThree.getCell(2).setText("col three, row three");
+            tableRowThree.getCell(0).setText("1C");
+            tableRowThree.getCell(1).setText("2C");
+            tableRowThree.getCell(2).setText("3C");
 
             XmlCursor c3 = table.getCTTbl().newCursor();
             c3.moveXml(cursor);
             c3.dispose();
 
 
+            // lists
+            // https://stackoverflow.com/questions/44433347/apache-poi-numbered-list
+
+
             cursor.removeXml(); // Removes replacement text paragraph
             cursor.dispose();
         }
     }
-
+*/
 
 
     private void genHeaderFooter(XWPFDocument document) {

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.util.HashMap;
@@ -51,6 +50,9 @@ public class ParsingService {
     public ByteArrayOutputStream preParse(InputStream excelFile) throws IOException {
 
         XSSFWorkbook templateWb = storageService.getTemplate(templateName);
+        if(templateWb == null) {
+            throw new IOException("Unable to get File " + templateName);
+        }
         Map<String, Sheet> templateSheetMap = initSheetMap(templateWb);
 
         XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
@@ -106,7 +108,6 @@ public class ParsingService {
         }
 
         // refresh everything
-        FunctionEval.registerFunction("DATEDIF", new DateDifFunc());
         FormulaEvaluator evaluator = templateWb.getCreationHelper().createFormulaEvaluator();
         evaluator.clearAllCachedResultValues();
         evaluator.evaluateAll();
@@ -178,7 +179,7 @@ public class ParsingService {
                     System.out.println(s);
                     Paragraph p = new Paragraph();
                     p.setText(s);
-                    section.addParagraph(p);
+                    section.addSectionElement(p);
                 } catch (Exception e) {}
         }
 

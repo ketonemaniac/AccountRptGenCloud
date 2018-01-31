@@ -3,6 +3,7 @@ package net.ketone.accrptgen.gen;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.entity.Paragraph;
 import net.ketone.accrptgen.entity.Section;
+import net.ketone.accrptgen.entity.Table;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.junit.Before;
@@ -21,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 
 import static org.mockito.Matchers.any;
@@ -71,8 +73,18 @@ public class GenerationTest {
         p.setText("This is line 1");
         Paragraph p2 = new Paragraph();
         p2.setText("This is line 2");
-        s.addParagraph(p);
-        s.addParagraph(p2);
+        s.addSectionElement(p);
+        s.addSectionElement(p2);
+
+        Table t = new Table();
+        t.setColumnWidths(Arrays.asList(4000, 2000, 8000));
+        t.addCell("A1");
+        t.addCell("A2");
+        t.addCell("A3");
+        t.addCell("B1");
+        t.addCell("B2");
+        t.addCell("B3");
+        s.addSectionElement(t);
 
         svc.generate(data);
 

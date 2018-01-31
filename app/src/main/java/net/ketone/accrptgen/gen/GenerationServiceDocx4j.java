@@ -22,7 +22,7 @@ import java.util.List;
  * https://stackoverflow.com/questions/23601516/create-docx-using-docx4j-with-multiple-headers
  * since Apache POI does not support multiple sections
  */
-public class GenerationServiceDocx4j {
+public class GenerationServiceDocx4j /* implements GenerationService */ {
 
     public static void main(String [] args) throws IOException, Docx4JException {
         new GenerationServiceDocx4j().generate();

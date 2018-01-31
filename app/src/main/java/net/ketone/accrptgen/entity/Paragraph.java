@@ -6,7 +6,7 @@ import lombok.Data;
  * One paragraph/line of the input Excel
  */
 @Data
-public class Paragraph {
+public class Paragraph implements SectionElement {
 
     // commands
     public static final String AUDITOR_HEADING = "auditor heading";
