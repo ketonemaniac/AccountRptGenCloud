@@ -1,18 +1,17 @@
 package net.ketone.accrptgen.entity;
 
-import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
 import lombok.Data;
-import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 @Data
 public class AccountData {
 
-    public static List<String> SECTION_LIST = ImmutableList.of("Cover", "Contents", "Section1",
-            "Section2", "Section3", "Section4", "Section5" , "Section6");
+    public static List<String> SECTION_LIST = Arrays.asList("Cover", "Contents", "Section1",
+            "Section2", "Section3", "Section4", "Section5", "Section6");
 
     private String companyName;
     private Date generationTime;
