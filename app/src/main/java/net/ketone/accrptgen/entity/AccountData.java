@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class AccountData {
 
-    public static List<String> SECTION_LIST = Arrays.asList("Cover", "Contents", "Section1",
+    public static List<String> SECTION_LIST = Arrays.asList("Cover", "Section1",
             "Section2", "Section3", "Section4", "Section5", "Section6");
 
     private String companyName;

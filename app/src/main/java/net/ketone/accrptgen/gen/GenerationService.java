@@ -12,7 +12,7 @@ public interface GenerationService {
 
     String generate(AccountData data);
 
-    void write(Paragraph paragraph);
+    void write(String sectionName, Paragraph paragraph);
 
-    void write(Table table);
+    void write(String sectionName, Table table);
 }

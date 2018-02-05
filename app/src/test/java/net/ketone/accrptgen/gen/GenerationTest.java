@@ -68,7 +68,7 @@ public class GenerationTest {
 
         Section s = new Section();
         data.addSection(s);
-        s.setName("SECTION1");
+        s.setName("Section1");
         Paragraph p = new Paragraph();
         p.setText("This is line 1");
         Paragraph p2 = new Paragraph();
@@ -85,6 +85,17 @@ public class GenerationTest {
         t.addCell("B2");
         t.addCell("B3");
         s.addSectionElement(t);
+
+        s = new Section();
+        data.addSection(s);
+        s.setName("Section2");
+        p = new Paragraph();
+        p.setText("line 1 again");
+        p2 = new Paragraph();
+        p2.setText("line 2 again");
+        s.addSectionElement(p);
+        s.addSectionElement(p2);
+
 
         svc.generate(data);
 

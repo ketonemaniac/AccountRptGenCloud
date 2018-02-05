@@ -35,6 +35,7 @@ public class ParserTest {
 
         data.setGenerationTime(new Date());
 
+        // TODO: remove, this is integration flow
         genSvc.generate(data);
     }
 
