@@ -1,9 +1,6 @@
 package net.ketone.accrptgen.gen;
 
-import net.ketone.accrptgen.entity.AccountData;
-import net.ketone.accrptgen.entity.Paragraph;
-import net.ketone.accrptgen.entity.Section;
-import net.ketone.accrptgen.entity.Table;
+import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.junit.Before;
@@ -96,6 +93,12 @@ public class GenerationTest {
         s.addSectionElement(p);
         s.addSectionElement(p2);
 
+        Header header1 = new Header();
+        header1.setText("COMPANY HEADER");
+        s.addSectionElement(header1);
+        Header header2 = new Header();
+        header2.setText("COMPANY HEADER 2");
+        s.addSectionElement(header2);
 
         svc.generate(data);
 

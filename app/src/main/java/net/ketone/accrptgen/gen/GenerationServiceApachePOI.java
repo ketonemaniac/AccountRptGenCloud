@@ -40,6 +40,7 @@ public class GenerationServiceApachePOI implements GenerationService {
     private StorageService storageService;
 
     Map<String, XWPFParagraph> currPghs = new HashMap<>();
+    Map<String, XWPFParagraph> pghHeaders = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -63,26 +64,34 @@ public class GenerationServiceApachePOI implements GenerationService {
             logger.error("Error in opening template.docx", e);
             throw new RuntimeException(e);
         }
-        findParagraphLocations(document,
-                data.getSections().stream().map(Section::getName).collect(Collectors.toList()));
+        currPghs = findParagraphLocations(data.getSections().stream().map(Section::getName).collect(Collectors.toList())
+                , document.getParagraphs());
+        List<XWPFParagraph> headerParagraphs = document.getHeaderList().stream().flatMap(
+                                hdr -> hdr.getParagraphs().stream()).collect(Collectors.toList());
+        pghHeaders = findParagraphLocations(data.getSections().stream().map(section -> "Header" + section.getName())
+                                                .collect(Collectors.toList())
+                                , headerParagraphs);
 
-        for(XWPFHeader hdr : document.getHeaderList()) {
-            XWPFParagraph para = hdr.createParagraph();
-                XWPFRun run2 = para.createRun();
-                run2.setText(data.getCompanyName());
-                run2.setBold(true);
-        }
+//        for(XWPFHeader hdr : document.getHeaderList()) {
+//            XWPFParagraph para = hdr.createParagraph();
+//                XWPFRun run2 = para.createRun();
+//                run2.setText(data.getCompanyName());
+//                run2.setBold(true);
+//        }
 
         for(Section currSection : data.getSections()) {
 
             for(SectionElement element : currSection.getElements()) {
-                if(element instanceof Paragraph) {
+                if(element instanceof Header) {
+                    write(currSection.getName(), (Header) element);
+                } else if(element instanceof Paragraph) {
                     write(currSection.getName(), (Paragraph) element);
                 } else if(element instanceof Table) {
                     write(currSection.getName(), (Table) element);
                 }
             }
-            endSection(currSection.getName());
+            endSection(currPghs.get(currSection.getName()));
+            endSection(pghHeaders.get("Header" + currSection.getName()));
 //            createParagraphs(section1Pgh, currSection.getParagraphs());
             // System.out.println("[" + run.text() + "]");
         }
@@ -102,33 +111,24 @@ public class GenerationServiceApachePOI implements GenerationService {
      * Must locate the paragraphs first,
      * otherwise will end up in ConcurrentModificationException if you try to locate them on the fly
      */
-    private void findParagraphLocations(XWPFDocument document, List<String> sections) {
+    private Map<String, XWPFParagraph> findParagraphLocations(List<String> sections, List<XWPFParagraph> paragraphs) {
+        Map<String, XWPFParagraph> pghsMap = new HashMap<>();
         for(String sectionName : sections) {
             findCurrPgh:
-            for(XWPFParagraph pgh : document.getParagraphs()) {
+            for(XWPFParagraph pgh : paragraphs) {
                 for(XWPFRun run : pgh.getRuns()) {
                     if(run.text().startsWith(sectionName)) {
-                        currPghs.put(sectionName, pgh);
+                        pghsMap.put(sectionName, pgh);
                         break findCurrPgh;
                     }
                 }
-//                CTPPr ctPPr = pgh.getCTP().getPPr();
-//                if(ctPPr != null) {
-//
-//                    // Get the CTSectPr object that contains the information
-//                    // about the document section and strip (some of) the
-//                    // information from it.
-//                    CTSectPr sectPr = ctPPr.getSectPr();
-//                    // this.discoverSectionInfo(sectPr, formatter);
-//                }
             }
-            if(!currPghs.containsKey(sectionName)) {
+            if(!pghsMap.containsKey(sectionName)) {
                 logger.warn("Cannot find paragraph " + sectionName);
             }
         }
-
+        return pghsMap;
     }
-
 
     @Override
     public void write(String sectionName, Paragraph paragraph) {
@@ -142,6 +142,23 @@ public class GenerationServiceApachePOI implements GenerationService {
             XWPFRun newR = newP.createRun();
             newR.getCTR().setRPr(currPgh.getRuns().get(0).getCTR().getRPr());
             newR.setText(paragraph.getText());
+            XmlCursor c2 = newP.getCTP().newCursor();
+            c2.moveXml(cursor);
+            c2.dispose();
+        }
+    }
+
+    public void write(String sectionName, Header header) {
+        XWPFParagraph currPgh = pghHeaders.get("Header" + sectionName);
+        if(currPgh != null) {
+            XWPFDocument doc = currPgh.getDocument();
+            XmlCursor cursor = currPgh.getCTP().newCursor();
+
+            XWPFParagraph newP = doc.createParagraph();
+            newP.getCTP().setPPr(currPgh.getCTP().getPPr());
+            XWPFRun newR = newP.createRun();
+            newR.getCTR().setRPr(currPgh.getRuns().get(0).getCTR().getRPr());
+            newR.setText(header.getText());
             XmlCursor c2 = newP.getCTP().newCursor();
             c2.moveXml(cursor);
             c2.dispose();
@@ -200,8 +217,7 @@ public class GenerationServiceApachePOI implements GenerationService {
     }
 
 
-    public void endSection(String sectionName) {
-        XWPFParagraph currPgh = currPghs.get(sectionName);
+    public void endSection(XWPFParagraph currPgh) {
         if(currPgh != null) {
             XmlCursor cursor = currPgh.getCTP().newCursor();
             cursor.removeXml(); // Removes replacement text paragraph
