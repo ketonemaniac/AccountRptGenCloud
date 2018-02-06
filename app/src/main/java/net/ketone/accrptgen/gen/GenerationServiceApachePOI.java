@@ -85,10 +85,6 @@ public class GenerationServiceApachePOI implements GenerationService {
             endSection(currSection.getName());
 //            createParagraphs(section1Pgh, currSection.getParagraphs());
             // System.out.println("[" + run.text() + "]");
-
-//            if(currSection.getName().equals("Section1")) {
-//                break;
-//            }
         }
 
 
@@ -116,9 +112,6 @@ public class GenerationServiceApachePOI implements GenerationService {
                         break findCurrPgh;
                     }
                 }
-                if(!currPghs.containsKey(sectionName)) {
-                    logger.warn("Cannot find paragraph " + sectionName);
-                }
 //                CTPPr ctPPr = pgh.getCTP().getPPr();
 //                if(ctPPr != null) {
 //
@@ -128,6 +121,9 @@ public class GenerationServiceApachePOI implements GenerationService {
 //                    CTSectPr sectPr = ctPPr.getSectPr();
 //                    // this.discoverSectionInfo(sectPr, formatter);
 //                }
+            }
+            if(!currPghs.containsKey(sectionName)) {
+                logger.warn("Cannot find paragraph " + sectionName);
             }
         }
 

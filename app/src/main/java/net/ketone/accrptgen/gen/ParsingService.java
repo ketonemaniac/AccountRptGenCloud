@@ -7,6 +7,7 @@ import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.ss.formula.eval.FunctionEval;
 import org.apache.poi.ss.formula.functions.DateDifFunc;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.util.HashMap;
@@ -162,25 +164,65 @@ public class ParsingService {
     private void parseSection(Workbook workbook, Section section) {
         Sheet sectionSheet = workbook.getSheet(section.getName());
 
-        System.out.println("section: " + section.getName() + " Control:" + section.getControlColumn());
+        boolean isHeader = false, isStart = false;
+        StringBuilder startEndBuilder = new StringBuilder("Start line=");
+
+        logger.info("section: " + section.getName() + " Control:" + section.getControlColumn());
+        doParse:
         for(int i = 0; ; i++) {
             Cell cell = sectionSheet.getRow(i).getCell(section.getControlColumn());
-            if(cell != null) {
+            // has control data
+            if(cell != null && !StringUtils.isEmpty(cell.getStringCellValue())) {
                 String control = cell.getStringCellValue();
-                if(control.equals(Paragraph.END)) {
-                    System.out.println("end is line " + i);
-                    break;
+                switch (control.trim().toLowerCase()) {
+                    case Paragraph.START:
+                        startEndBuilder.append(i);
+                        isStart = true;
+                        break;
+                    case Paragraph.END:
+                        startEndBuilder.append("End line=").append(i);
+                        logger.info(startEndBuilder.toString());
+                        break doParse;
+                    default:
+                        logger.warn("unknown command:" + control.trim());
+                        break;
                 }
             }
-            Cell dataCell = sectionSheet.getRow(i).getCell(0);
-            if(dataCell != null)
-                try {
-                    String s = dataCell.getStringCellValue();
-                    System.out.println(s);
-                    Paragraph p = new Paragraph();
-                    p.setText(s);
-                    section.addSectionElement(p);
-                } catch (Exception e) {}
+            // contents
+            else {
+                if(isStart) {
+                    Cell yesNoCell = sectionSheet.getRow(i).getCell(section.getYesNoColumn());
+                    if(yesNoCell == null) {
+                        continue;
+                    }
+                    String yesNo = Paragraph.NO;
+                    try {
+                        yesNo = yesNoCell.getStringCellValue();
+                    } catch (Exception e) {
+                        logger.warn("Unparsable Yes/No cell at " + section.getName() + " line " + (i+1) + ", " + e.toString());
+                    }
+                    // ignored row
+                    if(yesNo.equalsIgnoreCase(Paragraph.NO))
+                        continue;
+                    // inside section
+                    Cell dataCell = sectionSheet.getRow(i).getCell(0);
+                    if(dataCell != null) {
+                        try {
+                            String s = dataCell.getStringCellValue();
+                            Paragraph p = new Paragraph();
+                            p.setText(s);
+                            section.addSectionElement(p);
+                        } catch (Exception e) {
+                            logger.warn("Unparsable content at " + section.getName() + " line " + (i+1) + ", " + e.toString());
+                        }
+                    } else {
+                        // empty row
+                        Paragraph p = new Paragraph();
+                        p.setText("");
+                        section.addSectionElement(p);
+                    }
+                }
+            }
         }
 
     }

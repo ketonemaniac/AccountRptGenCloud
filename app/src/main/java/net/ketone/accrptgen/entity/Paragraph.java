@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class Paragraph implements SectionElement {
 
-    // commands
+    // Control Characters
     public static final String AUDITOR_HEADING = "auditor heading";
     public static final String AUDITOR_FOOTER = "auditor footer";
     public static final String HEADING = "heading";
@@ -17,6 +17,10 @@ public class Paragraph implements SectionElement {
     public static final String END = "end";
     public static final String TABLE_START = "table start";
     public static final String TABLE_END = "table end";
+
+    // yes/no Characters
+    public static final String YES = "y";
+    public static final String NO = "n";
 
     private boolean show;
     private String text;
