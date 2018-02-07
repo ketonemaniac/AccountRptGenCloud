@@ -12,6 +12,8 @@ public class Header extends Paragraph {
     }
 
     private Formatting formatting;
+    private boolean firstLine;
     private boolean lastLine;
+    private String companyName;
 
 }

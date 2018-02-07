@@ -1,8 +1,10 @@
 package net.ketone.accrptgen.gen;
 
 import net.ketone.accrptgen.entity.AccountData;
+import net.ketone.accrptgen.entity.Header;
 import net.ketone.accrptgen.entity.Paragraph;
 import net.ketone.accrptgen.entity.Section;
+import net.ketone.accrptgen.entity.SectionElement;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.ss.formula.eval.FunctionEval;
 import org.apache.poi.ss.formula.functions.DateDifFunc;
@@ -164,7 +166,8 @@ public class ParsingService {
     private void parseSection(Workbook workbook, Section section) {
         Sheet sectionSheet = workbook.getSheet(section.getName());
 
-        boolean isHeader = false, isStart = false;
+        boolean isStart = false;
+        Header curHeader = null;
         StringBuilder startEndBuilder = new StringBuilder("Start line=");
 
         logger.info("section: " + section.getName() + " Control:" + section.getControlColumn());
@@ -175,9 +178,20 @@ public class ParsingService {
             if(cell != null && !StringUtils.isEmpty(cell.getStringCellValue())) {
                 String control = cell.getStringCellValue();
                 switch (control.trim().toLowerCase()) {
+                    case Paragraph.HEADING:
+                    // case Paragraph.HEADING2:
+                        Header h = addRowToSection(section, sectionSheet.getRow(i), new Header());
+                        if(curHeader == null) {
+                            h.setFirstLine(true);
+                        }
+                        curHeader = h;
+                        break;
                     case Paragraph.START:
                         startEndBuilder.append(i);
                         isStart = true;
+                        if(curHeader != null) {
+                            curHeader.setLastLine(true);
+                        }
                         break;
                     case Paragraph.END:
                         startEndBuilder.append("End line=").append(i);
@@ -205,26 +219,29 @@ public class ParsingService {
                     if(yesNo.equalsIgnoreCase(Paragraph.NO))
                         continue;
                     // inside section
-                    Cell dataCell = sectionSheet.getRow(i).getCell(0);
-                    if(dataCell != null) {
-                        try {
-                            String s = dataCell.getStringCellValue();
-                            Paragraph p = new Paragraph();
-                            p.setText(s);
-                            section.addSectionElement(p);
-                        } catch (Exception e) {
-                            logger.warn("Unparsable content at " + section.getName() + " line " + (i+1) + ", " + e.toString());
-                        }
-                    } else {
-                        // empty row
-                        Paragraph p = new Paragraph();
-                        p.setText("");
-                        section.addSectionElement(p);
-                    }
+                    addRowToSection(section, sectionSheet.getRow(i), new Paragraph());
                 }
             }
         }
 
+    }
+
+    private <T extends Paragraph> T addRowToSection(Section section, Row row, T p) {
+        Cell dataCell = row.getCell(0);
+        if(dataCell != null) {
+            try {
+                String s = dataCell.getStringCellValue();
+                p.setText(s);
+                section.addSectionElement(p);
+            } catch (Exception e) {
+                logger.warn("Unparsable content at " + section.getName() + " line " + (row.getRowNum()+1) + ", " + e.toString());
+            }
+        } else {
+            // empty row
+            p.setText("");
+            section.addSectionElement(p);
+        }
+        return p;
     }
 
 

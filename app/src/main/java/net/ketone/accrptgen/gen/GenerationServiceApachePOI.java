@@ -2,6 +2,7 @@ package net.ketone.accrptgen.gen;
 
 import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.store.StorageService;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.poi.ss.formula.eval.FunctionEval;
 import org.apache.poi.ss.formula.functions.DateDifFunc;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
@@ -24,6 +25,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -64,8 +66,9 @@ public class GenerationServiceApachePOI implements GenerationService {
             logger.error("Error in opening template.docx", e);
             throw new RuntimeException(e);
         }
+        List<XWPFParagraph> contentParagraphs = document.getParagraphs();
         currPghs = findParagraphLocations(data.getSections().stream().map(Section::getName).collect(Collectors.toList())
-                , document.getParagraphs());
+                , contentParagraphs);
         List<XWPFParagraph> headerParagraphs = document.getHeaderList().stream().flatMap(
                                 hdr -> hdr.getParagraphs().stream()).collect(Collectors.toList());
         pghHeaders = findParagraphLocations(data.getSections().stream().map(section -> "Header" + section.getName())
@@ -83,7 +86,7 @@ public class GenerationServiceApachePOI implements GenerationService {
 
             for(SectionElement element : currSection.getElements()) {
                 if(element instanceof Header) {
-                    write(currSection.getName(), (Header) element);
+                    write(currSection.getName(), (Header) element, data.getCompanyName());
                 } else if(element instanceof Paragraph) {
                     write(currSection.getName(), (Paragraph) element);
                 } else if(element instanceof Table) {
@@ -117,7 +120,7 @@ public class GenerationServiceApachePOI implements GenerationService {
             findCurrPgh:
             for(XWPFParagraph pgh : paragraphs) {
                 for(XWPFRun run : pgh.getRuns()) {
-                    if(run.text().startsWith(sectionName)) {
+                    if(run.text().trim().startsWith(sectionName)) {
                         pghsMap.put(sectionName, pgh);
                         break findCurrPgh;
                     }
@@ -133,6 +136,10 @@ public class GenerationServiceApachePOI implements GenerationService {
     @Override
     public void write(String sectionName, Paragraph paragraph) {
         XWPFParagraph currPgh = currPghs.get(sectionName);
+        doWrite(currPgh, paragraph, null);
+    }
+
+    private void doWrite(XWPFParagraph currPgh, Paragraph paragraph, Consumer<XWPFParagraph> mods) {
         if(currPgh != null) {
             XWPFDocument doc = currPgh.getDocument();
             XmlCursor cursor = currPgh.getCTP().newCursor();
@@ -142,27 +149,33 @@ public class GenerationServiceApachePOI implements GenerationService {
             XWPFRun newR = newP.createRun();
             newR.getCTR().setRPr(currPgh.getRuns().get(0).getCTR().getRPr());
             newR.setText(paragraph.getText());
+            if(mods != null) {
+                mods.accept(newP);
+            }
             XmlCursor c2 = newP.getCTP().newCursor();
             c2.moveXml(cursor);
             c2.dispose();
         }
     }
 
-    public void write(String sectionName, Header header) {
-        XWPFParagraph currPgh = pghHeaders.get("Header" + sectionName);
-        if(currPgh != null) {
-            XWPFDocument doc = currPgh.getDocument();
-            XmlCursor cursor = currPgh.getCTP().newCursor();
 
-            XWPFParagraph newP = doc.createParagraph();
-            newP.getCTP().setPPr(currPgh.getCTP().getPPr());
-            XWPFRun newR = newP.createRun();
-            newR.getCTR().setRPr(currPgh.getRuns().get(0).getCTR().getRPr());
-            newR.setText(header.getText());
-            XmlCursor c2 = newP.getCTP().newCursor();
-            c2.moveXml(cursor);
-            c2.dispose();
+    public void write(String sectionName, Header header, String companyName) {
+        XWPFParagraph currPgh = pghHeaders.get("Header" + sectionName);
+        List<String> sectionsRequiringCompanyHeader = Arrays.asList(
+            "Section1", "Section3", "Section4", "Section5", "Section6");
+        if(header.isFirstLine() && sectionsRequiringCompanyHeader.contains(sectionName)) {
+            Paragraph p = new Paragraph();
+            p.setText(companyName);
+            doWrite(currPgh, p, null);
         }
+        if(header.isLastLine()) {
+            doWrite(currPgh, header, p -> p.setBorderTop(Borders.SINGLE));
+        } else {
+            doWrite(currPgh, header, null);
+        }
+
+
+
     }
 
     @Override
