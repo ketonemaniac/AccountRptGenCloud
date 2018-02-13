@@ -139,7 +139,7 @@ public class GenerationServiceApachePOI implements GenerationService {
         doWrite(currPgh, paragraph, null);
     }
 
-    private void doWrite(XWPFParagraph currPgh, Paragraph paragraph, Consumer<XWPFParagraph> mods) {
+    private void doWrite(XWPFParagraph currPgh, Paragraph paragraph, Consumer<XWPFParagraph> formatting) {
         if(currPgh != null) {
             XWPFDocument doc = currPgh.getDocument();
             XmlCursor cursor = currPgh.getCTP().newCursor();
@@ -148,9 +148,19 @@ public class GenerationServiceApachePOI implements GenerationService {
             newP.getCTP().setPPr(currPgh.getCTP().getPPr());
             XWPFRun newR = newP.createRun();
             newR.getCTR().setRPr(currPgh.getRuns().get(0).getCTR().getRPr());
-            newR.setText(paragraph.getText());
-            if(mods != null) {
-                mods.accept(newP);
+
+            StringBuffer sb = new StringBuffer();
+            for(int i = 0; i < paragraph.getText().length(); i++) {
+                char c = paragraph.getText().charAt(i);
+                if(c == '\t') {
+                    newR.addTab();
+                } else {
+                    sb.append(c);
+                }
+            }
+            newR.setText(sb.toString());
+            if(formatting != null) {
+                formatting.accept(newP);
             }
             XmlCursor c2 = newP.getCTP().newCursor();
             c2.moveXml(cursor);

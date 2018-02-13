@@ -6,6 +6,7 @@ import net.ketone.accrptgen.entity.Paragraph;
 import net.ketone.accrptgen.entity.Section;
 import net.ketone.accrptgen.entity.SectionElement;
 import net.ketone.accrptgen.store.StorageService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.formula.eval.FunctionEval;
 import org.apache.poi.ss.formula.functions.DateDifFunc;
 import org.apache.poi.ss.usermodel.*;
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+// import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.util.HashMap;
@@ -227,20 +228,28 @@ public class ParsingService {
     }
 
     private <T extends Paragraph> T addRowToSection(Section section, Row row, T p) {
-        Cell dataCell = row.getCell(0);
-        if(dataCell != null) {
-            try {
-                String s = dataCell.getStringCellValue();
-                p.setText(s);
-                section.addSectionElement(p);
-            } catch (Exception e) {
-                logger.warn("Unparsable content at " + section.getName() + " line " + (row.getRowNum()+1) + ", " + e.toString());
+
+        boolean hasContent = false;
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < section.getControlColumn(); i++) {
+            Cell dataCell = row.getCell(i);
+            if(dataCell != null) {
+                try {
+                    sb.append(dataCell.getStringCellValue());
+                    hasContent = true;
+                } catch (Exception e) {
+                    logger.warn("Unparsable content at " + section.getName() + " line " + (row.getRowNum()+1) + ", " + e.toString());
+                }
+            } else {
+                sb.append("\t");   // empty cell
             }
-        } else {
-            // empty row
-            p.setText("");
-            section.addSectionElement(p);
         }
+        if(hasContent) {
+            p.setText(StringUtils.stripEnd(sb.toString(), null));
+        } else {
+            p.setText("");
+        }
+        section.addSectionElement(p);
         return p;
     }
 
