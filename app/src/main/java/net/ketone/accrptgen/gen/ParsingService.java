@@ -7,10 +7,12 @@ import net.ketone.accrptgen.entity.Section;
 import net.ketone.accrptgen.entity.SectionElement;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.ss.formula.eval.FunctionEval;
 import org.apache.poi.ss.formula.functions.DateDifFunc;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.StringUtil;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -229,7 +231,7 @@ public class ParsingService {
 
     private <T extends Paragraph> T addRowToSection(Section section, Row row, T p) {
 
-        boolean hasContent = false;
+        boolean hasContent = false, isBold = false;
         StringBuffer sb = new StringBuffer();
         for(int i = 0; i < section.getControlColumn(); i++) {
             Cell dataCell = row.getCell(i);
@@ -237,6 +239,9 @@ public class ParsingService {
                 try {
                     sb.append(dataCell.getStringCellValue());
                     hasContent = true;
+                    XSSFCellStyle style = (XSSFCellStyle) dataCell.getCellStyle();
+                    isBold = style.getFont().getBold();
+                    p.setBold(isBold);
                 } catch (Exception e) {
                     logger.warn("Unparsable content at " + section.getName() + " line " + (row.getRowNum()+1) + ", " + e.toString());
                 }

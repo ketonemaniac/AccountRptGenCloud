@@ -148,6 +148,7 @@ public class GenerationServiceApachePOI implements GenerationService {
             newP.getCTP().setPPr(currPgh.getCTP().getPPr());
             XWPFRun newR = newP.createRun();
             newR.getCTR().setRPr(currPgh.getRuns().get(0).getCTR().getRPr());
+            newR.setBold(paragraph.isBold());
 
             StringBuffer sb = new StringBuffer();
             for(int i = 0; i < paragraph.getText().length(); i++) {

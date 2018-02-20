@@ -70,6 +70,7 @@ public class GenerationTest {
         p.setText("This is line 1");
         Paragraph p2 = new Paragraph();
         p2.setText("This is line 2");
+        p2.setBold(true);
         s.addSectionElement(p);
         s.addSectionElement(p2);
 
