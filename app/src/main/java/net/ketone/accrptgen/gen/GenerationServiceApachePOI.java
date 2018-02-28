@@ -2,26 +2,18 @@ package net.ketone.accrptgen.gen;
 
 import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.store.StorageService;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.poi.ss.formula.eval.FunctionEval;
 import org.apache.poi.ss.formula.functions.DateDifFunc;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.xmlbeans.*;
-import org.apache.xmlbeans.xml.stream.XMLInputStream;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Node;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.ext.LexicalHandler;
 
 import javax.annotation.PostConstruct;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamReader;
 import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
@@ -37,6 +29,10 @@ import java.util.stream.Collectors;
 public class GenerationServiceApachePOI implements GenerationService {
 
     private static final Logger logger = LoggerFactory.getLogger(GenerationServiceApachePOI.class);
+    // this converts cm to "twips" used internally for specifying height
+    private static final int twipsPerCm =  566;
+    // this converts the user input height to cm
+    private static final int twipsPerInput = (int) (0.035 * twipsPerCm);
 
     @Autowired
     private StorageService storageService;
@@ -198,6 +194,7 @@ public class GenerationServiceApachePOI implements GenerationService {
 
             XWPFDocument doc = currPgh.getDocument();
             XmlCursor cursor = currPgh.getCTP().newCursor();
+            setSingleLineSpacing(currPgh);
 
             //create table
             XWPFTable xwpfTable = doc.createTable(rows, cols);
@@ -217,20 +214,26 @@ public class GenerationServiceApachePOI implements GenerationService {
             // MS Word
             XWPFTableRow tableRowOne = xwpfTable.getRow(0);
             for(int i=0; i < table.getColumnWidths().size(); i++) {
-                tableRowOne.getCell(i).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(table.getColumnWidths().get(i)));
+                tableRowOne.getCell(i).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(table.getColumnWidths().get(i) * twipsPerInput));
             }
 
             for(int i=0; i < rows; i++) {
-                for(int j=0; j < cols; j++) {
-                    XWPFTableRow tableRow = xwpfTable.getRow(i);
-                    Table.Cell cell = table.getCells().get(i).get(j);
-                    tableRow.getCell(j).setText(cell.getText());
+                XWPFTableRow tableRow = xwpfTable.getRow(i);
+                tableRow.setHeight((int)(twipsPerInput * table.getRowHeight())); //set height 1/10 inch.
 
+                for(int j=0; j < cols; j++) {
+                    try {
+
+                        Table.Cell cell = table.getCells().get(i).get(j);
+                        tableRow.getCell(j).setText(cell.getText());
+                        setSingleLineSpacing(tableRow.getCell(j).getParagraphArray(0));
+                    }catch (Exception e) {
+                        logger.warn("What is this: " + sectionName + " i:" + i + " j:" + j, e);
+                    }
                     CTTcPr tcPr = tableRow.getCell(j).getCTTc().addNewTcPr();
 
-                    CTTcBorders border = tcPr.addNewTcBorders();
-
-                    border.addNewBottom().setVal(STBorder.DOUBLE);
+//                    CTTcBorders border = tcPr.addNewTcBorders();
+//                    border.addNewBottom().setVal(STBorder.DOUBLE);
                 }
             }
             XmlCursor c3 = xwpfTable.getCTTbl().newCursor();
@@ -248,6 +251,18 @@ public class GenerationServiceApachePOI implements GenerationService {
             cursor.dispose();
         }
     }
+
+
+    private void setSingleLineSpacing(XWPFParagraph para) {
+        CTPPr ppr = para.getCTP().getPPr();
+        if (ppr == null) ppr = para.getCTP().addNewPPr();
+        CTSpacing spacing = ppr.isSetSpacing()? ppr.getSpacing() : ppr.addNewSpacing();
+        spacing.setAfter(BigInteger.valueOf(0));
+        spacing.setBefore(BigInteger.valueOf(0));
+        spacing.setLineRule(STLineSpacingRule.AUTO);
+        spacing.setLine(BigInteger.valueOf(240));
+    }
+
 /*
     private void createParagraphs(XWPFParagraph p, List<Paragraph> paragraphs) {
         if (p != null) {

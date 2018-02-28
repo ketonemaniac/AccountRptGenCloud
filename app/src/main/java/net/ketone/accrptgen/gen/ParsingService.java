@@ -5,6 +5,7 @@ import net.ketone.accrptgen.entity.Header;
 import net.ketone.accrptgen.entity.Paragraph;
 import net.ketone.accrptgen.entity.Section;
 import net.ketone.accrptgen.entity.SectionElement;
+import net.ketone.accrptgen.entity.Table;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
@@ -23,9 +24,7 @@ import org.springframework.stereotype.Component;
 // import org.springframework.util.StringUtils;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class ParsingService {
@@ -169,61 +168,133 @@ public class ParsingService {
     private void parseSection(Workbook workbook, Section section) {
         Sheet sectionSheet = workbook.getSheet(section.getName());
 
-        boolean isStart = false;
+        boolean isStart = false, isInTable = false;
         Header curHeader = null;
+        Table curTable = null;
         StringBuilder startEndBuilder = new StringBuilder("Start line=");
 
         logger.info("section: " + section.getName() + " Control:" + section.getControlColumn());
         doParse:
         for(int i = 0; ; i++) {
-            Cell cell = sectionSheet.getRow(i).getCell(section.getControlColumn());
-            // has control data
-            if(cell != null && !StringUtils.isEmpty(cell.getStringCellValue())) {
-                String control = cell.getStringCellValue();
-                switch (control.trim().toLowerCase()) {
-                    case Paragraph.HEADING:
-                    // case Paragraph.HEADING2:
-                        Header h = addRowToSection(section, sectionSheet.getRow(i), new Header());
-                        if(curHeader == null) {
-                            h.setFirstLine(true);
-                        }
-                        curHeader = h;
-                        break;
-                    case Paragraph.START:
-                        startEndBuilder.append(i);
-                        isStart = true;
-                        if(curHeader != null) {
-                            curHeader.setLastLine(true);
-                        }
-                        break;
-                    case Paragraph.END:
-                        startEndBuilder.append("End line=").append(i);
-                        logger.info(startEndBuilder.toString());
-                        break doParse;
-                    default:
-                        logger.warn("unknown command:" + control.trim());
-                        break;
+            try {
+                Cell cell = sectionSheet.getRow(i).getCell(section.getControlColumn());
+                // has control data
+                if (cell != null && !StringUtils.isEmpty(cell.getStringCellValue())) {
+                    String control = cell.getStringCellValue();
+                    switch (control.trim().toLowerCase()) {
+                        case Paragraph.HEADING:
+                            // case Paragraph.HEADING2:
+                            Header h = addRowToSection(section, sectionSheet.getRow(i), new Header());
+                            if (curHeader == null) {
+                                h.setFirstLine(true);
+                            }
+                            curHeader = h;
+                            break;
+                        case Paragraph.START:
+                            startEndBuilder.append(i);
+                            isStart = true;
+                            if (curHeader != null) {
+                                curHeader.setLastLine(true);
+                            }
+                            break;
+                        case Paragraph.END:
+                            startEndBuilder.append("End line=").append(i);
+                            logger.info(startEndBuilder.toString());
+                            break doParse;
+                        case Paragraph.TABLE_START:
+                            isInTable = true;
+                            curTable = new Table();
+                            section.addSectionElement(curTable);
+                            // column widths
+                            List<Integer> columnWidths = new ArrayList<>();
+                            for (int j = 0; j < section.getControlColumn(); j++) {
+                                Cell dataCell = sectionSheet.getRow(i).getCell(j);
+                                if (dataCell != null) {
+                                    try {
+                                        int columnWidth = (int) dataCell.getNumericCellValue();
+                                        columnWidths.add(columnWidth);
+                                        logger.info("Column width " + section.getName() + " line " + (i + 1) + ", column=" + columnWidth);
+                                    } catch (Exception e) {
+                                        logger.warn("Unparsable Column Width cell at " + section.getName() + " line " + (i + 1) + ", " + e.toString());
+                                    }
+                                }
+                            }
+                            curTable.setColumnWidths(columnWidths);
+                            logger.info("Column widths " + section.getName() + " line " + (i + 1) + ", columns=" + columnWidths.size());
+                            // row height
+                            int rowHeight = (int) sectionSheet.getRow(i).getCell(section.getYesNoColumn()).getNumericCellValue();
+                            curTable.setRowHeight(rowHeight);
+
+                            break;
+                        case Paragraph.TABLE_END:
+                            isInTable = false;
+                            break;
+                        default:
+                            logger.warn("unknown command:" + control.trim());
+                            break;
+                    }
                 }
-            }
-            // contents
-            else {
-                if(isStart) {
+                // table
+                else if (isInTable) {
+                    for (int j = 0; j < curTable.getColumnWidths().size(); j++) {
+                        Cell dataCell = sectionSheet.getRow(i).getCell(j);
+                        if (dataCell != null) {
+                            try {
+                                switch (dataCell.getCellTypeEnum()) {
+                                    case STRING:
+                                        curTable.addCell(dataCell.getStringCellValue());
+                                        break;
+                                    case NUMERIC:
+                                        curTable.addCell(""+dataCell.getNumericCellValue());
+                                        break;
+                                    case FORMULA:
+                                        try {
+                                            curTable.addCell(dataCell.getStringCellValue());
+                                        } catch(Exception e) {
+                                            try {
+                                                curTable.addCell("" + dataCell.getNumericCellValue());
+                                            } catch (Exception e2) {
+                                                curTable.addCell("" + dataCell.getCellFormula());
+                                            }
+                                        }
+                                        break;
+                                    case BLANK:
+                                    case ERROR:
+                                    default:
+                                        curTable.addCell("");
+                                        logger.info("TYPE:" + dataCell.getCellTypeEnum().name());
+                                        break;
+                                }
+
+                            } catch (Exception e) {
+                                logger.warn("Unparsable table content at " + section.getName() + " line " + (sectionSheet.getRow(i).getRowNum() + 1) + ", " + e.toString());
+                            }
+                        } else {
+                            curTable.addCell("");
+                        }
+                    }
+                }
+                // rest of contents
+                else if (isStart) {
                     Cell yesNoCell = sectionSheet.getRow(i).getCell(section.getYesNoColumn());
-                    if(yesNoCell == null) {
+                    if (yesNoCell == null) {
                         continue;
                     }
                     String yesNo = Paragraph.NO;
                     try {
                         yesNo = yesNoCell.getStringCellValue();
                     } catch (Exception e) {
-                        logger.warn("Unparsable Yes/No cell at " + section.getName() + " line " + (i+1) + ", " + e.toString());
+                        logger.warn("Unparsable Yes/No cell at " + section.getName() + " line " + (i + 1) + ", " + e.toString());
                     }
                     // ignored row
-                    if(yesNo.equalsIgnoreCase(Paragraph.NO))
+                    if (yesNo.equalsIgnoreCase(Paragraph.NO))
                         continue;
                     // inside section
                     addRowToSection(section, sectionSheet.getRow(i), new Paragraph());
                 }
+            } catch (Exception e) {
+                logger.error("Error at section " + section.getName() + " line " + (i + 1), e);
+                throw e;
             }
         }
 

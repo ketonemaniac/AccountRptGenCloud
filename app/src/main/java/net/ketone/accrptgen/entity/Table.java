@@ -9,6 +9,7 @@ import java.util.List;
 public class Table implements SectionElement {
 
     private List<Integer> columnWidths;
+    private int rowHeight;
     private List<List<Cell>> cells;
 
     @Data
