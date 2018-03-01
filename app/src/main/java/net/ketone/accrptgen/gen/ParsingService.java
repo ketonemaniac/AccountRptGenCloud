@@ -1,18 +1,11 @@
 package net.ketone.accrptgen.gen;
 
-import net.ketone.accrptgen.entity.AccountData;
+import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.entity.Header;
-import net.ketone.accrptgen.entity.Paragraph;
-import net.ketone.accrptgen.entity.Section;
-import net.ketone.accrptgen.entity.SectionElement;
 import net.ketone.accrptgen.entity.Table;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.ss.formula.eval.FunctionEval;
-import org.apache.poi.ss.formula.functions.DateDifFunc;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -21,16 +14,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-// import org.springframework.util.StringUtils;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
+
+// import org.springframework.util.StringUtils;
 
 @Component
 public class ParsingService {
 
     private static final Logger logger = LoggerFactory.getLogger(ParsingService.class);
     private static final String COPY_COLOR = "4F81BD";
+    private static final List<String> preParseSheets = Arrays.asList("Control", "Dir info", "Section3", "Section4", "Section6");
 
     @Autowired
     private StorageService storageService;
@@ -65,6 +62,7 @@ public class ParsingService {
         Map<String, Sheet> inputSheetMap = initSheetMap(workbook);
 
         for(Sheet sheet : inputSheetMap.values()) {
+            if(!preParseSheets.contains(sheet.getSheetName())) continue;
             Sheet templateSheet = templateSheetMap.get(sheet.getSheetName());
             if(templateSheet == null) continue;
             logger.info("parsing sheet: " + sheet.getSheetName());
