@@ -182,18 +182,23 @@ public class ParsingService {
                     switch (control.trim().toLowerCase()) {
                         case Paragraph.HEADING:
                             // case Paragraph.HEADING2:
-                            Header h = addRowToSection(section, sectionSheet.getRow(i), new Header());
+                            Header h = addRowToSection(section, sectionSheet.getRow(i), createHeader(section.getName()));
                             if (curHeader == null) {
                                 h.setFirstLine(true);
+                                if(h.getText().trim().length() > 0) {
+                                    h.setLastLine(true);
+                                }
+                            } else {
+                                if(h.getText().trim().length() > 0) {
+                                    curHeader.setLastLine(false);
+                                    h.setLastLine(true);
+                                }
                             }
                             curHeader = h;
                             break;
                         case Paragraph.START:
                             startEndBuilder.append(i);
                             isStart = true;
-                            if (curHeader != null) {
-                                curHeader.setLastLine(true);
-                            }
                             break;
                         case Paragraph.END:
                             startEndBuilder.append("End line=").append(i);
@@ -306,11 +311,15 @@ public class ParsingService {
             Cell dataCell = row.getCell(i);
             if(dataCell != null) {
                 try {
-                    sb.append(dataCell.getStringCellValue());
+                    String data = dataCell.getStringCellValue();
+                    sb.append(data);
                     hasContent = true;
-                    XSSFCellStyle style = (XSSFCellStyle) dataCell.getCellStyle();
-                    isBold = style.getFont().getBold();
-                    p.setBold(isBold);
+                    // empty cells do not contibute to font
+                    if(dataCell.getStringCellValue().length() > 0) {
+                        XSSFCellStyle style = (XSSFCellStyle) dataCell.getCellStyle();
+                        isBold = style.getFont().getBold();
+                        p.setBold(isBold);
+                    }
                 } catch (Exception e) {
                     logger.warn("Unparsable content at " + section.getName() + " line " + (row.getRowNum()+1) + ", " + e.toString());
                 }
@@ -328,4 +337,31 @@ public class ParsingService {
     }
 
 
+    /**
+     * Put all predefined header properties here
+     * @param section
+     * @return
+     */
+    private Header createHeader(String section) {
+        Header header = new Header();
+        switch(section) {
+            case "Section1":
+                header.setHasCompanyName(true);
+                header.setUnderline(Header.Underline.NO_UNDERLINE);
+                break;
+            case "Section2":
+                header.setHasCompanyName(true);
+                header.setUnderline(Header.Underline.AFTER_LAST);
+                break;
+            case "Section3":
+            case "Section4":
+            case "Section5":
+            case "Section6":
+                header.setHasCompanyName(true);
+                header.setUnderline(Header.Underline.BEFORE_LAST);
+                break;
+        }
+
+        return header;
+    }
 }

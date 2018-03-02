@@ -5,15 +5,18 @@ import lombok.Data;
 @Data
 public class Header extends Paragraph {
 
-    enum Formatting {
-        ALL_BOLD,
-        LAST_LINE_PLAIN,
-        UNDERLINE_THEN_LAST_LINE_PLAIN;
+    public enum Underline {
+        NO_UNDERLINE,
+        BEFORE_LAST,
+        AFTER_LAST
     }
 
-    private Formatting formatting;
+    private Underline underline;
+
     private boolean firstLine;
     private boolean lastLine;
-    private String companyName;
+    private boolean hasCompanyName;
 
+    private String companyName;
+    private String auditorName;
 }

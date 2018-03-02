@@ -168,15 +168,19 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     public void write(String sectionName, Header header, String companyName) {
         XWPFParagraph currPgh = pghHeaders.get("Header" + sectionName);
-        List<String> sectionsRequiringCompanyHeader = Arrays.asList(
-            "Section1", "Section3", "Section4", "Section5", "Section6");
-        if(header.isFirstLine() && sectionsRequiringCompanyHeader.contains(sectionName)) {
+        if(header.isFirstLine() && header.isHasCompanyName()) {
             Paragraph p = new Paragraph();
             p.setText(companyName);
+            p.setBold(true);
             doWrite(currPgh, p, null);
         }
         if(header.isLastLine()) {
-            doWrite(currPgh, header, p -> p.setBorderTop(Borders.SINGLE));
+            if(header.getUnderline().equals(Header.Underline.BEFORE_LAST))
+                doWrite(currPgh, header, p -> p.setBorderTop(Borders.SINGLE));
+            else if(header.getUnderline().equals(Header.Underline.AFTER_LAST))
+                doWrite(currPgh, header, p -> p.setBorderBottom(Borders.SINGLE));
+            else
+                doWrite(currPgh, header, null);
         } else {
             doWrite(currPgh, header, null);
         }
