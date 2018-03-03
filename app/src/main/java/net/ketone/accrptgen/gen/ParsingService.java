@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.swing.border.Border;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -242,33 +243,46 @@ public class ParsingService {
                     for (int j = 0; j < curTable.getColumnWidths().size(); j++) {
                         Cell dataCell = sectionSheet.getRow(i).getCell(j);
                         if (dataCell != null) {
+                            Table.Cell parsedCell = null;
                             try {
                                 switch (dataCell.getCellTypeEnum()) {
                                     case STRING:
-                                        curTable.addCell(dataCell.getStringCellValue());
+                                        parsedCell = curTable.addCell(dataCell.getStringCellValue());
                                         break;
                                     case NUMERIC:
-                                        curTable.addCell(""+dataCell.getNumericCellValue());
+                                        parsedCell = curTable.addCell(""+dataCell.getNumericCellValue());
                                         break;
                                     case FORMULA:
                                         try {
-                                            curTable.addCell(dataCell.getStringCellValue());
+                                            parsedCell = curTable.addCell(dataCell.getStringCellValue());
                                         } catch(Exception e) {
                                             try {
-                                                curTable.addCell("" + dataCell.getNumericCellValue());
+                                                parsedCell = curTable.addCell("" + dataCell.getNumericCellValue());
                                             } catch (Exception e2) {
-                                                curTable.addCell("" + dataCell.getCellFormula());
+                                                parsedCell = curTable.addCell("" + dataCell.getCellFormula());
                                             }
                                         }
                                         break;
                                     case BLANK:
                                     case ERROR:
                                     default:
-                                        curTable.addCell("");
+                                        parsedCell = curTable.addCell("");
                                         logger.info("TYPE:" + dataCell.getCellTypeEnum().name());
                                         break;
                                 }
-
+                                if(dataCell.getCellStyle() == null) continue;
+                                XSSFCellStyle style = (XSSFCellStyle) dataCell.getCellStyle();
+                                parsedCell.setBold(style.getFont().getBold());
+                                parsedCell.setUnderline(style.getFont().getUnderline() == FontUnderline.SINGLE.getByteValue());
+                                if(style.getBorderBottomEnum() == null) continue;
+                                switch(style.getBorderBottomEnum()) {
+                                    case THIN:
+                                        parsedCell.setBottomBorderStyle(Table.BottomBorderStyle.SINGLE_LINE);
+                                        break;
+                                    case DOUBLE:
+                                        parsedCell.setBottomBorderStyle(Table.BottomBorderStyle.DOUBLE_LINE);
+                                        break;
+                                }
                             } catch (Exception e) {
                                 logger.warn("Unparsable table content at " + section.getName() + " line " + (sectionSheet.getRow(i).getRowNum() + 1) + ", " + e.toString());
                             }

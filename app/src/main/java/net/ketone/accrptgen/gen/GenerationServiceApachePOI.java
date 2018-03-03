@@ -229,15 +229,25 @@ public class GenerationServiceApachePOI implements GenerationService {
                     try {
 
                         Table.Cell cell = table.getCells().get(i).get(j);
-                        tableRow.getCell(j).setText(cell.getText());
-                        setSingleLineSpacing(tableRow.getCell(j).getParagraphArray(0));
+                        // tableRow.getCell(j).setText(cell.getText());
+                        tableRow.getCell(j).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+                        XWPFParagraph paragraph = tableRow.getCell(j).getParagraphArray(0);
+                        paragraph.createRun().setText(cell.getText());
+                        setSingleLineSpacing(paragraph);
+                        paragraph.getRuns().get(0).setBold(cell.isBold());
+                        paragraph.getRuns().get(0).setUnderline(cell.isUnderline() ? UnderlinePatterns.SINGLE : UnderlinePatterns.NONE);
+
+                        CTTcPr tcPr = tableRow.getCell(j).getCTTc().addNewTcPr();
+                        CTTcBorders border = tcPr.addNewTcBorders();
+                        switch(cell.getBottomBorderStyle()) {
+                            case SINGLE_LINE:
+                                border.addNewBottom().setVal(STBorder.SINGLE); break;
+                            case DOUBLE_LINE:
+                                border.addNewBottom().setVal(STBorder.DOUBLE); break;
+                        }
                     }catch (Exception e) {
                         logger.warn("What is this: " + sectionName + " i:" + i + " j:" + j, e);
                     }
-                    CTTcPr tcPr = tableRow.getCell(j).getCTTc().addNewTcPr();
-
-//                    CTTcBorders border = tcPr.addNewTcBorders();
-//                    border.addNewBottom().setVal(STBorder.DOUBLE);
                 }
             }
             XmlCursor c3 = xwpfTable.getCTTbl().newCursor();

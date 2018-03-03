@@ -12,15 +12,21 @@ public class Table implements SectionElement {
     private int rowHeight;
     private List<List<Cell>> cells;
 
+    public enum BottomBorderStyle {
+        NO_LINE,
+        SINGLE_LINE,
+        DOUBLE_LINE
+    }
+
     @Data
     public class Cell {
-        private String bottomBorderStyle;
+        private BottomBorderStyle bottomBorderStyle;
         private String text;
         private boolean isUnderline;
         private boolean isBold;
     }
 
-    public void addCell(String text) {
+    public Cell addCell(String text) {
         Cell cell = new Cell();
         cell.setText(text);
         List<Cell> lastRowCells = null;
@@ -36,5 +42,6 @@ public class Table implements SectionElement {
             }
         }
         lastRowCells.add(cell);
+        return cell;
     }
 }
