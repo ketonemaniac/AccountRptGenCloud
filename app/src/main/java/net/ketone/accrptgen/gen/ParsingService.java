@@ -19,6 +19,8 @@ import javax.swing.border.Border;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 
 // import org.springframework.util.StringUtils;
@@ -250,16 +252,16 @@ public class ParsingService {
                                         parsedCell = curTable.addCell(dataCell.getStringCellValue());
                                         break;
                                     case NUMERIC:
-                                        parsedCell = curTable.addCell(""+dataCell.getNumericCellValue());
+                                        parsedCell = curTable.addCell(numberFormat(dataCell.getNumericCellValue()));
                                         break;
                                     case FORMULA:
                                         try {
                                             parsedCell = curTable.addCell(dataCell.getStringCellValue());
                                         } catch(Exception e) {
                                             try {
-                                                parsedCell = curTable.addCell("" + dataCell.getNumericCellValue());
+                                                parsedCell = curTable.addCell(numberFormat(dataCell.getNumericCellValue()));
                                             } catch (Exception e2) {
-                                                parsedCell = curTable.addCell("" + dataCell.getCellFormula());
+                                                parsedCell = curTable.addCell(dataCell.getCellFormula());
                                             }
                                         }
                                         break;
@@ -378,4 +380,12 @@ public class ParsingService {
 
         return header;
     }
+
+    private String numberFormat(double value ) {
+        NumberFormat myFormatter = new DecimalFormat("###,###,###,###,###;(###,###,###,###,###)");
+        String output = myFormatter.format(value);
+        System.out.println(value + "  " + output);
+        return output;
+    }
+
 }
