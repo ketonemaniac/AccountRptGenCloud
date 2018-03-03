@@ -183,6 +183,16 @@ public class ParsingService {
                 if (cell != null && !StringUtils.isEmpty(cell.getStringCellValue())) {
                     String control = cell.getStringCellValue();
                     switch (control.trim().toLowerCase()) {
+                        case Paragraph.AUDITOR_HEADING:
+                            Header ah = createHeader(section.getName());
+                            ah.setAuditorName(sectionSheet.getRow(i).getCell(0).getStringCellValue());
+                            section.addSectionElement(ah);
+                            break;
+                        case Paragraph.AUDITOR_FOOTER:
+                            Header af = createHeader(section.getName());
+                            af.setAuditorAddress(sectionSheet.getRow(i).getCell(0).getStringCellValue());
+                            section.addSectionElement(af);
+                            break;
                         case Paragraph.HEADING:
                             // case Paragraph.HEADING2:
                             Header h = addRowToSection(section, sectionSheet.getRow(i), createHeader(section.getName()));

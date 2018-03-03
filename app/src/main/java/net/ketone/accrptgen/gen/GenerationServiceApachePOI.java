@@ -39,6 +39,7 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     Map<String, XWPFParagraph> currPghs = new HashMap<>();
     Map<String, XWPFParagraph> pghHeaders = new HashMap<>();
+    Map<String, XWPFParagraph> pghFooters = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -68,15 +69,12 @@ public class GenerationServiceApachePOI implements GenerationService {
         List<XWPFParagraph> headerParagraphs = document.getHeaderList().stream().flatMap(
                                 hdr -> hdr.getParagraphs().stream()).collect(Collectors.toList());
         pghHeaders = findParagraphLocations(data.getSections().stream().map(section -> "Header" + section.getName())
-                                                .collect(Collectors.toList())
-                                , headerParagraphs);
+                                                .collect(Collectors.toList()), headerParagraphs);
+        List<XWPFParagraph> footerParagraphs = document.getFooterList().stream().flatMap(
+                hdr -> hdr.getParagraphs().stream()).collect(Collectors.toList());
+        pghFooters = findParagraphLocations(data.getSections().stream().map(section -> "Footer" + section.getName())
+                .collect(Collectors.toList()), footerParagraphs);
 
-//        for(XWPFHeader hdr : document.getHeaderList()) {
-//            XWPFParagraph para = hdr.createParagraph();
-//                XWPFRun run2 = para.createRun();
-//                run2.setText(data.getCompanyName());
-//                run2.setBold(true);
-//        }
 
         for(Section currSection : data.getSections()) {
 
@@ -91,8 +89,7 @@ public class GenerationServiceApachePOI implements GenerationService {
             }
             endSection(currPghs.get(currSection.getName()));
             endSection(pghHeaders.get("Header" + currSection.getName()));
-//            createParagraphs(section1Pgh, currSection.getParagraphs());
-            // System.out.println("[" + run.text() + "]");
+            endSection(pghFooters.get("Footer" + currSection.getName()));
         }
 
 
@@ -168,6 +165,21 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     public void write(String sectionName, Header header, String companyName) {
         XWPFParagraph currPgh = pghHeaders.get("Header" + sectionName);
+        if(header.getAuditorName() != null) {
+            header.setText(header.getAuditorName());
+            doWrite(currPgh, header, p -> {
+                p.getRuns().get(0).setFontSize(17);
+                p.getRuns().get(0).setUnderline(UnderlinePatterns.SINGLE);
+                p.setAlignment(ParagraphAlignment.CENTER);
+            });
+            return;
+        }
+        if(header.getAuditorAddress() != null) {
+            currPgh = pghFooters.get("Footer" + sectionName);
+            header.setText(header.getAuditorAddress());
+            doWrite(currPgh, header, null);
+            return;
+        }
         if(header.isFirstLine() && header.isHasCompanyName()) {
             Paragraph p = new Paragraph();
             p.setText(companyName);
@@ -239,11 +251,13 @@ public class GenerationServiceApachePOI implements GenerationService {
 
                         CTTcPr tcPr = tableRow.getCell(j).getCTTc().addNewTcPr();
                         CTTcBorders border = tcPr.addNewTcBorders();
-                        switch(cell.getBottomBorderStyle()) {
-                            case SINGLE_LINE:
-                                border.addNewBottom().setVal(STBorder.SINGLE); break;
-                            case DOUBLE_LINE:
-                                border.addNewBottom().setVal(STBorder.DOUBLE); break;
+                        if(cell.getBottomBorderStyle() != null) {
+                            switch(cell.getBottomBorderStyle()) {
+                                case SINGLE_LINE:
+                                    border.addNewBottom().setVal(STBorder.SINGLE); break;
+                                case DOUBLE_LINE:
+                                    border.addNewBottom().setVal(STBorder.DOUBLE); break;
+                            }
                         }
                     }catch (Exception e) {
                         logger.warn("What is this: " + sectionName + " i:" + i + " j:" + j, e);

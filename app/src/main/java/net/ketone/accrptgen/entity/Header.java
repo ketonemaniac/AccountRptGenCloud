@@ -19,4 +19,5 @@ public class Header extends Paragraph {
 
     private String companyName;
     private String auditorName;
+    private String auditorAddress;
 }
