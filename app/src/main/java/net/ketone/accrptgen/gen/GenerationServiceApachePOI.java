@@ -34,6 +34,8 @@ public class GenerationServiceApachePOI implements GenerationService {
     // this converts the user input height to cm
     private static final int twipsPerInput = (int) (0.035 * twipsPerCm);
 
+    private static final int twipsPerIndent = (int) 1.27 * twipsPerCm;
+
     @Autowired
     private StorageService storageService;
 
@@ -51,6 +53,14 @@ public class GenerationServiceApachePOI implements GenerationService {
     }
 
 
+    /**
+     * The trick here is to make a template docx with only the words "SectionX" and locate them.
+     * Then we REPLACE the contents of each section by corresponding data
+     * There you do not need to deal with the creation of multi-section documents
+     * which Apache POI seems to struggle in implementing
+     * @param data
+     * @return the filename of the generated docx
+     */
     public String generate(AccountData data) {
 
         ClassLoader classLoader = getClass().getClassLoader();
@@ -133,6 +143,7 @@ public class GenerationServiceApachePOI implements GenerationService {
     }
 
     private void doWrite(XWPFParagraph currPgh, Paragraph paragraph, Consumer<XWPFParagraph> formatting) {
+        int indent = 0;
         if(currPgh != null) {
             XWPFDocument doc = currPgh.getDocument();
             XmlCursor cursor = currPgh.getCTP().newCursor();
@@ -144,15 +155,21 @@ public class GenerationServiceApachePOI implements GenerationService {
             newR.setBold(paragraph.isBold());
 
             StringBuffer sb = new StringBuffer();
-            for(int i = 0; i < paragraph.getText().length(); i++) {
-                char c = paragraph.getText().charAt(i);
-                if(c == '\t') {
-                    newR.addTab();
-                } else {
-                    sb.append(c);
-                }
+//            for(int i = 0; i < paragraph.getText().length(); i++) {
+//                char c = paragraph.getText().charAt(i);
+//                if(c == '\t') {
+//                    newR.addTab();
+//                } else {
+//                    sb.append(c);
+//                }
+//            }
+            if(paragraph.getIndent() > 0) {
+                CTInd ind = newP.getCTP().getPPr().addNewInd();
+                ind.setLeft(BigInteger.valueOf(paragraph.getIndent() * twipsPerIndent));
             }
-            newR.setText(sb.toString());
+
+            newR.setText(paragraph.getText());
+            // newR.setText(sb.toString());
             if(formatting != null) {
                 formatting.accept(newP);
             }

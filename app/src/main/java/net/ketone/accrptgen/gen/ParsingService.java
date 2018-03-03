@@ -339,24 +339,29 @@ public class ParsingService {
                 try {
                     String data = dataCell.getStringCellValue();
                     sb.append(data);
-                    hasContent = true;
                     // empty cells do not contibute to font
-                    if(dataCell.getStringCellValue().length() > 0) {
+                    if(data.length() > 0) {
+                        hasContent = true;
                         XSSFCellStyle style = (XSSFCellStyle) dataCell.getCellStyle();
                         isBold = style.getFont().getBold();
                         p.setBold(isBold);
+                    } else if(!hasContent) {
+                        // no content, empty cell = indent
+                        p.setIndent(p.getIndent()+1);
                     }
                 } catch (Exception e) {
                     logger.warn("Unparsable content at " + section.getName() + " line " + (row.getRowNum()+1) + ", " + e.toString());
                 }
-            } else {
-                sb.append("\t");   // empty cell
+            } else if(!hasContent) {
+                // no content, empty cell = indent
+                p.setIndent(p.getIndent()+1);
             }
         }
         if(hasContent) {
-            p.setText(StringUtils.stripEnd(sb.toString(), null));
+            p.setText(sb.toString().trim());
         } else {
             p.setText("");
+            p.setIndent(0);
         }
         section.addSectionElement(p);
         return p;
