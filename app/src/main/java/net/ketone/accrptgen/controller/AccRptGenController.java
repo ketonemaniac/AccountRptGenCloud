@@ -49,21 +49,36 @@ public class AccRptGenController {
     public AccountFileDto handleFileUpload(@RequestParam("file") MultipartFile file,
                                            RedirectAttributes redirectAttributes) throws IOException {
 
+        // TODO: use ThreadPool and Future to keep track of file generation status
+        // TODO: pre-parse filename and put to output
+        new Thread( () -> {
+            try {
+                InputStream is = new ByteArrayInputStream(file.getBytes());
+                ByteArrayOutputStream os = parsingService.preParse(is);
+                InputStream is2 = new ByteArrayInputStream(os.toByteArray());
+                AccountData data = parsingService.readFile(is2);
 
-        InputStream is = new ByteArrayInputStream(file.getBytes());
-        ByteArrayOutputStream os = parsingService.preParse(is);
-        InputStream is2 = new ByteArrayInputStream(os.toByteArray());
-        AccountData data = parsingService.readFile(is2);
+                data.setGenerationTime(new Date());
 
-        data.setGenerationTime(new Date());
+                // TODO: fix locale problems, generation time does not match filename
+                String filename = generationService.generate(data);
 
-        String filename = generationService.generate(data);
+                AccountFileDto dto = new AccountFileDto();
+                dto.setCompany(data.getCompanyName());
+                dto.setFilename(filename);
+                dto.setPassword(PasswordUtils.generatePassword(8));
+                dto.setGenerationTime(data.getGenerationTime());
+            } catch (Exception e) {
+                logger.warn("dang you" , e);
+            }
+        }).start();
 
         AccountFileDto dto = new AccountFileDto();
-        dto.setCompany(data.getCompanyName());
-        dto.setFilename(filename);
-        dto.setPassword(PasswordUtils.generatePassword(8));
-        dto.setGenerationTime(data.getGenerationTime());
+        dto.setCompany("N/A (generating...)");
+        dto.setFilename("(refresh when complete)");
+        dto.setPassword("");
+        dto.setGenerationTime(new Date());
+
         return dto;
     }
 
@@ -77,6 +92,8 @@ public class AccRptGenController {
 
     @GetMapping("/listFiles")
     public List<AccountFileDto> listFiles() {
+        // TODO: append files which are generating
+        // TODO: sort by descending time
         return storageService.list().stream()
                 .filter(f -> f.endsWith("docx"))
                 .map(
