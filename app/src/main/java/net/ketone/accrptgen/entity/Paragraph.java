@@ -17,6 +17,7 @@ public class Paragraph implements SectionElement {
     public static final String END = "end";
     public static final String TABLE_START = "table start";
     public static final String TABLE_END = "table end";
+    public static final String ITEM = "item";
 
     // yes/no Characters
     public static final String YES = "y";
@@ -27,5 +28,6 @@ public class Paragraph implements SectionElement {
     private String control;
     private int indent;
     private boolean isBold;
+    private boolean isItem;
 
 }
