@@ -103,6 +103,8 @@ public class GenerationServiceApachePOI implements GenerationService {
             endSection(pghHeaders.get("Header" + currSection.getName()));
             endSection(pghFooters.get("Footer" + currSection.getName()));
         }
+        // update TOC
+        document.enforceUpdateFields();
 
 
         String filename = data.getCompanyName() + "-" + sdf.format(data.getGenerationTime()) + ".docx";

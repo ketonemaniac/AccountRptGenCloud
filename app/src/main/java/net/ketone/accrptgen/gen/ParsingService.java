@@ -390,6 +390,7 @@ public class ParsingService {
                 header.setHasCompanyName(true);
                 header.setUnderline(Header.Underline.NO_UNDERLINE);
                 break;
+            case "Contents":
             case "Section2":
                 header.setHasCompanyName(true);
                 header.setUnderline(Header.Underline.AFTER_LAST);
