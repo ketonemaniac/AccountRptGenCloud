@@ -32,9 +32,9 @@ public class ParserTest {
     private StorageService storageSvc;
 
     private final String PLAIN_FILENAME = "program (plain) 19.1.18.xlsm";
-    private final String TEMPLATE_FILENAME = "All documents 18.1.18.xlsm";
+    private final String TEMPLATE_FILENAME = "All documents 10.3.18.xlsm";
 
-    // @Test
+    @Test
     public void testPreParse() throws IOException {
         InputStream inputStream = this.getClass().getResourceAsStream("/" + PLAIN_FILENAME);
         ByteArrayOutputStream os = svc.preParse(inputStream);
@@ -49,7 +49,7 @@ public class ParserTest {
         genSvc.generate(data);
     }
 
-    @Test
+    // @Test
     public void testParse() throws IOException {
         XSSFWorkbook templateWb = storageSvc.getTemplate(TEMPLATE_FILENAME);
         ByteArrayOutputStream os = new ByteArrayOutputStream();

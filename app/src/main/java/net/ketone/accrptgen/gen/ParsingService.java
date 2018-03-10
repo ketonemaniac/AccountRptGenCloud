@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.swing.border.Border;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +28,7 @@ import java.util.*;
 public class ParsingService {
 
     private static final Logger logger = LoggerFactory.getLogger(ParsingService.class);
-    private static final String COPY_COLOR = "4F81BD";
+    private static final List<String> COPY_COLORS = Arrays.asList("4F81BD", "8064A2");
     private static final List<String> preParseSheets = Arrays.asList("Control", "Dir info", "Section3", "Section4", "Section6");
 
     @Autowired
@@ -78,7 +77,7 @@ public class ParsingService {
                 while (cellIter.hasNext()) {
                     Cell cell = cellIter.next();
                     XSSFColor color = XSSFColor.toXSSFColor(cell.getCellStyle().getFillForegroundColorColor());
-                    if (color != null && color.getARGBHex().substring(2).equals(COPY_COLOR)) {
+                    if (color != null && COPY_COLORS.contains(color.getARGBHex().substring(2))) {
                         Cell templateCell = null;
                         // TODO: ask why some cells don't match
                         try {
@@ -282,10 +281,12 @@ public class ParsingService {
                                         }
                                         break;
                                     case BLANK:
+                                        parsedCell = curTable.addCell("");
+                                        break;
                                     case ERROR:
                                     default:
                                         parsedCell = curTable.addCell("");
-                                        logger.info("TYPE:" + dataCell.getCellTypeEnum().name());
+                                        logger.warn("TYPE:" + dataCell.getCellTypeEnum().name());
                                         break;
                                 }
                                 if(dataCell.getCellStyle() == null) continue;
@@ -410,7 +411,6 @@ public class ParsingService {
     private String numberFormat(double value ) {
         NumberFormat myFormatter = new DecimalFormat("###,###,###,###,###;(###,###,###,###,###)");
         String output = myFormatter.format(value);
-        System.out.println(value + "  " + output);
         return output;
     }
 
