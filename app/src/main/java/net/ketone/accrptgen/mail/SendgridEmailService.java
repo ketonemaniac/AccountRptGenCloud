@@ -41,6 +41,9 @@ public class SendgridEmailService implements EmailService {
     @Value("${mail.sendgrid.api-key}")
     private String SENDGRID_API_KEY;
 
+    @Value("${mail.enabled}")
+    private boolean SENDGRID_ENABLE;
+
     @Value("${mail.sender}")
     private String SENDGRID_SENDER;
 
@@ -48,7 +51,7 @@ public class SendgridEmailService implements EmailService {
     private String TO_EMAIL;
 
     public void sendEmail(String companyName, String attachmentName, InputStream attachment) throws Exception {
-
+        if(!SENDGRID_ENABLE) return;
         SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
         SendGrid.Email email = new SendGrid.Email();
         email.addTo(TO_EMAIL);
