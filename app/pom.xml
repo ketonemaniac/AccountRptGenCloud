@@ -118,6 +118,13 @@
 			<version>3.7</version>
 		</dependency>
 
+		<!-- mail client -->
+		<dependency>
+			<groupId>com.sendgrid</groupId>
+			<artifactId>sendgrid-java</artifactId>
+			<version>2.2.2</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

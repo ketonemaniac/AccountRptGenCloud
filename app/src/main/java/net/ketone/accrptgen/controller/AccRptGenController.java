@@ -5,6 +5,7 @@ import net.ketone.accrptgen.dto.DownloadFileDto;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.gen.GenerationService;
 import net.ketone.accrptgen.gen.ParsingService;
+import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.util.PasswordUtils;
 import org.slf4j.Logger;
@@ -17,10 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -37,6 +35,8 @@ public class AccRptGenController {
     private ParsingService parsingService;
     @Autowired
     private StorageService storageService;
+    @Autowired
+    private EmailService emailService;
 
 
     @RequestMapping("/hello")
@@ -50,33 +50,40 @@ public class AccRptGenController {
                                            RedirectAttributes redirectAttributes) throws IOException {
 
         // TODO: use ThreadPool and Future to keep track of file generation status
-        // TODO: pre-parse filename and put to output
+        InputStream is = new ByteArrayInputStream(file.getBytes());
+        final Date generationTime = new Date();
+        String companyName = parsingService.extractCompanyName(is);
+        String filename = companyName + "-" + GenerationService.sdf.format(generationTime) + ".docx";
+
         new Thread( () -> {
             try {
-                InputStream is = new ByteArrayInputStream(file.getBytes());
-                ByteArrayOutputStream os = parsingService.preParse(is);
+                InputStream is1 = new ByteArrayInputStream(file.getBytes());
+                ByteArrayOutputStream os = parsingService.preParse(is1);
                 InputStream is2 = new ByteArrayInputStream(os.toByteArray());
                 AccountData data = parsingService.readFile(is2);
 
-                data.setGenerationTime(new Date());
+                data.setGenerationTime(generationTime);
 
                 // TODO: fix locale problems, generation time does not match filename
-                String filename = generationService.generate(data);
+                ByteArrayOutputStream os1 = generationService.generate(data);
+                byte[] bytes = os1.toByteArray();
+                try {
+                    storageService.store(new ByteArrayInputStream(bytes), filename);
+                } catch (IOException e) {
+                    logger.error("Error storing generated file", e);
+                    throw new RuntimeException(e);
+                }
+                emailService.sendEmail(companyName, filename, new ByteArrayInputStream(bytes));
 
-                AccountFileDto dto = new AccountFileDto();
-                dto.setCompany(data.getCompanyName());
-                dto.setFilename(filename);
-                dto.setPassword(PasswordUtils.generatePassword(8));
-                dto.setGenerationTime(data.getGenerationTime());
             } catch (Exception e) {
                 logger.warn("dang you" , e);
             }
         }).start();
 
+
         AccountFileDto dto = new AccountFileDto();
-        dto.setCompany("N/A (generating...)");
-        dto.setFilename("(refresh when complete)");
-        dto.setPassword("");
+        dto.setCompany(companyName);
+        dto.setFilename(filename);
         dto.setGenerationTime(new Date());
 
         return dto;

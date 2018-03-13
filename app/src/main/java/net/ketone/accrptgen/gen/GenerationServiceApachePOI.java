@@ -4,7 +4,6 @@ import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.ss.formula.eval.FunctionEval;
 import org.apache.poi.ss.formula.functions.DateDifFunc;
-import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.xmlbeans.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
@@ -63,7 +62,7 @@ public class GenerationServiceApachePOI implements GenerationService {
      * @param data
      * @return the filename of the generated docx
      */
-    public String generate(AccountData data) {
+    public ByteArrayOutputStream generate(AccountData data) throws IOException {
 
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource("template.docx").getFile());
@@ -106,15 +105,9 @@ public class GenerationServiceApachePOI implements GenerationService {
         // update TOC
         document.enforceUpdateFields();
 
-
-        String filename = data.getCompanyName() + "-" + sdf.format(data.getGenerationTime()) + ".docx";
-        try {
-            storageService.store(document, filename);
-        } catch (IOException e) {
-            logger.error("Error storing generated file", e);
-            throw new RuntimeException(e);
-        }
-        return filename;
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        document.write(os);
+        return os;
     }
 
     /**

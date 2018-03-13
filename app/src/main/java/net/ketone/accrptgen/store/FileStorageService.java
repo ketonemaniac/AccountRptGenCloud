@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,12 +27,14 @@ public class FileStorageService implements StorageService {
     List<String> filenames = new ArrayList<>();
 
     @Override
-    public String store(XWPFDocument doc, String filename) throws IOException {
+    public String store(InputStream is, String filename) throws IOException {
+        logger.info("Writing to local file " + STORAGE_FOLDER + filename);
         File output= new File(STORAGE_FOLDER + filename);
         FileOutputStream out = new FileOutputStream(output);
-        doc.write(out);
+        byte[] bytes = new byte[is.available()];
+        is.read(bytes);
+        out.write(bytes);
         out.close();
-        doc.close();
         return filename;
     }
 

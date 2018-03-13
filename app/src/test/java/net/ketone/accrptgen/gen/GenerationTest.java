@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -40,7 +41,7 @@ public class GenerationTest {
 
     @Before
     public void init() throws IOException {
-        Mockito.when(storageService.store(any(XWPFDocument.class), any(String.class))).thenAnswer(new Answer<String>() {
+        Mockito.when(storageService.store(any(InputStream.class), any(String.class))).thenAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocationOnMock) throws Throwable {
                 XWPFDocument doc = (XWPFDocument) invocationOnMock.getArguments()[0];
@@ -58,7 +59,7 @@ public class GenerationTest {
 
 
     @Test
-    public void testGeneration() {
+    public void testGeneration() throws IOException {
         AccountData data = new AccountData();
         data.setCompanyName("KEITH ENTERPRISES LTD");
         data.setGenerationTime(new Date());

@@ -10,10 +10,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -34,14 +31,14 @@ public class GCloudStorageService implements StorageService {
 
 
     @Override
-    public String store(XWPFDocument doc, String filename) throws IOException {
+    public String store(InputStream is, String filename) throws IOException {
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        doc.write(out);
+        byte[] bytes = new byte[is.available()];
+        is.read(bytes);
         String contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         BlobInfo blobInfo =
                 BlobInfo.newBuilder(BUCKET_NAME, filename).setContentType(contentType).build();
-        storage.create(blobInfo, out.toByteArray());
+        storage.create(blobInfo, bytes);
         return filename;
     }
 

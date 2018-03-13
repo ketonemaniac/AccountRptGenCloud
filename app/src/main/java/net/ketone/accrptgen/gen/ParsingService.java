@@ -52,6 +52,17 @@ public class ParsingService {
         return sheetMap;
     }
 
+    public String extractCompanyName(InputStream excelFile) throws IOException {
+        XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
+        return extractCompanyName(workbook);
+    }
+
+    private String extractCompanyName(Workbook workbook) throws IOException {
+        Sheet controlSheet = workbook.getSheet("Control");
+        // this is D5, put as Row 5 Column D (0 = A1)
+        return controlSheet.getRow(1).getCell(3).getStringCellValue();
+    }
+
     public ByteArrayOutputStream preParse(InputStream excelFile) throws IOException {
 
         XSSFWorkbook templateWb = storageService.getTemplate(templateName);
@@ -129,6 +140,7 @@ public class ParsingService {
 
         AccountData data = new AccountData();
         Workbook workbook = new XSSFWorkbook(excelFile);
+        data.setCompanyName(extractCompanyName(workbook));
 
 
         Sheet metadataSheet = workbook.getSheet("Metadata");
@@ -148,15 +160,6 @@ public class ParsingService {
             data.addSection(section);
             secIdx++;
         }
-
-        Sheet controlSheet = workbook.getSheet("Control");
-        // this is D5, put as Row 5 Column D (0 = A1)
-        String companyName = controlSheet.getRow(1).getCell(3).getStringCellValue();
-        System.out.println(companyName);
-        data.setCompanyName(companyName);
-
-
-
 
         return data;
     }

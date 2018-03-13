@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.List;
@@ -15,13 +16,12 @@ import java.util.stream.Stream;
 public interface StorageService {
 
     /**
-     * Write the doc to an outputStream, using doc.write(os);
-     * @param doc
+     * Write the doc
      * @param filename
      * @return
      * @throws IOException
      */
-    String store(XWPFDocument doc, String filename) throws IOException;
+    String store(InputStream is, String filename) throws IOException;
 
     // String store(MultipartFile file) throws IOException;
 
