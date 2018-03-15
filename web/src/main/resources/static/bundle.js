@@ -51,8 +51,7 @@ var DateFormat = require('dateformat');
                         histTable.row.add( [
                             data.company,    
                             DateFormat(new Date(data.generationTime), "yyyy-mm-dd HH:MM:ss"),
-                            data.filename,
-                            "<span class=\"btn btn-primary dlbtn\">Download<span>"
+                            data.status,
                         ]).draw(false);
                         $("#modalTitle").text("Generation Started");
                         $("#modalText").html("When complete. please supply password <b>" + data.password + "</b> to the file <b>" + data.filename + "</b>");
@@ -163,11 +162,11 @@ var DateFormat = require('dateformat');
             success: function (dataArr) {
                 $.each(dataArr, function(idx, data) {
                     console.log("file is " + data.filename);
+                    var statusText = "<span class=\"glyphicon glyphicon-envelope\" style=\"color:green\"></span>&nbsp;" + data.status;
                     histTable.row.add( [
                         data.company,    
                         DateFormat(new Date(data.generationTime), "yyyy-mm-dd HH:MM:ss"),
-                        data.filename,
-                        "<span class=\"btn btn-primary dlbtn\">Download<span>"
+                        statusText,
                     ]);
                 });
                 histTable.draw(false);
@@ -179,7 +178,31 @@ var DateFormat = require('dateformat');
             }
         });
         
-        
+        // initialize historical chart
+        var ctx = document.getElementById("myChart");
+        var labels = ['January', 'February', 'March', 'April', 'May', 'June'];
+        var data = [20, 10, 30, 40, 50];
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    label: "Africa",
+                    borderColor: "#3e95cd",
+                    fill: false
+                }]
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Reports Generated'
+                }
+            }
+        });
     });
 
     

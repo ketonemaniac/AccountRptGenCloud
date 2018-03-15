@@ -7,9 +7,9 @@
 
 /* skin.css Style*/
 .upload-drop-zone {
-  color: #ccc;
+  color: #777;
   border-style: dashed;
-  border-color: #ccc;
+  border-color: #777;
   line-height: 200px;
   text-align: center
 }
@@ -20,4 +20,13 @@
 
 h3 {
   display:inline;
+}
+/* Header cells */
+#genHistoryTable thead th {
+  text-align: center;
+  background: #cdcdcd;
+}
+.jumbotron {
+  padding-top: 70px !important;
+  background:lightblue !important;
 }

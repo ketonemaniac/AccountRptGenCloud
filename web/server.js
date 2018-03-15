@@ -16,7 +16,7 @@ http.createServer(function(request, response) {
 	}
 	if (endpoint == "/listFiles") {
 	  response.writeHead(200, {'Content-Type': 'application/json'});
-	  response.write("[{\"company\":null,\"filename\":\"6886Sell-20171202112253.pdf\",\"password\":null,\"generationTime\":null},{\"company\":null,\"filename\":\"coverage-error-20171116115549.log\",\"password\":null,\"generationTime\":null}]");
+	  response.write("[{ \"company\": \"ABC Company\", \"generationTime\": \"2017-12-02 11:22:53\", \"status\": \"EMAIL_SENT\" }]");
 	  response.end();
 		return;		
 	}
@@ -27,7 +27,11 @@ http.createServer(function(request, response) {
 		return;
 	}
 	fs.readFile(fullName, function(err, data){
-	  response.writeHead(200, {'Content-Type': 'text/html'});
+		if(fullName.endsWith("css")) {
+			response.writeHead(200, {'Content-Type': 'text/css'});
+		} else {
+			response.writeHead(200, {'Content-Type': 'text/html'});
+		}
 	  response.write(data);
 	  response.end();
 	});
