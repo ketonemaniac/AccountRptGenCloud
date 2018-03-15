@@ -4,13 +4,13 @@
 <head>
 	<!-- Bootstrap -->
 	<script src="jquery-3.3.1.min.js"></script>
-	<script src="bootstrap-3.3.7.min.js"></script>
+	<script src="bootstrap-4.0.0.min.js"></script>
 	<script src="jquery.dataTables-1.10.16.min.js"></script>
 	<script src="loadingOverlay.js"></script>
 	<script src="chart.min.js"></script>
 
 	<link rel="stylesheet" type="text/css" href="dataTables.bootstrap-1.10.16.min.css" />
-	<link rel="stylesheet" type="text/css" href="bootstrap-3.3.7.min.css" />
+	<link rel="stylesheet" type="text/css" href="bootstrap-4.0.0.min.css" />
 	<link rel="stylesheet" type="text/css" href="style.css" />
 	<link rel="stylesheet" href="bootstrap-cerulean.min.css" />
 </head>
@@ -21,48 +21,50 @@
 	<div class="navbar navbar-default navbar-fixed-top">
 		<div class="container">
 			<span class="navbar-brand">Account Report Generator</span>
-			<ul class="nav navbar-nav navbar-right">
+			<ul class="nav navbar-nav flex-row ml-md-auto d-md-flex">
+
 				<li class="active">
 					<a href="#">Home</a>
 				</li>
 				<li>
-					<a href="/admin">Admin</a>
+					<a href="admin.html">Admin</a>
 				</li>
+
 			</ul>
 		</div>
 	</div>
 	<!-- main body -->
 
 	<!-- Upload Section -->
-	<div class="jumbotron col-md-12 rounded">
+	<div class="jumbotron rounded">
 		<div class="container">
-			<div class- "col-md-12">
-				<h3>Generate a report</h3>
-			</div>
-			<div class="col-md-6">
-				<!-- Standar Form -->
-				<form action="" method="post" enctype="multipart/form-data" id="js-upload-form">
-					<div class="form-group">
-						<label for="js-upload-files">Click to upload file</label>
-						<div class="input-group">
-							<label class="input-group-btn">
-								<span class="btn btn-primary">
-									Browse&hellip;
-									<input type="file" style="display: none;" name="files[]" id="js-upload-files" accept=".xlsx,.xlsm">
-								</span>
-							</label>
-							<input type="text" class="form-control" readonly>
+			<p class="lead">Generate a report</p>
+			<div class="row">
+				<div class="col-md-6">
+					<!-- Standar Form -->
+					<form action="" method="post" enctype="multipart/form-data" id="js-upload-form">
+						<div class="form-group">
+							<label for="js-upload-files">Upload data document</label>
+							<div class="input-group">
+								<label class="input-group-btn">
+									<span class="btn btn-primary">
+										Browse&hellip;
+										<input type="file" style="display: none;" name="files[]" id="js-upload-files" accept=".xlsx,.xlsm">
+									</span>
+								</label>
+								<input type="text" class="form-control" readonly>
+							</div>
 						</div>
-					</div>
-					<button type="submit" class="btn btn-primary" id="js-upload-submit">Upload</button>
-				</form>
-			</div>
-			<div class="col-md-6">
-				<!-- Drop Zone -->
-				<div class="form-group">
-					<label>Or drag and drop files below</label>
-					<div class="upload-drop-zone" id="drop-zone">
-						Just drag and drop file here
+						<button type="submit" class="btn btn-primary" id="js-upload-submit">Upload</button>
+					</form>
+				</div>
+				<div class="col-md-6">
+					<!-- Drop Zone -->
+					<div class="form-group">
+						<label>Or drag and drop data document below</label>
+						<div class="upload-drop-zone" id="drop-zone">
+							Just drag and drop file here
+						</div>
 					</div>
 				</div>
 			</div>
@@ -93,32 +95,6 @@
 				<div class="col-md-12">
 					<canvas id="myChart"></canvas>
 				</div>
-				<script>
-					var ctx = document.getElementById("myChart");
-					var labels = ['January', 'February', 'March', 'April', 'May', 'June'];
-					var data = [20, 10, 30, 40, 50];
-					var myChart = new Chart(ctx, {
-						type: 'line',
-						data: {
-							labels: labels,
-							datasets: [{
-								data: data,
-								label: "Africa",
-								borderColor: "#3e95cd",
-								fill: false
-							}]
-						},
-						options: {
-							legend: {
-								display: false
-							},
-							title: {
-								display: true,
-								text: 'Reports Generated'
-							}
-						}
-					});
-				</script>
 			</div>
 		</div>
 	</div>
