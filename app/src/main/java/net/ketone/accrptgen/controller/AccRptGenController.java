@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.controller;
 
+import net.ketone.accrptgen.admin.StatisticsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.dto.DownloadFileDto;
 import net.ketone.accrptgen.entity.AccountData;
@@ -11,6 +12,7 @@ import net.ketone.accrptgen.util.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +39,8 @@ public class AccRptGenController {
     private StorageService storageService;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private StatisticsService statisticsService;
 
 
     @RequestMapping("/hello")
@@ -55,18 +59,26 @@ public class AccRptGenController {
         String companyName = parsingService.extractCompanyName(is);
         String filename = companyName + "-" + GenerationService.sdf.format(generationTime) + ".docx";
 
+        AccountFileDto dto = new AccountFileDto();
+        dto.setCompany(companyName);
+        dto.setFilename(filename);
+        dto.setGenerationTime(new Date());
+
         new Thread( () -> {
             try {
                 InputStream is1 = new ByteArrayInputStream(file.getBytes());
                 ByteArrayOutputStream os = parsingService.preParse(is1);
+                is1.close();
                 InputStream is2 = new ByteArrayInputStream(os.toByteArray());
+                os.close();
                 AccountData data = parsingService.readFile(is2);
-
+                is2.close();
                 data.setGenerationTime(generationTime);
 
                 // TODO: fix locale problems, generation time does not match filename
                 ByteArrayOutputStream os1 = generationService.generate(data);
                 byte[] bytes = os1.toByteArray();
+                os1.close();
                 try {
                     storageService.store(new ByteArrayInputStream(bytes), filename);
                 } catch (IOException e) {
@@ -74,47 +86,52 @@ public class AccRptGenController {
                     throw new RuntimeException(e);
                 }
                 emailService.sendEmail(companyName, filename, new ByteArrayInputStream(bytes));
-
+                dto.setStatus(AccountFileDto.Status.EMAIL_SENT.name());
+                statisticsService.updateAccountReport(dto);
             } catch (Exception e) {
-                logger.warn("dang you" , e);
+                dto.setStatus(AccountFileDto.Status.FAILED.name());
+                try {
+                    statisticsService.updateAccountReport(dto);
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                logger.warn("Gneration Failed." , e);
             }
         }).start();
 
-
-        AccountFileDto dto = new AccountFileDto();
-        dto.setCompany(companyName);
-        dto.setFilename(filename);
-        dto.setGenerationTime(new Date());
+        dto.setStatus(AccountFileDto.Status.GENERATING.name());
 
         return dto;
     }
 
     @PostMapping("/downloadFile")
-    public ResponseEntity<Resource> downloadFile(@RequestBody DownloadFileDto dto) {
+    public ResponseEntity<Resource> downloadFile(@RequestBody DownloadFileDto dto) throws IOException {
         logger.info("filename is " + dto.getFilename());
-        Resource file = storageService.loadAsResource(dto.getFilename());
+        InputStream is = storageService.load(dto.getFilename());
+        Resource resource = new InputStreamResource(is);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+                "attachment; filename=\"" + dto.getFilename() + "\"").body(resource);
     }
 
     @GetMapping("/listFiles")
     public List<AccountFileDto> listFiles() {
         // TODO: append files which are generating
         // TODO: sort by descending time
-        return storageService.list().stream()
-                .filter(f -> f.endsWith("docx"))
-                .map(
-                f -> {
-                    AccountFileDto dto = new AccountFileDto();
-                    dto.setCompany(f.substring(0, f.lastIndexOf("-")));
-                    try {
-                        dto.setGenerationTime(GenerationService.sdf.parse(f.substring(f.lastIndexOf("-")+1, f.lastIndexOf("."))));
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    dto.setFilename(f);
-                    return dto;
-                }).collect(Collectors.toList());
+//        return storageService.list().stream()
+//                .filter(f -> f.endsWith("docx"))
+//                .map(
+//                f -> {
+//                    AccountFileDto dto = new AccountFileDto();
+//                    dto.setCompany(f.substring(0, f.lastIndexOf("-")));
+//                    try {
+//                        dto.setGenerationTime(GenerationService.sdf.parse(f.substring(f.lastIndexOf("-")+1, f.lastIndexOf("."))));
+//                    } catch (ParseException e) {
+//                        e.printStackTrace();
+//                    }
+//                    dto.setFilename(f);
+//                    return dto;
+//                }).collect(Collectors.toList());
+        return statisticsService.getRecentGenerations();
     }
 
 

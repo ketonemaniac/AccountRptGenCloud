@@ -48,25 +48,29 @@
                 </div>
             </div>
         </form>
+        <label for="currentFile" class="mt-5">Current "All Documents" File</label>
+        <input type="text" class="form-control" readonly="readonly" id="currentFile" value="All Documents" />
 
         <!-- All Documents update -->
         <div class="row py-5">
             <div class="col-md-6">
                 <!-- Standar Form -->
                 <form action="" method="post" enctype="multipart/form-data" id="js-upload-form">
-                    <div class="form-group">
-                        <label for="js-upload-files">"All Documents" Template update</label>
-                        <div class="input-group">
-                            <label class="input-group-btn">
-                                <span class="btn btn-primary">
-                                    Browse&hellip;
-                                    <input type="file" style="display: none;" name="files[]" id="js-upload-files" accept=".xlsx,.xlsm">
-                                </span>
-                            </label>
-                            <input type="text" class="form-control" readonly>
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="js-upload-files">"All Documents" Template update</label>
+                            <div class="input-group">
+                                <label class="input-group-btn">
+                                    <span class="btn btn-primary">
+                                        Browse&hellip;
+                                        <input type="file" style="display: none;" name="files[]" id="js-upload-files" accept=".xlsx,.xlsm" />
+                                    </span>
+                                </label>
+                                <input type="text" class="form-control" readonly>
+                            </div>
                         </div>
+                        <button type="submit" class="btn btn-primary" id="js-upload-submit">Upload</button>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="js-upload-submit">Upload</button>
                 </form>
             </div>
             <div class="col-md-6">

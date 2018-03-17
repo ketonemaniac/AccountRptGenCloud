@@ -65,7 +65,9 @@ public class ParsingService {
 
     public ByteArrayOutputStream preParse(InputStream excelFile) throws IOException {
 
-        XSSFWorkbook templateWb = storageService.getTemplate(templateName);
+        InputStream templateStream = storageService.load(templateName);
+        XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
+        templateStream.close();
         if(templateWb == null) {
             throw new IOException("Unable to get File " + templateName);
         }

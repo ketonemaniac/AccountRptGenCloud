@@ -1,5 +1,7 @@
 package net.ketone.accrptgen.gen;
 
+import com.sun.org.glassfish.external.statistics.Statistic;
+import net.ketone.accrptgen.admin.StatisticsService;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.util.POILogger;
@@ -30,6 +32,8 @@ public class ParserTest {
     private GenerationService genSvc;
     @Autowired
     private StorageService storageSvc;
+    @Autowired
+    private StatisticsService statisticsSvc;
 
     private final String PLAIN_FILENAME = "program (plain) 19.1.18.xlsm";
     private final String TEMPLATE_FILENAME = "All documents 10.3.18.xlsm";
@@ -46,12 +50,15 @@ public class ParserTest {
         data.setGenerationTime(new Date());
 
         // TODO: remove, this is integration flow
-        genSvc.generate(data);
+        ByteArrayOutputStream output = genSvc.generate(data);
+        storageSvc.store(new ByteArrayInputStream(output.toByteArray()), "testPreParse.docx");
+
     }
 
     // @Test
     public void testParse() throws IOException {
-        XSSFWorkbook templateWb = storageSvc.getTemplate(TEMPLATE_FILENAME);
+        InputStream templateStream = storageSvc.load(TEMPLATE_FILENAME);
+        XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         templateWb.write(os);
         InputStream is = new ByteArrayInputStream(os.toByteArray());
@@ -59,7 +66,8 @@ public class ParserTest {
         System.out.println(data.getCompanyName());
 
         data.setGenerationTime(new Date());
-        genSvc.generate(data);
+        ByteArrayOutputStream output =  genSvc.generate(data);
+        storageSvc.store(new ByteArrayInputStream(output.toByteArray()), "testParse.docx");
     }
 
 

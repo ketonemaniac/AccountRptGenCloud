@@ -23,14 +23,10 @@ public interface StorageService {
      */
     String store(InputStream is, String filename) throws IOException;
 
-    // String store(MultipartFile file) throws IOException;
-
-    Resource loadAsResource(String filename);
+    InputStream load(String filename);
 
     List<String> list();
 
     void delete(String filename);
-
-    XSSFWorkbook getTemplate(String templateName) throws IOException;
 
 }
