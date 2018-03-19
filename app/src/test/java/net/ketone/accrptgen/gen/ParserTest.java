@@ -3,6 +3,7 @@ package net.ketone.accrptgen.gen;
 import com.sun.org.glassfish.external.statistics.Statistic;
 import net.ketone.accrptgen.admin.StatisticsService;
 import net.ketone.accrptgen.entity.AccountData;
+import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.util.POILogger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -33,13 +34,17 @@ public class ParserTest {
     @Autowired
     private StorageService storageSvc;
     @Autowired
+    private EmailService emailSvc;
+    @Autowired
     private StatisticsService statisticsSvc;
+
+
 
     private final String PLAIN_FILENAME = "program (plain) 19.1.18.xlsm";
     private final String TEMPLATE_FILENAME = "All documents 10.3.18.xlsm";
 
     @Test
-    public void testPreParse() throws IOException {
+    public void testPreParse() throws Exception {
         InputStream inputStream = this.getClass().getResourceAsStream("/" + PLAIN_FILENAME);
         ByteArrayOutputStream os = svc.preParse(inputStream);
 
@@ -51,7 +56,9 @@ public class ParserTest {
 
         // TODO: remove, this is integration flow
         ByteArrayOutputStream output = genSvc.generate(data);
-        storageSvc.store(new ByteArrayInputStream(output.toByteArray()), "testPreParse.docx");
+        byte[] out = output.toByteArray();
+        storageSvc.store(new ByteArrayInputStream(out), "testPreParse.docx");
+        emailSvc.sendEmail(data.getCompanyName(), "testPreParse.docx", new ByteArrayInputStream(out));
 
     }
 

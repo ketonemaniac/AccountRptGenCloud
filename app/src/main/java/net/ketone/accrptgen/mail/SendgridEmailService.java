@@ -18,12 +18,15 @@ package net.ketone.accrptgen.mail;
 
 import com.sendgrid.SendGrid;
 import com.sendgrid.SendGridException;
+import net.ketone.accrptgen.admin.CredentialsService;
 import net.ketone.accrptgen.gen.GenerationServiceApachePOI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -38,7 +41,9 @@ public class SendgridEmailService implements EmailService {
 
     private static final Logger logger = LoggerFactory.getLogger(SendgridEmailService.class);
 
-    @Value("${mail.sendgrid.api-key}")
+    @Autowired
+    private CredentialsService credentialsService;
+
     private String SENDGRID_API_KEY;
 
     @Value("${mail.enabled}")
@@ -49,6 +54,12 @@ public class SendgridEmailService implements EmailService {
 
     @Value("${mail.to}")
     private String TO_EMAIL;
+
+    @PostConstruct
+    public void init() {
+        SENDGRID_API_KEY = credentialsService.getCredentials().getProperty("mail.sendgrid.api-key");
+        System.out.println(SENDGRID_API_KEY + " "  + SENDGRID_SENDER);
+    }
 
     public void sendEmail(String companyName, String attachmentName, InputStream attachment) throws Exception {
         if(!SENDGRID_ENABLE) return;
