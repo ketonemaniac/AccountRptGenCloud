@@ -5,8 +5,10 @@
   "description": "account report generation",
   "main": "main.js",
   "scripts": {
+    "build" : "npm run-script buildMain && npm run-script buildAdmin",
     "prebuild": "npm install",
-    "build": "browserify app/main.js --debug | exorcist ./src/main/resources/static/bundle.js.map > ./src/main/resources/static/bundle.js"
+    "buildMain": "browserify app/main.js --debug | exorcist ./src/main/resources/static/mainBundle.js.map > ./src/main/resources/static/mainBundle.js",
+    "buildAdmin": "browserify app/admin.js --debug | exorcist ./src/main/resources/static/adminBundle.js.map > ./src/main/resources/static/adminBundle.js"
   },
   "repository": {
     "type": "git",
@@ -27,3 +29,4 @@
     "watchify": "^3.9.0"
   }
 }
+

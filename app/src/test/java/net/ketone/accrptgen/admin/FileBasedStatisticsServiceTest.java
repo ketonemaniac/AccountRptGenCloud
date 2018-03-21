@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles("gcloud")
+@ActiveProfiles("local")
 @SpringBootTest
 public class FileBasedStatisticsServiceTest {
 

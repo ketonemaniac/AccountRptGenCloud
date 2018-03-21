@@ -41,6 +41,7 @@ public class SendgridEmailService implements EmailService {
 
     private static final Logger logger = LoggerFactory.getLogger(SendgridEmailService.class);
 
+    public static final String SENDGRID_API_KEY_PROP = "mail.sendgrid.api-key";
     @Autowired
     private CredentialsService credentialsService;
 
@@ -57,7 +58,7 @@ public class SendgridEmailService implements EmailService {
 
     @PostConstruct
     public void init() {
-        SENDGRID_API_KEY = credentialsService.getCredentials().getProperty("mail.sendgrid.api-key");
+        SENDGRID_API_KEY = credentialsService.getCredentials().getProperty(SENDGRID_API_KEY_PROP);
         System.out.println(SENDGRID_API_KEY + " "  + SENDGRID_SENDER);
     }
 

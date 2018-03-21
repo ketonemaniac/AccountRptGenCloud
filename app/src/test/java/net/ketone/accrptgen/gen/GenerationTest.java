@@ -1,6 +1,8 @@
 package net.ketone.accrptgen.gen;
 
+import net.ketone.accrptgen.admin.FileBasedCredentialsService;
 import net.ketone.accrptgen.entity.*;
+import net.ketone.accrptgen.mail.SendgridEmailService;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.junit.Before;
@@ -13,50 +15,59 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Date;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("local")
-@SpringBootTest
+@SpringBootTest(classes = {GenerationTest.MockStorageConfiguration.class})
 public class GenerationTest {
+
+    @Configuration
+    @ComponentScan(basePackages = {"net.ketone.accrptgen"})
+    static class MockStorageConfiguration {
+
+        @Bean
+        public StorageService storageService() throws IOException {
+            StorageService storageService = Mockito.mock(StorageService.class);
+            Mockito.when(storageService.store(any(InputStream.class), any(String.class))).thenAnswer(new Answer<String>() {
+                @Override
+                public String answer(InvocationOnMock invocationOnMock) throws Throwable {
+                    XWPFDocument doc = (XWPFDocument) invocationOnMock.getArguments()[0];
+                    String filename = (String) invocationOnMock.getArguments()[1];
+                    File output= new File(filename);
+                    FileOutputStream out = new FileOutputStream(output);
+                    System.out.println(output.getAbsolutePath());
+                    doc.write(out);
+                    out.close();
+                    doc.close();
+                    return filename;
+                }
+            });
+            String apiKey = SendgridEmailService.SENDGRID_API_KEY_PROP + "=1234567890";
+            Mockito.when(storageService.load(eq(FileBasedCredentialsService.CREDENTIALS_FILE))).thenReturn(new ByteArrayInputStream(apiKey.getBytes()));
+
+            return storageService;
+        }
+    }
+
 
     // TODO: use profiles
     @Autowired
     @Qualifier("generationServiceApachePOI")
     private GenerationService svc;
-
-    @MockBean
-    StorageService storageService;
-
-    @Before
-    public void init() throws IOException {
-        Mockito.when(storageService.store(any(InputStream.class), any(String.class))).thenAnswer(new Answer<String>() {
-            @Override
-            public String answer(InvocationOnMock invocationOnMock) throws Throwable {
-                XWPFDocument doc = (XWPFDocument) invocationOnMock.getArguments()[0];
-                String filename = (String) invocationOnMock.getArguments()[1];
-                File output= new File(filename);
-                FileOutputStream out = new FileOutputStream(output);
-                System.out.println(output.getAbsolutePath());
-                doc.write(out);
-                out.close();
-                doc.close();
-                return filename;
-            }
-        });
-    }
-
 
     @Test
     public void testGeneration() throws IOException {

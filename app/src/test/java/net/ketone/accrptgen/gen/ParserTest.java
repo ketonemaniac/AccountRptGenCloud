@@ -1,11 +1,9 @@
 package net.ketone.accrptgen.gen;
 
-import com.sun.org.glassfish.external.statistics.Statistic;
 import net.ketone.accrptgen.admin.StatisticsService;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
-import org.apache.poi.util.POILogger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.ResourceUtils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 /**
@@ -58,7 +58,7 @@ public class ParserTest {
         ByteArrayOutputStream output = genSvc.generate(data);
         byte[] out = output.toByteArray();
         storageSvc.store(new ByteArrayInputStream(out), "testPreParse.docx");
-        emailSvc.sendEmail(data.getCompanyName(), "testPreParse.docx", new ByteArrayInputStream(out));
+        // emailSvc.sendEmail(data.getCompanyName(), "testPreParse.docx", new ByteArrayInputStream(out));
 
     }
 
