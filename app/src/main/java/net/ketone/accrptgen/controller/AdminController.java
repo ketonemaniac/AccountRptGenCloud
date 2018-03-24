@@ -13,6 +13,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin")
@@ -57,4 +60,16 @@ public class AdminController {
         credentialsService.saveCredentials(params);
         return params;
     }
+
+    @GetMapping("getParam")
+    public Map<String, String> getParameters() {
+        Properties properties = credentialsService.getCredentials();
+        Map<String, String> params = properties.stringPropertyNames().stream()
+                .filter(s -> !s.equalsIgnoreCase(CredentialsService.SENDGRID_API_KEY_PROP))
+                .collect(Collectors.toMap(
+                Function.identity(), s -> properties.getProperty(s)
+        ));
+        return params;
+    }
+
 }

@@ -203,7 +203,6 @@ var listFiles = function () {
         success: function (dataArr) {
             histTable.clear();
             $.each(dataArr, function (idx, data) {
-                console.log("file is " + data.filename);
                 var statusText = "<span class=\"glyphicon glyphicon-envelope\" style=\"color:green\"></span>&nbsp;" + data.status;
                 histTable.row.add([
                     data.company,
