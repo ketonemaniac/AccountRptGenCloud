@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * Sendgrid service
@@ -41,7 +42,6 @@ public class SendgridEmailService implements EmailService {
 
     private static final Logger logger = LoggerFactory.getLogger(SendgridEmailService.class);
 
-    public static final String SENDGRID_API_KEY_PROP = "mail.sendgrid.api-key";
     @Autowired
     private CredentialsService credentialsService;
 
@@ -53,13 +53,14 @@ public class SendgridEmailService implements EmailService {
     @Value("${mail.sender}")
     private String SENDGRID_SENDER;
 
-    @Value("${mail.to}")
+    // @Value("${mail.to}")
     private String TO_EMAIL;
 
     @PostConstruct
     public void init() {
-        SENDGRID_API_KEY = credentialsService.getCredentials().getProperty(SENDGRID_API_KEY_PROP);
-        System.out.println(SENDGRID_API_KEY + " "  + SENDGRID_SENDER);
+        Properties props = credentialsService.getCredentials();
+        SENDGRID_API_KEY = props.getProperty(CredentialsService.SENDGRID_API_KEY_PROP);
+        TO_EMAIL = props.getProperty(CredentialsService.SEND_TO_PROP);
     }
 
     public void sendEmail(String companyName, String attachmentName, InputStream attachment) throws Exception {

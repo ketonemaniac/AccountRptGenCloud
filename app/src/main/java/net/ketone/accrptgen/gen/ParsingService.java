@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.gen;
 
+import net.ketone.accrptgen.admin.CredentialsService;
 import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.entity.Header;
 import net.ketone.accrptgen.entity.Table;
@@ -12,7 +13,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -33,9 +33,9 @@ public class ParsingService {
 
     @Autowired
     private StorageService storageService;
+    @Autowired
+    private CredentialsService credentialsService;
 
-    @Value("${xlsx.template.name}")
-    private String templateName;
 
     /**
      * Gets template workbook and fetches Sheets into a map
@@ -65,6 +65,7 @@ public class ParsingService {
 
     public ByteArrayOutputStream preParse(InputStream excelFile) throws IOException {
 
+        String templateName = credentialsService.getCredentials().getProperty(CredentialsService.PREPARSE_TEMPLATE_PROP);
         InputStream templateStream = storageService.load(templateName);
         XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
         templateStream.close();

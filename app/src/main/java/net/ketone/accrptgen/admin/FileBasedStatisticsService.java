@@ -67,6 +67,7 @@ public class FileBasedStatisticsService implements StatisticsService {
                 })
                 .collect(Collectors.toCollection(LinkedBlockingQueue::new));
         is.close();
+        // check whether this is the update of an existing line
         boolean isUpdate = false;
         for(AccountFileDto lineDto : lines) {
             if(lineDto.getFilename().equals(dto.getFilename())) {

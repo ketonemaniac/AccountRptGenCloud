@@ -1,6 +1,6 @@
 // var Spinner = require('spin');
 var FileUpload = require('./fileUpload.js');
-var Historical = require('./historical.js');
+var ParamUpload = require('./paramUpload.js');
 
 + function ($) {
     'use strict';
@@ -9,8 +9,8 @@ var Historical = require('./historical.js');
     // ==================
     $(document).ready(function () {
 
-        FileUpload.init("", function(data) { return "File upload success. Generation of " + data.company + " started."; });
-        Historical.init();
+        FileUpload.init("/admin", function(data) { return "File upload success. New Template: " + data.filename; });
+        ParamUpload.init("/admin");
 
     });
 

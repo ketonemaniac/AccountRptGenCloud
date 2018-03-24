@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.gen;
 
+import net.ketone.accrptgen.admin.CredentialsService;
 import net.ketone.accrptgen.admin.FileBasedCredentialsService;
 import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.mail.SendgridEmailService;
@@ -56,7 +57,7 @@ public class GenerationTest {
                     return filename;
                 }
             });
-            String apiKey = SendgridEmailService.SENDGRID_API_KEY_PROP + "=1234567890";
+            String apiKey = CredentialsService.SENDGRID_API_KEY_PROP + "=1234567890";
             Mockito.when(storageService.load(eq(FileBasedCredentialsService.CREDENTIALS_FILE))).thenReturn(new ByteArrayInputStream(apiKey.getBytes()));
 
             return storageService;

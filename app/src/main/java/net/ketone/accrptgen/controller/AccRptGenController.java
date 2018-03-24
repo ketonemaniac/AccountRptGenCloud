@@ -54,7 +54,8 @@ public class AccRptGenController {
                                            RedirectAttributes redirectAttributes) throws IOException {
 
         // TODO: use ThreadPool and Future to keep track of file generation status
-        InputStream is = new ByteArrayInputStream(file.getBytes());
+        final byte[] fileBytes = file.getBytes();
+        InputStream is = new ByteArrayInputStream(fileBytes);
         final Date generationTime = new Date();
         String companyName = parsingService.extractCompanyName(is);
         String filename = companyName + "-" + GenerationService.sdf.format(generationTime) + ".docx";
@@ -66,7 +67,7 @@ public class AccRptGenController {
 
         new Thread( () -> {
             try {
-                InputStream is1 = new ByteArrayInputStream(file.getBytes());
+                InputStream is1 = new ByteArrayInputStream(fileBytes);
                 ByteArrayOutputStream os = parsingService.preParse(is1);
                 is1.close();
                 InputStream is2 = new ByteArrayInputStream(os.toByteArray());
@@ -100,6 +101,7 @@ public class AccRptGenController {
         }).start();
 
         dto.setStatus(AccountFileDto.Status.GENERATING.name());
+        statisticsService.updateAccountReport(dto);
 
         return dto;
     }
