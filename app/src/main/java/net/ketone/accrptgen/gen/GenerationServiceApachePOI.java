@@ -178,6 +178,10 @@ public class GenerationServiceApachePOI implements GenerationService {
                 p.getRuns().get(0).setUnderline(UnderlinePatterns.SINGLE);
                 p.setAlignment(ParagraphAlignment.CENTER);
             });
+            // one more empty line
+            Paragraph p = new Paragraph();
+            p.setText("");
+            doWrite(currPgh, p, null);
             return;
         }
         if(header.getAuditorAddress() != null) {
@@ -260,9 +264,15 @@ public class GenerationServiceApachePOI implements GenerationService {
                         if(cell.getBottomBorderStyle() != null) {
                             switch(cell.getBottomBorderStyle()) {
                                 case SINGLE_LINE:
-                                    border.addNewBottom().setVal(STBorder.SINGLE); break;
+                                    CTBorder bottomBorder = border.addNewBottom();
+                                    bottomBorder.setVal(STBorder.SINGLE);
+                                    bottomBorder.setSz(BigInteger.valueOf(6));
+                                    break;
                                 case DOUBLE_LINE:
-                                    border.addNewBottom().setVal(STBorder.DOUBLE); break;
+                                    bottomBorder = border.addNewBottom();
+                                    bottomBorder.setVal(STBorder.DOUBLE);
+                                    bottomBorder.setSz(BigInteger.valueOf(6));
+                                    break;
                             }
                         }
                     }catch (Exception e) {
