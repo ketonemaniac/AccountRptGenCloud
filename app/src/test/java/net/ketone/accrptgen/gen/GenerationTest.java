@@ -2,6 +2,7 @@ package net.ketone.accrptgen.gen;
 
 import net.ketone.accrptgen.admin.CredentialsService;
 import net.ketone.accrptgen.admin.FileBasedCredentialsService;
+import net.ketone.accrptgen.config.CustomWebSecurityConfigurerAdapter;
 import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.mail.SendgridEmailService;
 import net.ketone.accrptgen.store.StorageService;
@@ -14,6 +15,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -32,8 +34,8 @@ import static org.mockito.Matchers.eq;
 
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles("local")
-@SpringBootTest(classes = {GenerationTest.MockStorageConfiguration.class})
+@ActiveProfiles("local, test")
+@SpringBootTest(classes = {GenerationTest.MockStorageConfiguration.class} )
 public class GenerationTest {
 
     @Configuration
