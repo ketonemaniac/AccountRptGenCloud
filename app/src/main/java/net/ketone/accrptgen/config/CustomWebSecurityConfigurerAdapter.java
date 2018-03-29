@@ -28,9 +28,10 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/admin/**", "/admin.html").authenticated()
+                .antMatchers("/admin/**").permitAll()
+                .antMatchers("/admin.html").authenticated()
                 .anyRequest().permitAll()
-                .and()
-                .httpBasic();
+                .and().httpBasic()
+                .and().csrf().disable();
     }
 }
