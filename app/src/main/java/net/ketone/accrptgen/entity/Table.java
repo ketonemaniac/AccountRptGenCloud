@@ -18,9 +18,16 @@ public class Table implements SectionElement {
         DOUBLE_LINE
     }
 
+    public enum Alignment {
+        LEFT,
+        CENTER,
+        RIGHT
+    }
+
     @Data
     public class Cell {
         private BottomBorderStyle bottomBorderStyle;
+        private Alignment alignment;
         private String text;
         private boolean isUnderline;
         private boolean isBold;

@@ -275,6 +275,16 @@ public class GenerationServiceApachePOI implements GenerationService {
                                     break;
                             }
                         }
+                        if(cell.getAlignment() != null) {
+                            switch (cell.getAlignment()) {
+                                case LEFT:
+                                    paragraph.setAlignment(ParagraphAlignment.LEFT); break;
+                                case CENTER:
+                                    paragraph.setAlignment(ParagraphAlignment.CENTER); break;
+                                case RIGHT:
+                                    paragraph.setAlignment(ParagraphAlignment.RIGHT); break;
+                            }
+                        }
                     }catch (Exception e) {
                         logger.warn("What is this: " + sectionName + " i:" + i + " j:" + j, e);
                     }

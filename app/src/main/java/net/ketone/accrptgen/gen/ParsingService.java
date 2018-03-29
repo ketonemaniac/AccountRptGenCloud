@@ -300,6 +300,7 @@ public class ParsingService {
                                 parsedCell.setBold(style.getFont().getBold());
                                 parsedCell.setUnderline(style.getFont().getUnderline() == FontUnderline.SINGLE.getByteValue());
                                 if(style.getBorderBottomEnum() == null) continue;
+                                // underline
                                 switch(style.getBorderBottomEnum()) {
                                     case THIN:
                                         parsedCell.setBottomBorderStyle(Table.BottomBorderStyle.SINGLE_LINE);
@@ -307,6 +308,15 @@ public class ParsingService {
                                     case DOUBLE:
                                         parsedCell.setBottomBorderStyle(Table.BottomBorderStyle.DOUBLE_LINE);
                                         break;
+                                }
+                                // horizontal alignment
+                                switch(style.getAlignmentEnum()) {
+                                    case LEFT:
+                                        parsedCell.setAlignment(Table.Alignment.LEFT); break;
+                                    case CENTER:
+                                        parsedCell.setAlignment(Table.Alignment.CENTER); break;
+                                    case RIGHT:
+                                        parsedCell.setAlignment(Table.Alignment.RIGHT); break;
                                 }
                             } catch (Exception e) {
                                 logger.warn("Unparsable table content at " + section.getName() + " line " + (sectionSheet.getRow(i).getRowNum() + 1) + ", " + e.toString());
@@ -415,7 +425,7 @@ public class ParsingService {
     }
 
     private String numberFormat(double value ) {
-        NumberFormat myFormatter = new DecimalFormat("###,###,###,###,###;(###,###,###,###,###)");
+        NumberFormat myFormatter = new DecimalFormat("###,###,###,###,###;-###,###,###,###,###");
         String output = myFormatter.format(value);
         return output;
     }
