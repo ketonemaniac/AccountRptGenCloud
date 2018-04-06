@@ -36,3 +36,14 @@ h3 {
 .body {
   background: #cdcdcd
 }
+#genHistoryTable td {
+  white-space:nowrap;
+}
+
+.blink {
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {  
+  50% { opacity: 0.0; }
+}

@@ -1,3 +1,5 @@
+var Historical = require('./historical.js');
+
 "use strict";
 
 // UPLOAD CLASS DEFINITION
@@ -39,7 +41,7 @@ var startUpload = function (files) {
                     }, {
                             type: 'success'
                         });
-        
+                    Historical.listFiles();
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.log('error');

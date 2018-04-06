@@ -1,4 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var Historical = require('./historical.js');
+
 "use strict";
 
 // UPLOAD CLASS DEFINITION
@@ -40,7 +42,7 @@ var startUpload = function (files) {
                     }, {
                             type: 'success'
                         });
-        
+                    Historical.listFiles();
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.log('error');
@@ -176,7 +178,7 @@ var init = function (path, msgFn) {
 
 module.exports.init = init;
 
-},{}],2:[function(require,module,exports){
+},{"./historical.js":2}],2:[function(require,module,exports){
 var DateFormat = require('dateformat');
 
 'use strict';
@@ -203,7 +205,18 @@ var listFiles = function () {
         success: function (dataArr) {
             histTable.clear();
             $.each(dataArr, function (idx, data) {
-                var statusText = "<span class=\"glyphicon glyphicon-envelope\" style=\"color:green\"></span>&nbsp;" + data.status;
+                switch (data.status) {
+                    case "EMAIL_SENT":
+                        var statusText = "<span><i class=\"fas fa-envelope\" style=\"color:green\"></i></span>&nbsp;Email Sent";
+                        break;
+                    case "FAILED":
+                        statusText = "<span><i class=\"fas fa-exclamation-circle\" style=\"color:red\"></i></span>&nbsp;Failed";
+                        break;
+                    case "GENERATING":
+                        statusText = "<span><i class=\"fas fa-cog blink\" style=\"color:grey\"></i></span>&nbsp;Generating";
+                        setTimeout(listFiles, 10000);
+                        break;
+                }
                 histTable.row.add([
                     data.company,
                     DateFormat(new Date(data.generationTime), "yyyy-mm-dd HH:MM:ss"),
@@ -224,7 +237,7 @@ var listFiles = function () {
 
 var init = function () {
     listFiles();
-    setInterval(listFiles, 10000);
+    // setInterval(listFiles, 10000);
 
     // initialize historical chart
     var ctx = document.getElementById("myChart");
@@ -253,6 +266,7 @@ var init = function () {
 }
 
 module.exports.init = init;
+module.exports.listFiles = listFiles;
 },{"dateformat":4}],3:[function(require,module,exports){
 // var Spinner = require('spin');
 var FileUpload = require('./fileUpload.js');

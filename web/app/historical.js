@@ -24,7 +24,18 @@ var listFiles = function () {
         success: function (dataArr) {
             histTable.clear();
             $.each(dataArr, function (idx, data) {
-                var statusText = "<span class=\"glyphicon glyphicon-envelope\" style=\"color:green\"></span>&nbsp;" + data.status;
+                switch (data.status) {
+                    case "EMAIL_SENT":
+                        var statusText = "<span><i class=\"fas fa-envelope\" style=\"color:green\"></i></span>&nbsp;Email Sent";
+                        break;
+                    case "FAILED":
+                        statusText = "<span><i class=\"fas fa-exclamation-circle\" style=\"color:red\"></i></span>&nbsp;Failed";
+                        break;
+                    case "GENERATING":
+                        statusText = "<span><i class=\"fas fa-cog blink\" style=\"color:grey\"></i></span>&nbsp;Generating";
+                        setTimeout(listFiles, 10000);
+                        break;
+                }
                 histTable.row.add([
                     data.company,
                     DateFormat(new Date(data.generationTime), "yyyy-mm-dd HH:MM:ss"),
@@ -45,7 +56,7 @@ var listFiles = function () {
 
 var init = function () {
     listFiles();
-    setInterval(listFiles, 10000);
+    // setInterval(listFiles, 10000);
 
     // initialize historical chart
     var ctx = document.getElementById("myChart");
@@ -74,3 +85,4 @@ var init = function () {
 }
 
 module.exports.init = init;
+module.exports.listFiles = listFiles;
