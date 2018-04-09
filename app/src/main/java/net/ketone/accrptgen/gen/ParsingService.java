@@ -262,7 +262,7 @@ public class ParsingService {
                     }
                 }
                 // table
-                else if (isInTable) {
+                else if (isInTable && isRowIncluded(sectionSheet, section, i)) {
                     for (int j = 0; j < curTable.getColumnWidths().size(); j++) {
                         Cell dataCell = sectionSheet.getRow(i).getCell(j);
                         if (dataCell != null) {
@@ -338,22 +338,30 @@ public class ParsingService {
 
     }
 
-    private Paragraph parseContentRow(Sheet sectionSheet, Section section, int row) {
+    private boolean isRowIncluded(Sheet sectionSheet, Section section, int row) {
         Cell yesNoCell = sectionSheet.getRow(row).getCell(section.getYesNoColumn());
         if (yesNoCell == null) {
-            return null;
+            return false;
         }
         String yesNo = Paragraph.NO;
         try {
             yesNo = yesNoCell.getStringCellValue();
         } catch (Exception e) {
             logger.warn("Unparsable Yes/No cell at " + section.getName() + " line " + (row + 1) + ", " + e.toString());
+            return false;
         }
         // ignored row
         if (yesNo.equalsIgnoreCase(Paragraph.NO))
-            return null;
-        // inside section
-        return addRowToSection(section, sectionSheet.getRow(row), new Paragraph());
+            return false;
+        return true;
+    }
+
+    private Paragraph parseContentRow(Sheet sectionSheet, Section section, int row) {
+        if(isRowIncluded(sectionSheet, section, row)) {
+            // inside section
+            return addRowToSection(section, sectionSheet.getRow(row), new Paragraph());
+        }
+        return null;
     }
 
     private <T extends Paragraph> T addRowToSection(Section section, Row row, T p) {
