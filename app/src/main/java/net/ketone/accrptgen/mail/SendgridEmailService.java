@@ -53,21 +53,17 @@ public class SendgridEmailService implements EmailService {
     @Value("${mail.sender}")
     private String SENDGRID_SENDER;
 
-    // @Value("${mail.to}")
-    private String TO_EMAIL;
-
     @PostConstruct
     public void init() {
         Properties props = credentialsService.getCredentials();
         SENDGRID_API_KEY = props.getProperty(CredentialsService.SENDGRID_API_KEY_PROP);
-        TO_EMAIL = props.getProperty(CredentialsService.SEND_TO_PROP);
     }
 
     public void sendEmail(String companyName, String attachmentName, InputStream attachment) throws Exception {
         if(!SENDGRID_ENABLE) return;
         SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
         SendGrid.Email email = new SendGrid.Email();
-        email.addTo(TO_EMAIL);
+        email.addTo(credentialsService.getCredentials().getProperty(CredentialsService.SEND_TO_PROP));
         email.setFrom(SENDGRID_SENDER);
         email.setSubject("Accounting Report For " + companyName);
         email.setText("Please find the accounting report for " + companyName + " as attached.");
