@@ -433,7 +433,10 @@ public class ParsingService {
     }
 
     private String numberFormat(double value ) {
-        NumberFormat myFormatter = new DecimalFormat("###,###,###,###,###;-###,###,###,###,###");
+        if(value == 0) {
+            return "-";
+        }
+        NumberFormat myFormatter = new DecimalFormat("###,###,###,###,###;(###,###,###,###,###)");
         String output = myFormatter.format(value);
         return output;
     }
