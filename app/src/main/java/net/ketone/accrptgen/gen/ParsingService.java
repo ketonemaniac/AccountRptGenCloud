@@ -21,6 +21,10 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.function.Function;
+
+import static org.apache.poi.ss.usermodel.BorderStyle.DOUBLE;
+import static org.apache.poi.ss.usermodel.BorderStyle.THIN;
 
 // import org.springframework.util.StringUtils;
 
@@ -299,16 +303,10 @@ public class ParsingService {
                                 XSSFCellStyle style = (XSSFCellStyle) dataCell.getCellStyle();
                                 parsedCell.setBold(style.getFont().getBold());
                                 parsedCell.setUnderline(style.getFont().getUnderline() == FontUnderline.SINGLE.getByteValue());
-                                if(style.getBorderBottomEnum() == null) continue;
                                 // underline
-                                switch(style.getBorderBottomEnum()) {
-                                    case THIN:
-                                        parsedCell.setBottomBorderStyle(Table.BottomBorderStyle.SINGLE_LINE);
-                                        break;
-                                    case DOUBLE:
-                                        parsedCell.setBottomBorderStyle(Table.BottomBorderStyle.DOUBLE_LINE);
-                                        break;
-                                }
+                                setCellStyle(dataCell, parsedCell, s -> s.getBorderBottomEnum());
+                                // see if the cell below has a top border...
+                                setCellStyle(sectionSheet.getRow(i+1).getCell(j), parsedCell, s -> s.getBorderTopEnum());
                                 // horizontal alignment
                                 switch(style.getAlignmentEnum()) {
                                     case LEFT:
@@ -322,7 +320,9 @@ public class ParsingService {
                                 logger.warn("Unparsable table content at " + section.getName() + " line " + (sectionSheet.getRow(i).getRowNum() + 1) + ", " + e.toString());
                             }
                         } else {
-                            curTable.addCell("");
+                            Table.Cell blankCell = curTable.addCell("");
+                            // see if the cell below has a top border...
+                            setCellStyle(sectionSheet.getRow(i+1).getCell(j), blankCell, s -> s.getBorderTopEnum());
                         }
                     }
                 }
@@ -337,6 +337,21 @@ public class ParsingService {
         }
 
     }
+
+    private void setCellStyle(Cell srcCell, Table.Cell parsedCell, Function<XSSFCellStyle, BorderStyle> f) {
+        if(srcCell != null && srcCell.getCellStyle() != null) {
+            XSSFCellStyle style = (XSSFCellStyle) srcCell.getCellStyle();
+            switch(f.apply(style)) {
+                case THIN:
+                    parsedCell.setBottomBorderStyle(Table.BottomBorderStyle.SINGLE_LINE);
+                    break;
+                case DOUBLE:
+                    parsedCell.setBottomBorderStyle(Table.BottomBorderStyle.DOUBLE_LINE);
+                    break;
+            }
+        }
+    }
+
 
     private boolean isRowIncluded(Sheet sectionSheet, Section section, int row) {
         Cell yesNoCell = sectionSheet.getRow(row).getCell(section.getYesNoColumn());
