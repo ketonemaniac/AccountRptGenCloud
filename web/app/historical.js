@@ -22,6 +22,7 @@ var listFiles = function () {
         processData: false,
         contentType: false,
         success: function (dataArr) {
+            var regen = false;
             histTable.clear();
             $.each(dataArr, function (idx, data) {
                 switch (data.status) {
@@ -33,7 +34,7 @@ var listFiles = function () {
                         break;
                     case "GENERATING":
                         statusText = "<span><i class=\"fas fa-cog blink\" style=\"color:grey\"></i></span>&nbsp;Generating";
-                        setTimeout(listFiles, 10000);
+                        regen = true;
                         break;
                 }
                 histTable.row.add([
@@ -43,6 +44,9 @@ var listFiles = function () {
                 ]);
             });
             histTable.draw(false);
+            if(regen) {
+                setTimeout(listFiles, 10000);
+            }
         },
         error: function (jqXHR, textStatus, errorThrown) {
             $.notify({
