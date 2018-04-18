@@ -114,8 +114,20 @@ public class ParsingService {
                                 count++;
                                 break;
                             case FORMULA:
-                                templateCell.setCellFormula(cell.getCellFormula());
+                                // templateCell.setCellFormula(cell.getCellFormula());
+                                try {
+                                    templateCell.setCellValue(cell.getStringCellValue());
+                                } catch(Exception e) {
+                                    try {
+                                        templateCell.setCellValue(numberFormat(cell.getNumericCellValue()));
+                                    } catch (Exception e2) {
+                                        templateCell.setCellValue(cell.getCellFormula());
+                                    }
+                                }
                                 count++;
+                                break;
+                            case BOOLEAN:
+                                templateCell.setCellValue(cell.getBooleanCellValue());
                                 break;
                             case BLANK:
                             case ERROR:
@@ -238,7 +250,7 @@ public class ParsingService {
                                     try {
                                         int columnWidth = (int) dataCell.getNumericCellValue();
                                         columnWidths.add(columnWidth);
-                                        logger.info("Column width " + section.getName() + " line " + (i + 1) + ", column=" + columnWidth);
+                                        logger.debug("Column width " + section.getName() + " line " + (i + 1) + ", column=" + columnWidth);
                                     } catch (Exception e) {
                                         logger.warn("Unparsable Column Width cell at " + section.getName() + " line " + (i + 1) + ", " + e.toString());
                                     }
@@ -289,6 +301,9 @@ public class ParsingService {
                                                 parsedCell = curTable.addCell(dataCell.getCellFormula());
                                             }
                                         }
+                                        break;
+                                    case BOOLEAN:
+                                        parsedCell = curTable.addCell(Boolean.valueOf(dataCell.getBooleanCellValue()).toString());
                                         break;
                                     case BLANK:
                                         parsedCell = curTable.addCell("");

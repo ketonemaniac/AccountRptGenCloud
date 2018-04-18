@@ -94,9 +94,9 @@ public class AccRptGenController {
                 try {
                     statisticsService.updateAccountReport(dto);
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    logger.warn("Fail to save a failure generation." , e);
                 }
-                logger.warn("Gneration Failed." , e);
+                logger.warn("Generation Failed." , e);
             }
         }).start();
 
