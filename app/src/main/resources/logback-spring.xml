@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <springProfile name="local">
+        <include resource="org/springframework/boot/logging/logback/base.xml"/>
+        <logger name="net.ketone.accrptgen" level="WARN" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </logger>
+        <logger name="net.ketone.accrptgen.gen" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </logger>
+    </springProfile>
+    <springProfile name="gcloud">
+
+        <appender name="CLOUD" class="com.google.cloud.logging.logback.LoggingAppender">
+        </appender>
+
+        <logger name="net.ketone.accrptgen" level="WARN" additivity="false">
+            <appender-ref ref="CLOUD"/>
+        </logger>
+        <logger name="net.ketone.accrptgen.gen" level="INFO" additivity="false">
+            <appender-ref ref="CLOUD"/>
+        </logger>
+        <root level="info">
+            <appender-ref ref="CLOUD" />
+        </root>
+    </springProfile>
+
+</configuration>
