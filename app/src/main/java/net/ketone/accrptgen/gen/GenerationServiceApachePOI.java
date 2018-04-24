@@ -33,7 +33,7 @@ public class GenerationServiceApachePOI implements GenerationService {
     // this converts the user input height to cm
     private static final int twipsPerInput = (int) (0.035 * twipsPerCm);
 
-    private static final int twipsPerIndent = (int) 1.27 * twipsPerCm;
+    private static final int twipsPerIndent = 360;
 
     @Autowired
     private StorageService storageService;
@@ -152,7 +152,11 @@ public class GenerationServiceApachePOI implements GenerationService {
 
             if(paragraph.getIndent() > 0) {
                 CTInd ind = newP.getCTP().getPPr().addNewInd();
-                ind.setLeft(BigInteger.valueOf(paragraph.getIndent() * twipsPerIndent));
+                if(paragraph.isItem()) {
+                    ind.setLeft(BigInteger.valueOf((paragraph.getIndent()+1) * twipsPerIndent));
+                } else {
+                    ind.setLeft(BigInteger.valueOf((paragraph.getIndent()) * twipsPerIndent));
+                }
             }
             if(paragraph.isItem()) {
                 newP.setNumID(getNumberedList(doc, paragraph.getIndent()));
@@ -348,8 +352,10 @@ public class GenerationServiceApachePOI implements GenerationService {
         CTPPr ctpPr = cTLvl.addNewPPr();
         CTInd ctInd = ctpPr.addNewInd();
         // magic indentations...
-        ctInd.setLeft(BigInteger.valueOf(68));
-        ctInd.setHanging(BigInteger.valueOf(357));
+        // left controls the number itself
+        ctInd.setLeft(BigInteger.valueOf(twipsPerIndent));   // if I do not set it becomes -0.25cm
+        // hanging controls the numbers after it
+        ctInd.setHanging(BigInteger.valueOf(twipsPerIndent));
 
         XWPFAbstractNum abstractNum = new XWPFAbstractNum(cTAbstractNum);
 

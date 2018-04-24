@@ -190,7 +190,7 @@ public class ParsingService {
     private void parseSection(Workbook workbook, Section section) {
         Sheet sectionSheet = workbook.getSheet(section.getName());
 
-        boolean isStart = false, isInTable = false;
+        boolean isStart = false, isInTable = false, isInItem = false;
         Header curHeader = null;
         Table curTable = null;
         StringBuilder startEndBuilder = new StringBuilder("Start line=");
@@ -271,6 +271,7 @@ public class ParsingService {
                             if(p != null) {
                                 p.setItem(true);
                             }
+                            isInItem = true;
                             break;
                         default:
                             logger.warn("unknown command:" + control.trim());
@@ -343,7 +344,11 @@ public class ParsingService {
                 }
                 // rest of contents
                 else if (isStart) {
-                    parseContentRow(sectionSheet, section, i);
+                    Paragraph p = parseContentRow(sectionSheet, section, i);
+                    // indent should automatically add 1 if this is inside numeric lists
+                    if(p != null && isInItem) {
+                        p.setIndent(p.getIndent()+1);
+                    }
                 }
             } catch (Exception e) {
                 logger.error("Error at section " + section.getName() + " line " + (i + 1), e);
