@@ -41,7 +41,7 @@ public class ParserTest {
 
 
     private final String PLAIN_FILENAME = "program (plain) 09.4.18.xlsm";
-    private final String TEMPLATE_FILENAME = "All documents 09.4.18-3.xlsm";
+    private final String TEMPLATE_FILENAME = "All documents 23.4.18.xlsm";
 
     @Test
     public void testPreParse() throws Exception {
