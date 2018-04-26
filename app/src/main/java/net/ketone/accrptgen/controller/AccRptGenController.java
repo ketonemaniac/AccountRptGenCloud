@@ -67,28 +67,34 @@ public class AccRptGenController {
 
         new Thread( () -> {
             try {
+                logger.info("Threaded operation of " + filename + " begins.");
                 InputStream is1 = new ByteArrayInputStream(fileBytes);
                 ByteArrayOutputStream os = parsingService.preParse(is1);
                 is1.close();
                 InputStream is2 = new ByteArrayInputStream(os.toByteArray());
                 os.close();
+                logger.info("Start parse operation for " + filename);
                 AccountData data = parsingService.readFile(is2);
                 is2.close();
                 data.setGenerationTime(generationTime);
 
-                // TODO: fix locale problems, generation time does not match filename
+                logger.info("Start generation for " + filename);
                 ByteArrayOutputStream os1 = generationService.generate(data);
                 byte[] bytes = os1.toByteArray();
                 os1.close();
                 try {
+                    logger.info("Storing file " + filename);
                     storageService.store(new ByteArrayInputStream(bytes), filename);
                 } catch (IOException e) {
                     logger.error("Error storing generated file", e);
                     throw new RuntimeException(e);
                 }
+                logger.info("Sending email for " + filename);
                 emailService.sendEmail(companyName, filename, new ByteArrayInputStream(bytes));
                 dto.setStatus(AccountFileDto.Status.EMAIL_SENT.name());
+                logger.info("Updating statistics for " + filename);
                 statisticsService.updateAccountReport(dto);
+                logger.info("Operation complete for " + filename);
             } catch (Exception e) {
                 dto.setStatus(AccountFileDto.Status.FAILED.name());
                 try {

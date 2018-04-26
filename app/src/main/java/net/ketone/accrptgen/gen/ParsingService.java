@@ -70,6 +70,7 @@ public class ParsingService {
     public ByteArrayOutputStream preParse(InputStream excelFile) throws IOException {
 
         String templateName = credentialsService.getCredentials().getProperty(CredentialsService.PREPARSE_TEMPLATE_PROP);
+        logger.info("starting pre-parse to template " + templateName);
         InputStream templateStream = storageService.load(templateName);
         XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
         templateStream.close();
@@ -144,9 +145,11 @@ public class ParsingService {
         }
 
         // refresh everything
+        logger.info("start refreshing template");
         FormulaEvaluator evaluator = templateWb.getCreationHelper().createFormulaEvaluator();
         evaluator.clearAllCachedResultValues();
         evaluator.evaluateAll();
+        logger.info("template refreshed. Writing to stream");
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         templateWb.write(os);
