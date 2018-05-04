@@ -62,14 +62,15 @@ public class GenerationServiceApachePOI implements GenerationService {
      * @param data
      * @return the filename of the generated docx
      */
-    public ByteArrayOutputStream generate(AccountData data) throws IOException {
+    public byte[] generate(AccountData data) throws IOException {
 
         ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource("template.docx").getFile());
+        // File file = new File(classLoader.getResource("template.docx").getFile());
 
         XWPFDocument document = null;
         try {
-            document = new XWPFDocument(new FileInputStream(file));
+//            document = new XWPFDocument(new FileInputStream(file));
+            document = new XWPFDocument(storageService.load("template.docx"));
         } catch (IOException e) {
             logger.error("Error in opening template.docx", e);
             throw new RuntimeException(e);
@@ -107,7 +108,10 @@ public class GenerationServiceApachePOI implements GenerationService {
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         document.write(os);
-        return os;
+        document.close();
+        byte[] bytes = os.toByteArray();
+        os.close();
+        return bytes;
     }
 
     /**

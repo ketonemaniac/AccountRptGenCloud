@@ -277,7 +277,6 @@ var listFiles = function () {
 
 var init = function () {
     listFiles();
-    // setInterval(listFiles, 10000);
 
     // initialize historical chart
     var ctx = document.getElementById("myChart");

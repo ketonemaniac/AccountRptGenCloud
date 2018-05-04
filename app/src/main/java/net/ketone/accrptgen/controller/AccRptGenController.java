@@ -1,14 +1,18 @@
 package net.ketone.accrptgen.controller;
 
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import net.ketone.accrptgen.admin.StatisticsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.dto.DownloadFileDto;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.gen.GenerationService;
 import net.ketone.accrptgen.gen.ParsingService;
+import net.ketone.accrptgen.mail.Attachment;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
-import net.ketone.accrptgen.util.PasswordUtils;
+import net.ketone.accrptgen.threading.ThreadingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +24,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.*;
-import java.text.ParseException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 public class AccRptGenController {
@@ -41,6 +46,8 @@ public class AccRptGenController {
     private EmailService emailService;
     @Autowired
     private StatisticsService statisticsService;
+    @Autowired
+    private ThreadingService threadingService;
 
 
     @RequestMapping("/hello")
@@ -50,67 +57,28 @@ public class AccRptGenController {
     }
 
     @PostMapping("/uploadFile")
-    public AccountFileDto handleFileUpload(@RequestParam("file") MultipartFile file,
+    public AccountFileDto handleFileUploadTest(@RequestParam("file") MultipartFile file,
                                            RedirectAttributes redirectAttributes) throws IOException {
-
-        // TODO: use ThreadPool and Future to keep track of file generation status
         final byte[] fileBytes = file.getBytes();
         InputStream is = new ByteArrayInputStream(fileBytes);
         final Date generationTime = new Date();
         String companyName = parsingService.extractCompanyName(is);
-        String filename = companyName + "-" + GenerationService.sdf.format(generationTime) + ".docx";
+        String filename = companyName + "-" + GenerationService.sdf.format(generationTime);
 
+        storageService.store(new ByteArrayInputStream(fileBytes), filename + ".xlsm");
         AccountFileDto dto = new AccountFileDto();
         dto.setCompany(companyName);
-        dto.setFilename(filename);
+        dto.setFilename(filename + ".docx");
         dto.setGenerationTime(new Date());
-
-        new Thread( () -> {
-            try {
-                logger.info("Threaded operation of " + filename + " begins.");
-                InputStream is1 = new ByteArrayInputStream(fileBytes);
-                ByteArrayOutputStream os = parsingService.preParse(is1);
-                is1.close();
-                InputStream is2 = new ByteArrayInputStream(os.toByteArray());
-                os.close();
-                logger.info("Start parse operation for " + filename);
-                AccountData data = parsingService.readFile(is2);
-                is2.close();
-                data.setGenerationTime(generationTime);
-
-                logger.info("Start generation for " + filename);
-                ByteArrayOutputStream os1 = generationService.generate(data);
-                byte[] bytes = os1.toByteArray();
-                os1.close();
-                try {
-                    logger.info("Storing file " + filename);
-                    storageService.store(new ByteArrayInputStream(bytes), filename);
-                } catch (IOException e) {
-                    logger.error("Error storing generated file", e);
-                    throw new RuntimeException(e);
-                }
-                logger.info("Sending email for " + filename);
-                emailService.sendEmail(companyName, filename, new ByteArrayInputStream(bytes));
-                dto.setStatus(AccountFileDto.Status.EMAIL_SENT.name());
-                logger.info("Updating statistics for " + filename);
-                statisticsService.updateAccountReport(dto);
-                logger.info("Operation complete for " + filename);
-            } catch (Exception e) {
-                dto.setStatus(AccountFileDto.Status.FAILED.name());
-                try {
-                    statisticsService.updateAccountReport(dto);
-                } catch (IOException e1) {
-                    logger.warn("Fail to save a failure generation." , e);
-                }
-                logger.warn("Generation Failed." , e);
-            }
-        }).start();
-
         dto.setStatus(AccountFileDto.Status.GENERATING.name());
         statisticsService.updateAccountReport(dto);
 
+        threadingService.runPipeline(companyName, generationTime, filename);
+
         return dto;
     }
+
+
 
     @PostMapping("/downloadFile")
     public ResponseEntity<Resource> downloadFile(@RequestBody DownloadFileDto dto) throws IOException {
@@ -123,24 +91,9 @@ public class AccRptGenController {
 
     @GetMapping("/listFiles")
     public List<AccountFileDto> listFiles() {
-        // TODO: append files which are generating
-        // TODO: sort by descending time
-//        return storageService.list().stream()
-//                .filter(f -> f.endsWith("docx"))
-//                .map(
-//                f -> {
-//                    AccountFileDto dto = new AccountFileDto();
-//                    dto.setCompany(f.substring(0, f.lastIndexOf("-")));
-//                    try {
-//                        dto.setGenerationTime(GenerationService.sdf.parse(f.substring(f.lastIndexOf("-")+1, f.lastIndexOf("."))));
-//                    } catch (ParseException e) {
-//                        e.printStackTrace();
-//                    }
-//                    dto.setFilename(f);
-//                    return dto;
-//                }).collect(Collectors.toList());
         return statisticsService.getRecentGenerations();
     }
 
 
 }
+

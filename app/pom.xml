@@ -6,7 +6,7 @@
 	<groupId>net.ketone</groupId>
 	<artifactId>accrptgen-app</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<name>accrptgen app</name>
 	<description>Account Report Generator App</description>

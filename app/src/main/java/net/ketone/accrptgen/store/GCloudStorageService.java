@@ -55,6 +55,7 @@ public class GCloudStorageService implements StorageService {
         }
         storage.create(blobInfoBuilder.build(), bytes);
         logger.info("stored " + filename + " in " + stopwatch.toString());
+        is.close();
         return filename;
     }
 

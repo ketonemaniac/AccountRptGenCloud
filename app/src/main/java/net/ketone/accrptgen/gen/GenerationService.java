@@ -14,7 +14,7 @@ public interface GenerationService {
 
     final static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA);
 
-    ByteArrayOutputStream generate(AccountData data) throws IOException;
+    byte[] generate(AccountData data) throws IOException;
 
     void write(String sectionName, Paragraph paragraph);
 

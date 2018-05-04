@@ -17,9 +17,7 @@
 package net.ketone.accrptgen.mail;
 
 import com.sendgrid.SendGrid;
-import com.sendgrid.SendGridException;
 import net.ketone.accrptgen.admin.CredentialsService;
-import net.ketone.accrptgen.gen.GenerationServiceApachePOI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +25,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -59,7 +56,8 @@ public class SendgridEmailService implements EmailService {
         SENDGRID_API_KEY = props.getProperty(CredentialsService.SENDGRID_API_KEY_PROP);
     }
 
-    public void sendEmail(String companyName, String attachmentName, InputStream attachment) throws Exception {
+    @Override
+    public void sendEmail(String companyName, List<Attachment> attachments) throws Exception {
         if(!SENDGRID_ENABLE) return;
         SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
         SendGrid.Email email = new SendGrid.Email();
@@ -68,14 +66,19 @@ public class SendgridEmailService implements EmailService {
         email.setSubject("Accounting Report For " + companyName);
         email.setText("Please find the accounting report for " + companyName + " as attached.");
 
-        email.addAttachment(attachmentName, attachment);
+        for(Attachment attachment : attachments) {
+            InputStream data = new ByteArrayInputStream(attachment.getData());
+            email.addAttachment(attachment.getAttachmentName(), data);
+            data.close();
+            logger.info("Added attachment " + attachment.getAttachmentName());
+        }
 
         SendGrid.Response response = sendgrid.send(email);
         if (response.getCode() != 200) {
             logger.warn(String.format("An error occured: %s", response.getMessage()));
             return;
         }
-        logger.info("Email with attachment " + attachmentName + " sent.");
+        logger.info("Email sent.");
     }
 
 }

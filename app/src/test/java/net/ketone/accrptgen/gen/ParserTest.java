@@ -46,35 +46,28 @@ public class ParserTest {
     @Test
     public void testPreParse() throws Exception {
         InputStream inputStream = this.getClass().getResourceAsStream("/" + PLAIN_FILENAME);
-        ByteArrayOutputStream os = svc.preParse(inputStream);
-
-        InputStream is = new ByteArrayInputStream(os.toByteArray());
-        AccountData data = svc.readFile(is);
+        byte[] preParseOutput = svc.preParse(inputStream);
+        AccountData data = svc.readFile(preParseOutput);
         System.out.println(data.getCompanyName());
 
         data.setGenerationTime(new Date());
 
         // TODO: remove, this is integration flow
-        ByteArrayOutputStream output = genSvc.generate(data);
-        byte[] out = output.toByteArray();
-        storageSvc.store(new ByteArrayInputStream(out), "testPreParse.docx");
-        // emailSvc.sendEmail(data.getCompanyName(), "testPreParse.docx", new ByteArrayInputStream(out));
-
+        // byte[] out = genSvc.generate(data);
     }
 
-    // @Test
+    @Test
     public void testParse() throws IOException {
         InputStream templateStream = storageSvc.load(TEMPLATE_FILENAME);
         XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         templateWb.write(os);
-        InputStream is = new ByteArrayInputStream(os.toByteArray());
-        AccountData data = svc.readFile(is);
+        AccountData data = svc.readFile(os.toByteArray());
         System.out.println(data.getCompanyName());
 
         data.setGenerationTime(new Date());
-        ByteArrayOutputStream output =  genSvc.generate(data);
-        storageSvc.store(new ByteArrayInputStream(output.toByteArray()), "testParse.docx");
+        byte[] output =  genSvc.generate(data);
+        // storageSvc.store(new ByteArrayInputStream(output), "testParse.docx");
     }
 
 

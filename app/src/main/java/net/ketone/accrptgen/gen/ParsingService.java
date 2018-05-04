@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +68,7 @@ public class ParsingService {
         return controlSheet.getRow(1).getCell(3).getStringCellValue();
     }
 
-    public ByteArrayOutputStream preParse(InputStream excelFile) throws IOException {
+    public byte[] preParse(InputStream excelFile) throws IOException {
 
         String templateName = credentialsService.getCredentials().getProperty(CredentialsService.PREPARSE_TEMPLATE_PROP);
         logger.info("starting pre-parse to template " + templateName);
@@ -151,15 +152,22 @@ public class ParsingService {
         evaluator.evaluateAll();
         logger.info("template refreshed. Writing to stream");
 
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
+        logger.info("writing template. os.size()=" + os.size());
         templateWb.write(os);
-        // templateWb.close();  // Don't do this. You dun wanna save it.
-        return os;
+        logger.info("creating byte[] from template. os.size()=" + os.size());
+        byte [] result = os.toByteArray();
+        logger.info("closing template");
+        os.close();
+        workbook.close();
+        templateWb.close();
+        return result;
     }
 
 
-    public AccountData readFile(InputStream excelFile) throws IOException {
+    public AccountData readFile(byte[] preParseOutput) throws IOException {
 
+        InputStream excelFile = new ByteArrayInputStream(preParseOutput);
         AccountData data = new AccountData();
         Workbook workbook = new XSSFWorkbook(excelFile);
         data.setCompanyName(extractCompanyName(workbook));
@@ -182,7 +190,8 @@ public class ParsingService {
             data.addSection(section);
             secIdx++;
         }
-
+        excelFile.close();
+        workbook.close();
         return data;
     }
 
