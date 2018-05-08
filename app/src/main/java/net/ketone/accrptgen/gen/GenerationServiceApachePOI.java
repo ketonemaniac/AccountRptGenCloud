@@ -98,6 +98,7 @@ public class GenerationServiceApachePOI implements GenerationService {
                 } else if(element instanceof Table) {
                     write(currSection.getName(), (Table) element);
                 }
+                clearNumeberedList();
             }
             endSection(currPghs.get(currSection.getName()));
             endSection(pghHeaders.get("Header" + currSection.getName()));
@@ -372,5 +373,12 @@ public class GenerationServiceApachePOI implements GenerationService {
         return numID;
     }
 
+    /**
+     * Clear list at the end of every section
+     * TODO: concurrency problems. Make this class prototype.
+     */
+    private void clearNumeberedList() {
+        numberedLists.clear();
+    }
 
 }

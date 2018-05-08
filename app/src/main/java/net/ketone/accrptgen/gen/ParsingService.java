@@ -118,10 +118,12 @@ public class ParsingService {
                             case FORMULA:
                                 // templateCell.setCellFormula(cell.getCellFormula());
                                 try {
-                                    templateCell.setCellValue(cell.getStringCellValue());
+                                    // always try numbers first
+                                    templateCell.setCellValue(numberFormat(cell.getNumericCellValue()));
                                 } catch(Exception e) {
                                     try {
-                                        templateCell.setCellValue(numberFormat(cell.getNumericCellValue()));
+                                        // then try String
+                                        templateCell.setCellValue(cell.getStringCellValue());
                                     } catch (Exception e2) {
                                         templateCell.setCellValue(cell.getCellFormula());
                                     }
