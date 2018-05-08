@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
@@ -50,6 +51,9 @@ public class SendgridEmailService implements EmailService {
     @Value("${mail.sender}")
     private String SENDGRID_SENDER;
 
+    @Value("${mail.bcc}")
+    private String EMAIL_BCC;
+
     @PostConstruct
     public void init() {
         Properties props = credentialsService.getCredentials();
@@ -61,8 +65,13 @@ public class SendgridEmailService implements EmailService {
         if(!SENDGRID_ENABLE) return;
         SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
         SendGrid.Email email = new SendGrid.Email();
-        email.addTo(credentialsService.getCredentials().getProperty(CredentialsService.SEND_TO_PROP));
+        String sendTo = credentialsService.getCredentials().getProperty(CredentialsService.SEND_TO_PROP);
+        email.addTo(sendTo);
         email.setFrom(SENDGRID_SENDER);
+        email.setFromName("Accounting Report Generator");
+        if(!StringUtils.isEmpty(EMAIL_BCC)) {
+            email.setBcc(new String[]{EMAIL_BCC});
+        }
         email.setSubject("Accounting Report For " + companyName);
         email.setText("Please find the accounting report for " + companyName + " as attached.");
 
@@ -78,7 +87,7 @@ public class SendgridEmailService implements EmailService {
             logger.warn(String.format("An error occured: %s", response.getMessage()));
             return;
         }
-        logger.info("Email sent.");
+        logger.info("Email sent to " + sendTo + " BCC " + EMAIL_BCC);
     }
 
 }
