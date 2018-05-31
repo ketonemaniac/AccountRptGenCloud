@@ -2,6 +2,9 @@ package net.ketone.accrptgen.gen;
 
 import net.ketone.accrptgen.admin.StatisticsService;
 import net.ketone.accrptgen.entity.AccountData;
+import net.ketone.accrptgen.entity.Section;
+import net.ketone.accrptgen.entity.SectionElement;
+import net.ketone.accrptgen.entity.Table;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -17,6 +20,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Run with VM options
@@ -48,13 +56,56 @@ public class ParserTest {
         InputStream inputStream = this.getClass().getResourceAsStream("/" + PLAIN_FILENAME);
         byte[] preParseOutput = svc.preParse(inputStream);
         AccountData data = svc.readFile(preParseOutput);
-        System.out.println(data.getCompanyName());
+        assertThat(data.getCompanyName()).isEqualTo("MOP ENTERTAINMENT LIMITED");
 
-        data.setGenerationTime(new Date());
+        for(Section section : data.getSections()) {
+            switch (section.getName()) {
+                case "Section4":
+                   testSection4(section); break;
+                case "Section3":
+                    testSection3(section); break;
+            }
+        }
 
         // TODO: remove, this is integration flow
+        // data.setGenerationTime(new Date());
         // byte[] out = genSvc.generate(data);
     }
+
+    private void testSection3(Section section) {
+        Optional<SectionElement> t = section.getElements().stream().filter(s -> s instanceof Table).findFirst();
+        assertTrue(t.isPresent());
+        Table table = (Table) t.get();
+        for(List<Table.Cell> row : table.getCells()) {
+            // addition formula
+            if(row.get(0).getText().contains("Other income")) {
+                assertThat(row.get(4).getText()).isEqualTo("4,605");
+            }
+            // summation in source and target
+            if(row.get(0).getText().contains("from operations and before taxation")) {
+                assertThat(row.get(4).getText()).isEqualTo("(1,537,691)");
+            }
+        }
+    }
+
+    private void testSection4(Section section) {
+        Optional<SectionElement> t = section.getElements().stream().filter(s -> s instanceof Table).findFirst();
+        assertTrue(t.isPresent());
+        Table table = (Table) t.get();
+        for(List<Table.Cell> row : table.getCells()) {
+            // cell formulas on source
+            if(row.get(0).getText().contains("Property, plant and equipment")) {
+                assertThat(row.get(2).getText()).isEqualTo("1,540,797");
+            }
+            // cell formula on source and target
+            if(row.get(0).getText().contains("Amount due from a director")) {
+                assertThat(row.get(2).getText()).isEqualTo("20,000");
+                assertThat(row.get(4).getText()).isEqualTo("20,000");
+            }
+        }
+    }
+
+
 
     @Test
     public void testParse() throws IOException {

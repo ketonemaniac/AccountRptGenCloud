@@ -120,10 +120,12 @@ public class ParsingService {
                                 try {
                                     // always try numbers first
                                     templateCell.setCellValue(numberFormat(cell.getNumericCellValue()));
+                                    templateCell.setCellFormula(null);
                                 } catch(Exception e) {
                                     try {
                                         // then try String
                                         templateCell.setCellValue(cell.getStringCellValue());
+                                        templateCell.setCellFormula(null);
                                     } catch (Exception e2) {
                                         templateCell.setCellValue(cell.getCellFormula());
                                     }
@@ -308,10 +310,10 @@ public class ParsingService {
                                         break;
                                     case FORMULA:
                                         try {
-                                            parsedCell = curTable.addCell(dataCell.getStringCellValue());
+                                            parsedCell = curTable.addCell(numberFormat(dataCell.getNumericCellValue()));
                                         } catch(Exception e) {
                                             try {
-                                                parsedCell = curTable.addCell(numberFormat(dataCell.getNumericCellValue()));
+                                                parsedCell = curTable.addCell(dataCell.getStringCellValue());
                                             } catch (Exception e2) {
                                                 parsedCell = curTable.addCell(dataCell.getCellFormula());
                                             }
