@@ -119,7 +119,7 @@ public class ParsingService {
                                 // templateCell.setCellFormula(cell.getCellFormula());
                                 try {
                                     // always try numbers first
-                                    templateCell.setCellValue(numberFormat(cell.getNumericCellValue()));
+                                    templateCell.setCellValue(cell.getNumericCellValue());
                                     templateCell.setCellFormula(null);
                                 } catch(Exception e) {
                                     try {

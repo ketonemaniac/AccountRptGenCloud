@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -60,16 +61,45 @@ public class ParserTest {
 
         for(Section section : data.getSections()) {
             switch (section.getName()) {
-                case "Section4":
-                   testSection4(section); break;
                 case "Section3":
                     testSection3(section); break;
+                case "Section4":
+                    testSection4(section); break;
+                case "Section5":
+                    testSection5(section); break;
+                case "Section6":
+                    testSection6(section); break;
             }
         }
 
         // TODO: remove, this is integration flow
         // data.setGenerationTime(new Date());
         // byte[] out = genSvc.generate(data);
+    }
+
+    private void testSection6(Section section) {
+        List<SectionElement> t = section.getElements().stream().filter(s -> s instanceof Table).collect(Collectors.toList());
+        assertTrue(t.size() >= 4);
+        Table table = (Table) t.get(3);
+        for(List<Table.Cell> row : table.getCells()) {
+            // Yes/No column value derived from other sheets
+            if(row.get(1).getText().contains("As at")) {
+                assertThat(row.get(8).getText()).isEqualTo("9,302,500");
+            }
+        }
+    }
+
+    private void testSection5(Section section) {
+        Optional<SectionElement> t = section.getElements().stream().filter(s -> s instanceof Table).findFirst();
+        assertTrue(t.isPresent());
+        Table table = (Table) t.get();
+        for(List<Table.Cell> row : table.getCells()) {
+            // formula derived from other sheets
+            if(row.get(0).getText().contains("Balance as at")) {
+                assertThat(row.get(5).getText()).isEqualTo("(1,527,691)");
+            }
+        }
+
     }
 
     private void testSection3(Section section) {
