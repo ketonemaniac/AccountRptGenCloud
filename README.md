@@ -1,5 +1,7 @@
 # AccountRptGenCloud #
-Proprietory Accounting Report Generator on Google Cloud. Runs with Spring boot with static content written with ECMAScript6.
+Accounting Report Generator on Google Cloud. Runs with Spring boot with a Bootstrap UI.
+
+*Will not run because the Proprietory Accounting Excel is not uploaded to Github. Might make a simple example in the future for the sake of the Unit tests.* 
 
 ## Run ##
 In the root module run the following to run browsify the web content (main.js)

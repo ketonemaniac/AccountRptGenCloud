@@ -7,6 +7,7 @@ import net.ketone.accrptgen.mail.Attachment;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.threading.ThreadingService;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
@@ -54,13 +56,20 @@ public class Pipeline implements Runnable {
     @Override
     public void run() {
         String inputFileName = filename + ".xlsm";
+        String preParsedFileName = filename + "-allDocs.xlsm";
         String outputDocName = filename + ".docx";
         try {
             InputStream is1 = storageService.load(inputFileName);
             byte[] preParseOutput = parsingService.preParse(is1);
-            is1.close();
+
+            InputStream is2 = storageService.load(inputFileName);
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            IOUtils.copy(is2, os);
+            Attachment inputXlsx = new Attachment(filename + "-plain.xlsm", os.toByteArray());
+            is2.close();
             // no need to use the template anymore, delete it.
             storageService.delete(inputFileName);
+
             logger.info("template Closing input file stream, " + preParseOutput.length + "_bytes");
             is1.close();
             logger.info("Start parse operation for " + filename);
@@ -71,8 +80,8 @@ public class Pipeline implements Runnable {
             byte[] generatedDoc = generationService.generate(data);
             logger.info("Generated doc. " + generatedDoc.length + "_bytes");
             Attachment doc = new Attachment(outputDocName, generatedDoc);
-            Attachment template = new Attachment(inputFileName, preParseOutput);
-            emailService.sendEmail(companyName, Arrays.asList(doc, template));
+            Attachment template = new Attachment(preParsedFileName, preParseOutput);
+            emailService.sendEmail(companyName, Arrays.asList(doc, template, inputXlsx));
 
             AccountFileDto dto = new AccountFileDto();
             dto.setCompany(companyName);
