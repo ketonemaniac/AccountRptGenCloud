@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@Profile("gcloud")
+@Profile({"gCloudStandard","gCloudFlexible"})
 public class GCloudStorageService implements StorageService {
 
     private static final Logger logger = LoggerFactory.getLogger(GCloudStorageService.class);

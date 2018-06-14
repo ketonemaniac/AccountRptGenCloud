@@ -10,7 +10,7 @@ import java.nio.channels.Pipe;
 import java.util.Date;
 
 @Component
-@Profile({"local","gcloud"})
+@Profile({"local","gCloudFlexible"})
 public class SimpleThreadingService implements ThreadingService {
 
     @Autowired

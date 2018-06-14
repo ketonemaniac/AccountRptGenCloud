@@ -6,7 +6,8 @@
 	<groupId>net.ketone</groupId>
 	<artifactId>accrptgen-app</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<!-- packaging>jar</packaging --> <!-- for flexible env -->
+	<packaging>war</packaging> <!-- for standard env -->
 
 	<name>accrptgen app</name>
 	<description>Account Report Generator App</description>
@@ -42,13 +43,12 @@
 					<groupId>log4j</groupId>
 					<artifactId>log4j</artifactId>
 				</exclusion>
-			</exclusions>
-			<!-- exclusions>
+				<!-- exclude this when running on gCloudStandard -->
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-tomcat</artifactId>
 				</exclusion>
-			</exclusions -->
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

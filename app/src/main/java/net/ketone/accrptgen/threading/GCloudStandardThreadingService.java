@@ -21,7 +21,7 @@ import java.util.concurrent.ThreadFactory;
 /**
  * Works for Google cloud Standard environment
  */
-@Profile("gcloudStandard")
+@Profile("gCloudStandard")
 @RestController
 public class GCloudStandardThreadingService implements ThreadingService {
 

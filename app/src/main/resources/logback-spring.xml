@@ -15,7 +15,7 @@
             <appender-ref ref="CONSOLE" />
         </root>
     </springProfile>
-    <springProfile name="gcloud">
+    <springProfile name="gCloudStandard,gCloudFlexible">
 
         <appender name="CLOUD" class="com.google.cloud.logging.logback.LoggingAppender">
         </appender>
