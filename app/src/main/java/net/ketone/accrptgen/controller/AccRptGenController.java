@@ -1,20 +1,13 @@
 package net.ketone.accrptgen.controller;
 
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions;
 import net.ketone.accrptgen.admin.StatisticsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.dto.DownloadFileDto;
-import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.gen.GenerationService;
 import net.ketone.accrptgen.gen.ParsingService;
-import net.ketone.accrptgen.mail.Attachment;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.threading.ThreadingService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -27,14 +20,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 @RestController
 public class AccRptGenController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AccRptGenController.class);
+//    private static final Logger logger = LoggerFactory.getLogger(AccRptGenController.class);
+    private static final Logger logger = Logger.getLogger(AccRptGenController.class.getName());
 
     @Autowired
     private GenerationService generationService;

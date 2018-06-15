@@ -3,8 +3,6 @@ package net.ketone.accrptgen.controller;
 import net.ketone.accrptgen.admin.CredentialsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.store.StorageService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,13 +13,15 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AccRptGenController.class);
+//    private static final Logger logger = LoggerFactory.getLogger(AccRptGenController.class);
+    private static final Logger logger = Logger.getLogger(AdminController.class.getName());
 
     @Autowired
     private StorageService storageService;

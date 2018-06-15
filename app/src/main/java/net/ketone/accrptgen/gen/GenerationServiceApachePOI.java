@@ -5,18 +5,21 @@ import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.ss.formula.eval.FunctionEval;
 import org.apache.poi.ss.formula.functions.DateDifFunc;
 import org.apache.poi.xwpf.usermodel.*;
-import org.apache.xmlbeans.*;
+import org.apache.xmlbeans.XmlCursor;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -27,7 +30,9 @@ import java.util.stream.Collectors;
 @Component
 public class GenerationServiceApachePOI implements GenerationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(GenerationServiceApachePOI.class);
+//    private static final Logger logger = LoggerFactory.getLogger(GenerationServiceApachePOI.class);
+    private static final Logger logger = Logger.getLogger(GenerationServiceApachePOI.class.getName());
+
     // this converts cm to "twips" used internally for specifying height
     private static final int twipsPerCm =  566;
     // this converts the user input height to cm
@@ -72,7 +77,7 @@ public class GenerationServiceApachePOI implements GenerationService {
 //            document = new XWPFDocument(new FileInputStream(file));
             document = new XWPFDocument(storageService.load("template.docx"));
         } catch (IOException e) {
-            logger.error("Error in opening template.docx", e);
+            logger.log(Level.SEVERE, "Error in opening template.docx", e);
             throw new RuntimeException(e);
         }
         List<XWPFParagraph> contentParagraphs = document.getParagraphs();
@@ -132,7 +137,7 @@ public class GenerationServiceApachePOI implements GenerationService {
                 }
             }
             if(!pghsMap.containsKey(sectionName)) {
-                logger.warn("Cannot find paragraph " + sectionName);
+                logger.warning("Cannot find paragraph " + sectionName);
             }
         }
         return pghsMap;
@@ -295,7 +300,7 @@ public class GenerationServiceApachePOI implements GenerationService {
                             }
                         }
                     }catch (Exception e) {
-                        logger.warn("What is this: " + sectionName + " i:" + i + " j:" + j, e);
+                        logger.log(Level.WARNING, "write table error: " + sectionName + " i:" + i + " j:" + j, e);
                     }
                 }
             }

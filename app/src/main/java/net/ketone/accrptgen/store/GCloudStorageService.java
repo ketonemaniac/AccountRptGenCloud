@@ -3,29 +3,24 @@ package net.ketone.accrptgen.store;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
 import com.google.common.base.Stopwatch;
-import net.ketone.accrptgen.gen.GenerationServiceApachePOI;
 import org.apache.commons.io.input.NullInputStream;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Component
 @Profile({"gCloudStandard","gCloudFlexible"})
 public class GCloudStorageService implements StorageService {
 
-    private static final Logger logger = LoggerFactory.getLogger(GCloudStorageService.class);
+    // private static final Logger logger = LoggerFactory.getLogger(GCloudStorageService.class);
+    private static final Logger logger = Logger.getLogger(GCloudStorageService.class.getName());
 
     Storage storage;
     static final String BUCKET_NAME = "accountrptgen-storage-test";

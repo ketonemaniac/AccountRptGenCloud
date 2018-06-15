@@ -1,8 +1,6 @@
 package net.ketone.accrptgen.store;
 
 import org.apache.commons.io.input.NullInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -10,12 +8,15 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Component
 @Profile("local")
 public class FileStorageService implements StorageService {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
+//    private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
+    private static final Logger logger = Logger.getLogger(FileStorageService.class.getName());
+
     private static final String STORAGE_FOLDER = "files" + File.separator;
     List<String> filenames = new ArrayList<>();
 

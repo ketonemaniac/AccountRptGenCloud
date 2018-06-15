@@ -10,8 +10,6 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,16 +21,17 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.function.Function;
-
-import static org.apache.poi.ss.usermodel.BorderStyle.DOUBLE;
-import static org.apache.poi.ss.usermodel.BorderStyle.THIN;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 // import org.springframework.util.StringUtils;
 
 @Component
 public class ParsingService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ParsingService.class);
+//    private static final Logger logger = LoggerFactory.getLogger(ParsingService.class);
+    private static final Logger logger = Logger.getLogger(ParsingService.class.getName());
+
     private static final List<String> COPY_COLORS = Arrays.asList("4F81BD", "8064A2");
     private static final List<String> preParseSheets = Arrays.asList("Control", "Dir info", "Section3", "Section4", "Section6");
 
@@ -266,9 +265,9 @@ public class ParsingService {
                                     try {
                                         int columnWidth = (int) dataCell.getNumericCellValue();
                                         columnWidths.add(columnWidth);
-                                        logger.debug("Column width " + section.getName() + " line " + (i + 1) + ", column=" + columnWidth);
+                                        logger.fine("Column width " + section.getName() + " line " + (i + 1) + ", column=" + columnWidth);
                                     } catch (Exception e) {
-                                        logger.warn("Unparsable Column Width cell at " + section.getName() + " line " + (i + 1) + ", " + e.toString());
+                                        logger.warning("Unparsable Column Width cell at " + section.getName() + " line " + (i + 1) + ", " + e.toString());
                                     }
                                 }
                             }
@@ -290,7 +289,7 @@ public class ParsingService {
                             isInItem = true;
                             break;
                         default:
-                            logger.warn("unknown command:" + control.trim());
+                            logger.warning("unknown command:" + control.trim());
                             break;
                     }
                 }
@@ -328,7 +327,7 @@ public class ParsingService {
                                     case ERROR:
                                     default:
                                         parsedCell = curTable.addCell("");
-                                        logger.warn("TYPE:" + dataCell.getCellTypeEnum().name());
+                                        logger.warning("TYPE:" + dataCell.getCellTypeEnum().name());
                                         break;
                                 }
                                 if(dataCell.getCellStyle() == null) continue;
@@ -349,7 +348,7 @@ public class ParsingService {
                                         parsedCell.setAlignment(Table.Alignment.RIGHT); break;
                                 }
                             } catch (Exception e) {
-                                logger.warn("Unparsable table content at " + section.getName() + " line " + (sectionSheet.getRow(i).getRowNum() + 1) + ", " + e.toString());
+                                logger.warning("Unparsable table content at " + section.getName() + " line " + (sectionSheet.getRow(i).getRowNum() + 1) + ", " + e.toString());
                             }
                         } else {
                             Table.Cell blankCell = curTable.addCell("");
@@ -367,7 +366,7 @@ public class ParsingService {
                     }
                 }
             } catch (Exception e) {
-                logger.error("Error at section " + section.getName() + " line " + (i + 1), e);
+                logger.log(Level.SEVERE, "Error at section " + section.getName() + " line " + (i + 1), e);
                 throw e;
             }
         }
@@ -398,7 +397,7 @@ public class ParsingService {
         try {
             yesNo = yesNoCell.getStringCellValue();
         } catch (Exception e) {
-            logger.warn("Unparsable Yes/No cell at " + section.getName() + " line " + (row + 1) + ", " + e.toString());
+            logger.warning("Unparsable Yes/No cell at " + section.getName() + " line " + (row + 1) + ", " + e.toString());
             return false;
         }
         // ignored row
@@ -436,7 +435,7 @@ public class ParsingService {
                         p.setIndent(p.getIndent()+1);
                     }
                 } catch (Exception e) {
-                    logger.warn("Unparsable content at " + section.getName() + " line " + (row.getRowNum()+1) + ", " + e.toString());
+                    logger.warning("Unparsable content at " + section.getName() + " line " + (row.getRowNum()+1) + ", " + e.toString());
                 }
             } else if(!hasContent) {
                 // no content, empty cell = indent

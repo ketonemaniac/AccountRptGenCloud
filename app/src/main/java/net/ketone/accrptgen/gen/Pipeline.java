@@ -5,20 +5,20 @@ import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.mail.Attachment;
 import net.ketone.accrptgen.mail.EmailService;
+import net.ketone.accrptgen.mail.SendgridEmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.threading.ThreadingService;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * File generation batch processes pipeline
@@ -28,7 +28,8 @@ import java.util.Date;
 @Scope("prototype")
 public class Pipeline implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(Pipeline.class);
+//    private static final Logger logger = LoggerFactory.getLogger(Pipeline.class);
+    private static final Logger logger = Logger.getLogger(Pipeline.class.getName());
 
     @Autowired
     private GenerationService generationService;
@@ -93,7 +94,7 @@ public class Pipeline implements Runnable {
             logger.info("Operation complete for " + filename);
 
         } catch (Exception e) {
-            logger.warn("Generation failed", e);
+            logger.log(Level.WARNING, "Generation failed", e);
             throw new RuntimeException(e);
         }
 

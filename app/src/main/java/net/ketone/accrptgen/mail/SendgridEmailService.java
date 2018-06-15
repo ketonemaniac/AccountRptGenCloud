@@ -18,8 +18,6 @@ package net.ketone.accrptgen.mail;
 
 import com.sendgrid.SendGrid;
 import net.ketone.accrptgen.admin.CredentialsService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Sendgrid service
@@ -38,7 +37,8 @@ import java.util.Properties;
 @Service
 public class SendgridEmailService implements EmailService {
 
-    private static final Logger logger = LoggerFactory.getLogger(SendgridEmailService.class);
+//    private static final Logger logger = LoggerFactory.getLogger(SendgridEmailService.class);
+    private static final Logger logger = Logger.getLogger(SendgridEmailService.class.getName());
 
     @Autowired
     private CredentialsService credentialsService;
@@ -84,7 +84,7 @@ public class SendgridEmailService implements EmailService {
 
         SendGrid.Response response = sendgrid.send(email);
         if (response.getCode() != 200) {
-            logger.warn(String.format("An error occured: %s", response.getMessage()));
+            logger.warning(String.format("An error occured: %s", response.getMessage()));
             return;
         }
         logger.info("Email sent to " + sendTo + " BCC " + EMAIL_BCC);
