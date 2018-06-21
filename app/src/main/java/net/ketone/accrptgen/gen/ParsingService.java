@@ -119,7 +119,9 @@ public class ParsingService {
                                 try {
                                     // always try numbers first
                                     templateCell.setCellValue(cell.getNumericCellValue());
+                                    logger.info("template cell with formula: " + templateCell.getCellFormula() + " is now: " + templateCell.getNumericCellValue() + " changed to NUMERIC");
                                     templateCell.setCellFormula(null);
+                                    templateCell.setCellType(CellType.NUMERIC);
                                 } catch(Exception e) {
                                     try {
                                         // then try String

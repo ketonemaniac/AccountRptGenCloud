@@ -28,7 +28,7 @@ public class FileBasedStatisticsServiceTest {
 
     @Test
     public void testSaveEmptyFile() throws IOException {
-        storageService.delete(FileBasedStatisticsService.RECENTS_FILE);
+        storageService.delete(FileBasedStatisticsService.HISTORY_FILE);
         doSave();
     }
 
@@ -62,7 +62,7 @@ public class FileBasedStatisticsServiceTest {
 
     @Test
     public void testUpdate() throws IOException {
-        storageService.delete(FileBasedStatisticsService.RECENTS_FILE);
+        storageService.delete(FileBasedStatisticsService.HISTORY_FILE);
         AccountFileDto dto = doSave();
         svc.updateAccountReport(dto);
         List<AccountFileDto> dtos = svc.getRecentGenerations();

@@ -24,9 +24,9 @@ import java.util.List;
  */
 public class GenerationServiceDocx4j /* implements GenerationService */ {
 
-    public static void main(String [] args) throws IOException, Docx4JException {
-        new GenerationServiceDocx4j().generate();
-    }
+//    public static void main(String [] args) throws IOException, Docx4JException {
+//        new GenerationServiceDocx4j().generate();
+//    }
 
     public void generate() throws IOException, Docx4JException {
         WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();

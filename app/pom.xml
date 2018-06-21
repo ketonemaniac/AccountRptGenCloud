@@ -6,8 +6,7 @@
 	<groupId>net.ketone</groupId>
 	<artifactId>accrptgen-app</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<!-- packaging>jar</packaging --> <!-- for flexible env -->
-	<packaging>war</packaging> <!-- for standard env -->
+	<packaging>jar</packaging> <!-- for local and flexible env -->
 
 	<name>accrptgen app</name>
 	<description>Account Report Generator App</description>
@@ -44,10 +43,10 @@
 					<artifactId>log4j</artifactId>
 				</exclusion>
 				<!-- exclude this when running on gCloudStandard -->
-				<exclusion>
+				<!-- exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion>
+				</exclusion -->
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -164,6 +163,23 @@
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>appengine-maven-plugin</artifactId>
 				<version>1.3.1</version>
+			</plugin>
+
+			<!-- use this to skip packaging into executable -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>1.4.1.RELEASE</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+						<configuration>
+							<classifier>exec</classifier>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>

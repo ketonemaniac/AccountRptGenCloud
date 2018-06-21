@@ -63,7 +63,7 @@ public class DateDifFunc extends Fixed3ArgFunction {
             } else {
                 nDay = Math.abs(((12 * (firstArg.get(Calendar.YEAR) -
                         secondArg.get(Calendar.YEAR))) + firstArg.get(Calendar.MONTH) -
-                        secondArg.get(Calendar.MONTH))) - 1;
+                        secondArg.get(Calendar.MONTH)));
             }
         }
         if (timeUnit.equals("Y")) {
@@ -84,8 +84,8 @@ public class DateDifFunc extends Fixed3ArgFunction {
         return nDay;
     }
 
-    public static void main(String [] args) {
-        LocalDate d = LocalDate.of(1900, 1, 1).plusDays(42005);
-        System.out.println(d.toString());
-    }
+//    public static void main(String [] args) {
+//        LocalDate d = LocalDate.of(1900, 1, 1).plusDays(42005);
+//        System.out.println(d.toString());
+//    }
 }

@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
@@ -95,6 +96,16 @@ public class Pipeline implements Runnable {
 
         } catch (Exception e) {
             logger.log(Level.WARNING, "Generation failed", e);
+            AccountFileDto dto = new AccountFileDto();
+            dto.setCompany(companyName);
+            dto.setFilename(outputDocName);
+            dto.setGenerationTime(generationTime);
+            dto.setStatus(AccountFileDto.Status.FAILED.name());
+            try {
+                statisticsService.updateAccountReport(dto);
+            } catch (IOException e1) {
+                logger.log(Level.WARNING, "History file write failed", e1);
+            }
             throw new RuntimeException(e);
         }
 

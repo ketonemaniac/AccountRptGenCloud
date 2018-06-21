@@ -13,9 +13,9 @@ public class PasswordUtils {
         return sb.toString();
     }
 
-    public static void main(String [] args) {
-        for(int j = 0; j < 100; j++) {
-            System.out.println(generatePassword(8));
-        }
-    }
+//    public static void main(String [] args) {
+//        for(int j = 0; j < 100; j++) {
+//            System.out.println(generatePassword(8));
+//        }
+//    }
 }
