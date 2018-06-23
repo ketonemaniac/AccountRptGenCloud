@@ -20,6 +20,7 @@ import com.sendgrid.SendGrid;
 import net.ketone.accrptgen.admin.CredentialsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -35,6 +36,7 @@ import java.util.logging.Logger;
  * @see https://cloud.google.com/compute/docs/tutorials/sending-mail/using-sendgrid
  */
 @Service
+@Profile("!local")
 public class SendgridEmailService implements EmailService {
 
 //    private static final Logger logger = LoggerFactory.getLogger(SendgridEmailService.class);
