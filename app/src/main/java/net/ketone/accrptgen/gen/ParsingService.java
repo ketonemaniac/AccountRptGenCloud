@@ -82,6 +82,8 @@ public class ParsingService {
         XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
         Map<String, Sheet> inputSheetMap = initSheetMap(workbook);
 
+        FormulaEvaluator inputWbEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
+
         for(Sheet sheet : inputSheetMap.values()) {
             if(!preParseSheets.contains(sheet.getSheetName())) continue;
             Sheet templateSheet = templateSheetMap.get(sheet.getSheetName());
@@ -115,19 +117,24 @@ public class ParsingService {
                                 count++;
                                 break;
                             case FORMULA:
+                                logger.info("Formula Sheet=" + sheet.getSheetName() + " Cell=" + cell.getAddress().formatAsString());
                                 // templateCell.setCellFormula(cell.getCellFormula());
+                                CellValue cellValue = inputWbEvaluator.evaluate(cell);
                                 try {
                                     // always try numbers first
-                                    templateCell.setCellValue(cell.getNumericCellValue());
-                                    logger.info("template cell with formula: " + templateCell.getCellFormula() + " is now: " + templateCell.getNumericCellValue() + " changed to NUMERIC");
+                                    templateCell.setCellValue(cellValue.getNumberValue());
+                                    logger.info("input cell with formula: " + cell.getCellFormula() + " is now: " + templateCell.getNumericCellValue() + " of type NUMERIC");
                                     templateCell.setCellFormula(null);
                                     templateCell.setCellType(CellType.NUMERIC);
                                 } catch(Exception e) {
                                     try {
                                         // then try String
-                                        templateCell.setCellValue(cell.getStringCellValue());
+                                        templateCell.setCellValue(cellValue.getStringValue());
+                                        logger.info("input cell with formula: " + cell.getCellFormula() + " is now: " + templateCell.getStringCellValue() + " of type STRING");
                                         templateCell.setCellFormula(null);
+                                        templateCell.setCellType(CellType.STRING);
                                     } catch (Exception e2) {
+                                        logger.log(Level.WARNING, "cannot evaluate cell with formula: " + cell.getCellFormula());
                                         templateCell.setCellValue(cell.getCellFormula());
                                     }
                                 }
