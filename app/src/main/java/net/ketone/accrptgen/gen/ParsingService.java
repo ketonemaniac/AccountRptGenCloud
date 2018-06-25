@@ -108,11 +108,14 @@ public class ParsingService {
                         }
                         if(templateCell == null) continue;
                         switch (cell.getCellTypeEnum()) {
+                            // MUST CHANGE THE TYPE FIRST. Otherwise the setCellValue will set the wrong tag.
                             case STRING:
+                                templateCell.setCellType(CellType.STRING);
                                 templateCell.setCellValue(cell.getStringCellValue());
                                 count++;
                                 break;
                             case NUMERIC:
+                                templateCell.setCellType(CellType.NUMERIC);
                                 templateCell.setCellValue(cell.getNumericCellValue());
                                 count++;
                                 break;
@@ -120,27 +123,30 @@ public class ParsingService {
                                 logger.info("Formula Sheet=" + sheet.getSheetName() + " Cell=" + cell.getAddress().formatAsString());
                                 // templateCell.setCellFormula(cell.getCellFormula());
                                 CellValue cellValue = inputWbEvaluator.evaluate(cell);
-                                try {
-                                    // always try numbers first
-                                    templateCell.setCellValue(cellValue.getNumberValue());
-                                    logger.info("input cell with formula: " + cell.getCellFormula() + " is now: " + templateCell.getNumericCellValue() + " of type NUMERIC");
-                                    templateCell.setCellFormula(null);
-                                    templateCell.setCellType(CellType.NUMERIC);
-                                } catch(Exception e) {
-                                    try {
-                                        // then try String
-                                        templateCell.setCellValue(cellValue.getStringValue());
-                                        logger.info("input cell with formula: " + cell.getCellFormula() + " is now: " + templateCell.getStringCellValue() + " of type STRING");
-                                        templateCell.setCellFormula(null);
-                                        templateCell.setCellType(CellType.STRING);
-                                    } catch (Exception e2) {
-                                        logger.log(Level.WARNING, "cannot evaluate cell with formula: " + cell.getCellFormula());
-                                        templateCell.setCellValue(cell.getCellFormula());
+                                    switch(cellValue.getCellTypeEnum()) {
+                                        case NUMERIC:
+                                            templateCell.setCellType(CellType.NUMERIC);
+                                            templateCell.setCellValue(cellValue.getNumberValue());
+                                            logger.info("input cell with formula: " + cell.getCellFormula() + " is now: " + templateCell.getNumericCellValue() + " of type " + cellValue.getCellTypeEnum().name());
+                                            templateCell.setCellFormula(null);
+                                            break;
+                                        default:
+                                            try {
+                                                // try String for anything else
+                                                templateCell.setCellType(CellType.STRING);
+                                                templateCell.setCellValue(cellValue.getStringValue());
+                                                logger.info("input cell with formula: " + cell.getCellFormula() + " is now: " + templateCell.getStringCellValue() + " of type STRING.");
+                                                templateCell.setCellFormula(null);
+                                            } catch (Exception e2) {
+                                                logger.log(Level.WARNING, "cannot evaluate cell with formula: " + cell.getCellFormula() + ". CellType=" + cellValue.getCellTypeEnum().name());
+                                                templateCell.setCellValue(cell.getCellFormula());
+                                            }
+                                            break;
                                     }
-                                }
                                 count++;
                                 break;
                             case BOOLEAN:
+                                templateCell.setCellType(CellType.BOOLEAN);
                                 templateCell.setCellValue(cell.getBooleanCellValue());
                                 break;
                             case BLANK:
@@ -159,9 +165,7 @@ public class ParsingService {
 
         // refresh everything
         logger.info("start refreshing template");
-        FormulaEvaluator evaluator = templateWb.getCreationHelper().createFormulaEvaluator();
-        evaluator.clearAllCachedResultValues();
-        evaluator.evaluateAll();
+        evaluateAll(templateWb, templateSheetMap);
         logger.info("template refreshed. Writing to stream");
 
         ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
@@ -176,6 +180,36 @@ public class ParsingService {
         return result;
     }
 
+    /**
+     * Same as evaluator.evaluateAll();, but evaluates Cell By Cell making debugging easy.
+     * @param templateWb
+     * @param templateSheetMap
+     */
+    private void evaluateAll(XSSFWorkbook templateWb, Map<String, Sheet> templateSheetMap) {
+        FormulaEvaluator evaluator = templateWb.getCreationHelper().createFormulaEvaluator();
+        evaluator.clearAllCachedResultValues();
+//        evaluator.evaluateAll();
+        for(Sheet sheet : templateSheetMap.values()) {
+            logger.info("refreshing sheet: " + sheet.getSheetName());
+            int count = 0;
+            for (int r = 0; r < sheet.getLastRowNum(); r++) {
+                Row row = sheet.getRow(r);
+                if (row == null) continue;
+                Iterator<Cell> cellIter = row.cellIterator();
+                while (cellIter.hasNext()) {
+                    Cell cell = cellIter.next();
+                    CellType cellType = null;
+                    try {
+                        cellType = evaluator.evaluateFormulaCellEnum(cell);
+                    } catch(Exception e) {
+                        logger.log(Level.WARNING, "cannot evaluate cell " + cell.getAddress().formatAsString() + " with formula: " + cell.getCellFormula() + " cellType=" + cell.getCellTypeEnum().name(), e);
+                        throw e;
+                    }
+                }
+            }
+        }
+
+    }
 
     public AccountData readFile(byte[] preParseOutput) throws IOException {
 
