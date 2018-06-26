@@ -524,8 +524,11 @@ public class ParsingService {
                 header.setUnderline(Header.Underline.NO_UNDERLINE);
                 break;
             case "Contents":
-            case "Section2":
                 header.setHasCompanyName(true);
+                header.setUnderline(Header.Underline.AFTER_LAST);
+                break;
+            case "Section2":
+                header.setHasCompanyName(false);
                 header.setUnderline(Header.Underline.AFTER_LAST);
                 break;
             case "Section3":
