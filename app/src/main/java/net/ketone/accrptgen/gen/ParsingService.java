@@ -117,6 +117,7 @@ public class ParsingService {
                             case NUMERIC:
                                 templateCell.setCellType(CellType.NUMERIC);
                                 templateCell.setCellValue(cell.getNumericCellValue());
+                                setNumericCellStyle(templateWb, templateCell, cell.getCellStyle());
                                 count++;
                                 break;
                             case FORMULA:
@@ -127,6 +128,7 @@ public class ParsingService {
                                         case NUMERIC:
                                             templateCell.setCellType(CellType.NUMERIC);
                                             templateCell.setCellValue(cellValue.getNumberValue());
+                                            setNumericCellStyle(templateWb, templateCell, cell.getCellStyle());
                                             logger.info("input cell with formula: " + cell.getCellFormula() + " is now: " + templateCell.getNumericCellValue() + " of type " + cellValue.getCellTypeEnum().name());
                                             templateCell.setCellFormula(null);
                                             break;
@@ -178,6 +180,19 @@ public class ParsingService {
         workbook.close();
         templateWb.close();
         return result;
+    }
+
+    /**
+     * keep style such as percentages
+     * @param srcCellStyle
+     * @param templateWb
+     * @param templateCell
+     */
+    private void setNumericCellStyle(XSSFWorkbook templateWb, Cell templateCell, CellStyle srcCellStyle) {
+        short df = srcCellStyle.getDataFormat();
+        CellStyle tgtCellStyle = templateWb.getStylesSource().createCellStyle();  // must create from styles source
+        tgtCellStyle.setDataFormat(df);
+        templateCell.setCellStyle(tgtCellStyle);
     }
 
     /**
@@ -348,11 +363,11 @@ public class ParsingService {
                                         parsedCell = curTable.addCell(dataCell.getStringCellValue());
                                         break;
                                     case NUMERIC:
-                                        parsedCell = curTable.addCell(numberFormat(dataCell.getNumericCellValue()));
+                                        parsedCell = curTable.addCell(numberFormat(dataCell.getNumericCellValue(), dataCell.getCellStyle()));
                                         break;
                                     case FORMULA:
                                         try {
-                                            parsedCell = curTable.addCell(numberFormat(dataCell.getNumericCellValue()));
+                                            parsedCell = curTable.addCell(numberFormat(dataCell.getNumericCellValue(), dataCell.getCellStyle()));
                                         } catch(Exception e) {
                                             try {
                                                 parsedCell = curTable.addCell(dataCell.getStringCellValue());
@@ -525,9 +540,14 @@ public class ParsingService {
         return header;
     }
 
-    private String numberFormat(double value ) {
+    private String numberFormat(double value, CellStyle cellStyle) {
         if(value == 0) {
             return "-";
+        }
+        if(cellStyle != null && cellStyle.getDataFormat() == 9) {
+            // Percentages
+            NumberFormat percentageFormatter = new DecimalFormat("###.##%;(###.##%)");
+            return percentageFormatter.format(value);
         }
         NumberFormat myFormatter = new DecimalFormat("###,###,###,###,###;(###,###,###,###,###)");
         String output = myFormatter.format(value);
