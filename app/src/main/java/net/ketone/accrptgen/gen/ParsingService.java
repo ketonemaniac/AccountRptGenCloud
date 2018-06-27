@@ -190,9 +190,12 @@ public class ParsingService {
      */
     private void setNumericCellStyle(XSSFWorkbook templateWb, Cell templateCell, CellStyle srcCellStyle) {
         short df = srcCellStyle.getDataFormat();
-        CellStyle tgtCellStyle = templateWb.getStylesSource().createCellStyle();  // must create from styles source
+        CellStyle tgtCellStyle = templateCell.getCellStyle();
+        if(tgtCellStyle == null) {
+            tgtCellStyle = templateWb.getStylesSource().createCellStyle();  // must create from styles source
+            templateCell.setCellStyle(tgtCellStyle);
+        }
         tgtCellStyle.setDataFormat(df);
-        templateCell.setCellStyle(tgtCellStyle);
     }
 
     /**
