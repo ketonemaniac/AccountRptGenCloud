@@ -31,137 +31,13 @@
             <groupId>net.ketone</groupId>
             <artifactId>accrptgen-app</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-            <exclusions>
-                <!-- exclude this when running on gCloudStandard -->
-                <!-- exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion -->
-            </exclusions>
-        </dependency>
-
-
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <!-- exclude this when running on gCloudStandard -->
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>3.17</version>
-        </dependency>
-        <dependency>
-            <groupId>org.docx4j</groupId>
-            <artifactId>docx4j</artifactId>
-            <version>3.3.6</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>net.ketone</groupId>
-            <artifactId>accrptgen-web</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.vaadin.external.google</groupId>
-                    <artifactId>android-json</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
         </dependency>
 
-        <!-- gcloud dependencies -->
-        <!-- dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-gcp-starter-sql</artifactId>
-            <version>${spring-starter-gcp.version}</version>
-        </dependency -->
-        <!-- dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-gcp-starter-storage</artifactId>
-            <version>${spring-starter-gcp.version}</version>
-        </dependency -->
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud</artifactId>
-            <!-- version>1.14.0</version -->
-            <version>0.44.0-alpha</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-logging-logback</artifactId>
-            <version>0.44.0-alpha</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>1.9.50</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jul-to-slf4j</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.16.20</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.7</version>
-        </dependency>
-
-        <!-- mail client -->
-        <dependency>
-            <groupId>com.sendgrid</groupId>
-            <artifactId>sendgrid-java</artifactId>
-            <version>2.2.2</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -182,6 +58,9 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
+
+
+
         </plugins>
     </build>
 
