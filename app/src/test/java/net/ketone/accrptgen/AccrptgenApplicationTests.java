@@ -51,7 +51,7 @@ public class AccrptgenApplicationTests {
 		pipeline.run();
 		Mockito.verify(emailService).sendEmail(any(), argumentCaptor.capture());
 		List<Attachment> attachments = argumentCaptor.getValue();
-		assertThat(attachments).hasSize(2);
+		assertThat(attachments).hasSize(3);
 
 		for(Attachment attachment : attachments) {
 			FileUtils.writeByteArrayToFile(new File("files/" + attachment.getAttachmentName()), attachment.getData());

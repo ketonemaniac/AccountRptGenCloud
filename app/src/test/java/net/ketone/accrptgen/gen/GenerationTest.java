@@ -5,6 +5,7 @@ import net.ketone.accrptgen.admin.FileBasedCredentialsService;
 import net.ketone.accrptgen.config.CustomWebSecurityConfigurerAdapter;
 import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.mail.SendgridEmailService;
+import net.ketone.accrptgen.store.FileStorageService;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.junit.Before;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -43,8 +45,10 @@ public class GenerationTest {
     static class MockStorageConfiguration {
 
         @Bean
+        @Primary
         public StorageService storageService() throws IOException {
-            StorageService storageService = Mockito.mock(StorageService.class);
+            StorageService storageService = Mockito.mock(FileStorageService.class);
+            //
             Mockito.when(storageService.store(any(InputStream.class), any(String.class))).thenAnswer(new Answer<String>() {
                 @Override
                 public String answer(InvocationOnMock invocationOnMock) throws Throwable {
@@ -61,6 +65,8 @@ public class GenerationTest {
             });
             String apiKey = CredentialsService.SENDGRID_API_KEY_PROP + "=1234567890";
             Mockito.when(storageService.load(eq(FileBasedCredentialsService.CREDENTIALS_FILE))).thenReturn(new ByteArrayInputStream(apiKey.getBytes()));
+
+            Mockito.when(storageService.load(eq("template.docx"))).thenCallRealMethod();
 
             return storageService;
         }
