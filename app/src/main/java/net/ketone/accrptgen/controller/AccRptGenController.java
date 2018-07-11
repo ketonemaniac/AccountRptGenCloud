@@ -1,5 +1,7 @@
 package net.ketone.accrptgen.controller;
 
+import com.google.api.client.util.DateTime;
+import com.google.appengine.repackaged.com.google.common.collect.ImmutableMap;
 import net.ketone.accrptgen.admin.StatisticsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.dto.DownloadFileDto;
@@ -9,6 +11,7 @@ import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.threading.ThreadingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -20,8 +23,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @RestController
@@ -43,11 +51,18 @@ public class AccRptGenController {
     @Autowired
     private ThreadingService threadingService;
 
+    @Value("${build.version}")
+    private String buildVersion;
 
-    @RequestMapping("/hello")
-    public String greeting() {
-        logger.info("hello!");
-        return "Hello World!";
+    @Value("${build.timestamp}")
+    private String buildTimestamp;
+
+    @RequestMapping("/version")
+    public Map<String, String> greeting() {
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime localDateTime = LocalDateTime.parse(buildTimestamp, df);
+        String timestamp = df.format(localDateTime.toInstant(ZoneOffset.UTC).atOffset(ZoneOffset.of("+8")));
+        return ImmutableMap.of("version", buildVersion, "timestamp" , timestamp);
     }
 
     @PostMapping("/uploadFile")
