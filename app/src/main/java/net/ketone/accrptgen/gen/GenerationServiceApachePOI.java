@@ -228,7 +228,7 @@ public class GenerationServiceApachePOI implements GenerationService {
     @Override
     public void write(String sectionName, Table table) {
         XWPFParagraph currPgh = currPghs.get(sectionName);
-        if(currPgh != null) {
+        if(currPgh != null && table.getCells() != null) {   // skip empty table
             int cols = table.getColumnWidths().size();
             int rows = table.getCells().size();
 
