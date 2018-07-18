@@ -190,6 +190,7 @@ public class ParsingService {
      */
     private void setNumericCellStyle(XSSFWorkbook templateWb, Cell templateCell, CellStyle srcCellStyle) {
         short df = srcCellStyle.getDataFormat();
+        if(df == 170) df = 14;  // I don't want the d/m/yyyy format
         CellStyle tgtCellStyle = templateCell.getCellStyle();
         if(tgtCellStyle == null) {
             tgtCellStyle = templateWb.getStylesSource().createCellStyle();  // must create from styles source
