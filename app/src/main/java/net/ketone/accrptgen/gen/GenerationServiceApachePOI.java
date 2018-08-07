@@ -349,6 +349,7 @@ public class GenerationServiceApachePOI implements GenerationService {
         switch (level) {
             case 0:
                 cTLvl.addNewNumFmt().setVal(STNumberFormat.DECIMAL);
+                cTLvl.addNewRPr().addNewB();
                 break;
             case 1:
                 cTLvl.addNewNumFmt().setVal(STNumberFormat.LOWER_LETTER);
