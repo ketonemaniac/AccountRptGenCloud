@@ -1,3 +1,8 @@
+'use strict';
+
+require('qunit');
+var MyClass = require('../app/closure.js');
+
 QUnit.module('module 1', {
 	setup : function() {
 		

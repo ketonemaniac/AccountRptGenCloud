@@ -5,7 +5,8 @@
   "description": "account report generation",
   "main": "main.js",
   "scripts": {
-    "test" : "qunit",
+    "clean" : "rm -rf generated && mkdir generated",
+    "test" : "npm run-script clean && browserify test/tests.js > generated/tests-bundle.js && qunit generated/tests-bundle.js",
     "build" : "npm run-script buildMain && npm run-script buildAdmin",
     "prebuild": "npm install",
     "buildMain": "browserify app/main.js --debug | exorcist ./src/main/resources/static/mainBundle.js.map > ./src/main/resources/static/mainBundle.js",

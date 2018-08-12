@@ -14,3 +14,4 @@ var yo = new MyClass();
 console.log(yo.secret + " " + yo.sayHi());
 console.log(yo.secret2 + " " + yo.printSec2());
 
+module.exports = MyClass;
