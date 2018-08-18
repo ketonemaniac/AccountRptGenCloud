@@ -4,6 +4,24 @@ var MyClass = function(){
     this.printSec2 = function() {
             return secret2;
     };
+    this.writeToClass = function() {
+        $('.myTestClass').text(secret2);
+    }
+    this.methodToBeTested = function() {  
+        $.ajax('/hello')
+        .done(function (data) {
+            if (typeof console == "object") {
+                console.log("Success - " + data);
+                $('.myTestClass').text(data);
+            };
+        })
+        .fail(function (xhr, textStatus, error) {
+            console.log(xhr.statusText);
+            console.log(textStatus);
+            console.log(error);
+        });
+}
+
 };
 
 MyClass.prototype.sayHi = function() {

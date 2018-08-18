@@ -6,7 +6,7 @@
   "main": "main.js",
   "scripts": {
     "clean" : "rm -rf generated && mkdir generated",
-    "test" : "npm run-script clean && browserify test/tests.js > generated/tests-bundle.js && qunit generated/tests-bundle.js",
+    "test" : "npm run-script clean && browserify test/tests.js > generated/tests-bundle.js && node-qunit-phantomjs test/tests.html",
     "build" : "npm run-script buildMain && npm run-script buildAdmin",
     "prebuild": "npm install",
     "buildMain": "browserify app/main.js --debug | exorcist ./src/main/resources/static/mainBundle.js.map > ./src/main/resources/static/mainBundle.js",
@@ -27,9 +27,11 @@
     "browserify": "^14.5.0",
     "dateformat": "^3.0.2",
     "exorcist": "^1.0.0",
-    "spin": "0.0.1",
+    "spin": "^0.0.1",
     "watchify": "^3.9.0",
-	  "qunit" : "2.6.1"
+    "qunit" : "^2.6.1",
+    "datatables" : "^1.10.18",
+    "sinon" : "^6.1.5"
   }
 }
 
