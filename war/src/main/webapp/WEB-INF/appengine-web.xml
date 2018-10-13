@@ -8,4 +8,8 @@
     <system-properties>
         <property name="java.util.logging.config.file" value="WEB-INF/classes/logging.properties"/>
     </system-properties>
+    <basic-scaling>
+        <max-instances>1</max-instances>
+        <!-- idle-timeout>5m</idle-timeout -->
+    </basic-scaling>
 </appengine-web-app>

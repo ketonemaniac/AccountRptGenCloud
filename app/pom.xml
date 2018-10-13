@@ -179,7 +179,7 @@
 
 			<!-- use this to skip packaging into executable -->
 			<!-- this diverts the executable to another jar -->
-			<plugin>
+			<!-- plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>1.4.1.RELEASE</version>
@@ -193,7 +193,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin -->
 
 		</plugins>
 	</build>
