@@ -4,6 +4,7 @@ import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
 import com.google.common.base.Stopwatch;
 import org.apache.commons.io.input.NullInputStream;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +20,14 @@ import java.util.logging.Logger;
 @Profile({"gCloudStandard","gCloudFlexible"})
 public class GCloudStorageService implements StorageService {
 
+
     // private static final Logger logger = LoggerFactory.getLogger(GCloudStorageService.class);
     private static final Logger logger = Logger.getLogger(GCloudStorageService.class.getName());
 
     Storage storage;
-    static final String BUCKET_NAME = "accountrptgen-storage-test";
+
+    @Value("${gcloud.storage.bucket}")
+    private String BUCKET_NAME;
 
     @PostConstruct
     public void init() {
