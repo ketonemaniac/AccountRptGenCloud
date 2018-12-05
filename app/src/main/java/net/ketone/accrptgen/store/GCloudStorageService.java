@@ -1,11 +1,13 @@
 package net.ketone.accrptgen.store;
 
 import com.google.api.gax.paging.Page;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.*;
 import com.google.common.base.Stopwatch;
 import org.apache.commons.io.input.NullInputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -13,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -30,7 +33,10 @@ public class GCloudStorageService implements StorageService {
     private String BUCKET_NAME;
 
     @PostConstruct
-    public void init() {
+    public void init() throws IOException {
+//        GoogleCredentials credentials = GoogleCredentials.fromStream(new ClassPathResource("gcloud-tests-4337e92868b4.json").getInputStream())
+//                .createScoped(Arrays.asList("https://www.googleapis.com/auth/cloud-platform"));
+//        StorageOptions.Builder optionsBuilder = StorageOptions.newBuilder().setCredentials(credentials);
         StorageOptions.Builder optionsBuilder = StorageOptions.newBuilder();
         storage = optionsBuilder.build().getService();
     }

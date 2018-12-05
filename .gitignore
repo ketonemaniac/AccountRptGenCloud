@@ -25,3 +25,4 @@ nbdist/
 /web/node_modules
 /files
 /.mvn
+/.metadata

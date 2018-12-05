@@ -6,7 +6,7 @@
 	<groupId>net.ketone</groupId>
 	<artifactId>accrptgen-app</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging> <!-- for local and flexible env -->
+	<packaging>war</packaging> <!-- for local and flexible env -->
 
 	<name>accrptgen app</name>
 	<description>Account Report Generator App</description>
@@ -36,19 +36,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
 				<!-- exclude this when running on gCloudStandard -->
-				<!-- exclusion>
+				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion -->
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -68,14 +60,6 @@
 				<exclusion>
 					<groupId>com.google.guava</groupId>
 					<artifactId>guava</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -110,12 +94,6 @@
 		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud</artifactId>
-			<!-- version>1.14.0</version -->
-			<version>0.44.0-alpha</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.cloud</groupId>
-			<artifactId>google-cloud-logging-logback</artifactId>
 			<version>0.44.0-alpha</version>
 		</dependency>
 		<dependency>
@@ -160,9 +138,9 @@
 			<resource>
 				<filtering>true</filtering>
 				<directory>src/main/resources</directory>
-				<includes>
+				<!-- includes>
 					<include>application.properties</include>
-				</includes>
+				</includes -->
 			</resource>
 		</resources>
 
