@@ -29,10 +29,9 @@ To switch between plans,
 * In application.properties, `spring.profiles.active=gCloudStandard` 
 * `war/src/main/webapp/WEB-INF/appengine-web.xml` will be read. This defines the instance count etc
 * uncomment `spring-boot-maven-plugin` in app's `pom.xml`. This will let the war include the resulting jar from app.  
-* To deploy, run `clean appengine:deploy -Dmaven.test.skip=true` from war
+* To deploy, run `clean appengine:deploy -Dmaven.test.skip=true` from app
 
 ### Flexible ###
-* You don't need the war project.
 * In application.properties, `spring.profiles.active=gCloudFlexible` 
 * `app/src/main/appengine.yaml` will be read. This defines the instance count etc
 * comment `spring-boot-maven-plugin` in app's `pom.xml`. This will make the app jar executable.  
