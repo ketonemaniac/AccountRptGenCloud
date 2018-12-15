@@ -1,7 +1,7 @@
 # AccountRptGenCloud #
 Accounting Report Generator on Google Cloud. Runs with Spring boot with a Bootstrap UI.
 
-*Will not run because the Proprietory Accounting Excel is not uploaded to Github. Might make a simple example in the future for the sake of the Unit tests.* 
+*Since this is a public domain, Google account keys and the Proprietory Accounting Excel is not uploaded to Github* 
 
 ## Run ##
 In the root module run the following to run browsify the web content (main.js)
@@ -13,10 +13,13 @@ Running locally in IDE without google services
 * Run in app folder
 
 Local run with google services
-`mvn appengine:run`
+* make sure you have the right enviromenet set in appengine-web.xml. Default points to staging
+* Put in Enviroment variable GOOGLE_APPLICATION_CREDENTIALS for access to different buckets
+* Run `mvn appengine:run`
 
-To deploy to google cloud run
-`mvn appengine:deploy`
+To deploy to google cloud
+* make sure you have the right enviromenet set in appengine-web.xml.
+* Run `mvn appengine:deploy`
 
 
 ## Switching Google App Engine Plans ##
@@ -36,5 +39,3 @@ To switch between plans,
 * `app/src/main/appengine.yaml` will be read. This defines the instance count etc
 * comment `spring-boot-maven-plugin` in app's `pom.xml`. This will make the app jar executable.  
 * To deploy, run `clean appengine:deploy -Dmaven.test.skip=true` directly from app
-
-
