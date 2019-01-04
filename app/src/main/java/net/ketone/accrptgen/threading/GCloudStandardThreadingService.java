@@ -81,11 +81,4 @@ public class GCloudStandardThreadingService implements ThreadingService {
         return "OK";
     }
 
-    @PostMapping("/updateStat")
-    public String doSaveStat(@RequestParam("dto") String dto) throws IOException {
-        logger.info("Updating statistics for " + dto);
-        fileBasedStatisticsService.updateAccountReport(mapper.readValue(dto, AccountFileDto.class));
-        return "OK";
-    }
-
 }

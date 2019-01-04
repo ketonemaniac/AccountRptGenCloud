@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.cache.Cache;
 import java.io.IOException;
@@ -24,8 +27,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
-@Profile("!local")
+@Profile({"gCloudStandard","gCloudFlexible"})
 @Primary
+@RestController
 public class MemcacheStatisticsService implements StatisticsService {
 
     private static final Logger logger = Logger.getLogger(MemcacheStatisticsService.class.getName());
@@ -99,6 +103,13 @@ public class MemcacheStatisticsService implements StatisticsService {
         }
         return null;
 
+    }
+
+    @PostMapping("/updateStat")
+    public String doSaveStat(@RequestParam("dto") String dto) throws IOException {
+        logger.info("Updating statistics for " + dto);
+        fileBasedStatisticsService.updateAccountReport(mapper.readValue(dto, AccountFileDto.class));
+        return "OK";
     }
 
 }
