@@ -75,7 +75,7 @@ public class GenerationServiceApachePOI implements GenerationService {
         XWPFDocument document = null;
         try {
 //            document = new XWPFDocument(new FileInputStream(file));
-            document = new XWPFDocument(storageService.load("template.docx"));
+            document = new XWPFDocument(storageService.loadAsInputStream("template.docx"));
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error in opening template.docx", e);
             throw new RuntimeException(e);

@@ -56,22 +56,17 @@ public class ParsingService {
         return sheetMap;
     }
 
-    public String extractCompanyName(InputStream excelFile) throws IOException {
-        XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
-        return extractCompanyName(workbook);
-    }
-
-    private String extractCompanyName(Workbook workbook) throws IOException {
+    public String extractCompanyName(Workbook workbook) throws IOException {
         Sheet controlSheet = workbook.getSheet("Control");
         // this is D5, put as Row 5 Column D (0 = A1)
         return controlSheet.getRow(1).getCell(3).getStringCellValue();
     }
 
-    public byte[] preParse(InputStream excelFile) throws IOException {
+    public byte[] preParse(Workbook workbook) throws IOException {
 
         String templateName = credentialsService.getCredentials().getProperty(CredentialsService.PREPARSE_TEMPLATE_PROP);
         logger.info("starting pre-parse to template " + templateName);
-        InputStream templateStream = storageService.load(templateName);
+        InputStream templateStream = storageService.loadAsInputStream(templateName);
         XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
         templateStream.close();
         if(templateWb == null) {
@@ -79,7 +74,6 @@ public class ParsingService {
         }
         Map<String, Sheet> templateSheetMap = initSheetMap(templateWb);
 
-        XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
         Map<String, Sheet> inputSheetMap = initSheetMap(workbook);
 
         FormulaEvaluator inputWbEvaluator = workbook.getCreationHelper().createFormulaEvaluator();

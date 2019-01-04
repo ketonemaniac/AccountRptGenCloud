@@ -10,6 +10,7 @@ import java.util.Map;
 
 public interface StatisticsService {
 
+    int MAX_RECENTS = 10;
     /**
      * Gets generation counts by year and month
      * @return map of yyyyMM, generation count
@@ -18,8 +19,7 @@ public interface StatisticsService {
 
     List<AccountFileDto> getRecentGenerations();
 
-    List<AccountFileDto> getGenerationsByYearMonth(String yyyyMM);
-
     void updateAccountReport(AccountFileDto dto) throws IOException;
 
+    AccountFileDto getAccountReport(String handleName);
 }

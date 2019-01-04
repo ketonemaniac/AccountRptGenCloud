@@ -1,9 +1,12 @@
 package net.ketone.accrptgen.threading;
 
+import net.ketone.accrptgen.dto.AccountFileDto;
+
+import java.io.IOException;
 import java.util.Date;
 
 public interface ThreadingService {
 
-    void runPipeline(String companyName, Date generationTime, String filename);
+    AccountFileDto runPipeline(Date generationTime) throws IOException;
 
 }

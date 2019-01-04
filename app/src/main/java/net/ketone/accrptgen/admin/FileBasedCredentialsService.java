@@ -2,6 +2,7 @@ package net.ketone.accrptgen.admin;
 
 import net.ketone.accrptgen.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -15,6 +16,7 @@ public class FileBasedCredentialsService implements CredentialsService {
     public static String CREDENTIALS_FILE = "credentials.properties";
 
     @Autowired
+    @Qualifier("persistentStorage")
     private StorageService storageService;
 
 
@@ -22,7 +24,7 @@ public class FileBasedCredentialsService implements CredentialsService {
     public Properties getCredentials() {
         Properties prop = new Properties();
         try {
-            InputStream is = storageService.load(CREDENTIALS_FILE);
+            InputStream is = storageService.loadAsInputStream(CREDENTIALS_FILE);
             prop.load(is);
             is.close();
         } catch (IOException e) {
@@ -45,7 +47,7 @@ public class FileBasedCredentialsService implements CredentialsService {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             prop.store(os, "File for sotring passwords and configurations");
-            storageService.store(new ByteArrayInputStream(os.toByteArray()), CREDENTIALS_FILE);
+            storageService.store(os.toByteArray(), CREDENTIALS_FILE);
         } catch (IOException e) {
             e.printStackTrace();
         }

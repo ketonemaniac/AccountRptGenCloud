@@ -15,10 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -54,8 +53,9 @@ public class ParserTest {
 
     @Test
     public void testPreParse() throws Exception {
-        InputStream inputStream = this.getClass().getResourceAsStream("/" + PLAIN_FILENAME);
-        byte[] preParseOutput = svc.preParse(inputStream);
+        byte[] workbookArr = Files.readAllBytes(new File("/" + PLAIN_FILENAME).toPath());
+        XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(workbookArr));
+        byte[] preParseOutput = svc.preParse(workbook);
         AccountData data = svc.readFile(preParseOutput);
         assertThat(data.getCompanyName()).isEqualTo("MOP ENTERTAINMENT LIMITED");
 
@@ -139,7 +139,7 @@ public class ParserTest {
 
     @Test
     public void testParse() throws IOException {
-        InputStream templateStream = storageSvc.load(TEMPLATE_FILENAME);
+        InputStream templateStream = storageSvc.loadAsInputStream(TEMPLATE_FILENAME);
         XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         templateWb.write(os);

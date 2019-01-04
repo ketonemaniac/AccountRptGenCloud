@@ -6,6 +6,7 @@ import com.google.cloud.storage.*;
 import com.google.common.base.Stopwatch;
 import org.apache.commons.io.input.NullInputStream;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -19,8 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-@Component
-@Profile({"gCloudStandard","gCloudFlexible"})
 public class GCloudStorageService implements StorageService {
 
 
@@ -43,11 +42,9 @@ public class GCloudStorageService implements StorageService {
 
 
     @Override
-    public String store(InputStream is, String filename) throws IOException {
+    public String store(byte[] input, String filename) throws IOException {
         logger.info("storing " + filename);
         Stopwatch stopwatch = Stopwatch.createStarted();
-        byte[] bytes = new byte[is.available()];
-        is.read(bytes);
         String contentType = null;
         BlobInfo.Builder blobInfoBuilder =
                 BlobInfo.newBuilder(BUCKET_NAME, filename);
@@ -58,25 +55,29 @@ public class GCloudStorageService implements StorageService {
         } else if(filename.endsWith(".xlsx") || filename.endsWith(".xlsm")) {
             blobInfoBuilder.setContentType("application/vnd.ms-excel");
         }
-        storage.create(blobInfoBuilder.build(), bytes);
+        storage.create(blobInfoBuilder.build(), input);
         logger.info("stored " + filename + " in " + stopwatch.toString());
-        is.close();
         return filename;
     }
 
     @Override
-    public InputStream load(String filename) {
+    public InputStream loadAsInputStream(String filename) {
+        return new ByteArrayInputStream(load(filename));
+    }
+
+    @Override
+    public byte[] load(String filename) {
         logger.info("loading " + filename);
         Stopwatch stopwatch = Stopwatch.createStarted();
         BlobId blobId = BlobId.of(BUCKET_NAME, filename);
         Blob blob = storage.get(blobId);
         if (blob == null) {
-            System.out.println("No such object");
-            return new NullInputStream(0);
+            logger.warning("No such object");
+            return new byte[0];
         }
         byte[] content = blob.getContent();
         logger.info("loaded " + filename + " in " + stopwatch.toString());
-        return new ByteArrayInputStream(content);
+        return content;
     }
 
     @Override
