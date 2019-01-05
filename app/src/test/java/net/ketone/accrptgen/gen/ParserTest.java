@@ -53,8 +53,9 @@ public class ParserTest {
 
     @Test
     public void testPreParse() throws Exception {
-        byte[] workbookArr = Files.readAllBytes(new File("/" + PLAIN_FILENAME).toPath());
-        XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(workbookArr));
+        InputStream in = this.getClass().getClassLoader()
+                .getResourceAsStream(PLAIN_FILENAME);
+        XSSFWorkbook workbook = new XSSFWorkbook(in);
         byte[] preParseOutput = svc.preParse(workbook);
         AccountData data = svc.readFile(preParseOutput);
         assertThat(data.getCompanyName()).isEqualTo("MOP ENTERTAINMENT LIMITED");

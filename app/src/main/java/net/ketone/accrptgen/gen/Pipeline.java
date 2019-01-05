@@ -57,6 +57,7 @@ public class Pipeline implements Runnable {
     @Override
     public void run() {
         String inputFileName = generationTime.getTime() + ".xlsm";
+        logger.info("Opening file: " + inputFileName);
         try {
             byte[] workbookArr = storageService.load(inputFileName);
             XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(workbookArr));
