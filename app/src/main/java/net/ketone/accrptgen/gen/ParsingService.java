@@ -555,4 +555,46 @@ public class ParsingService {
         return output;
     }
 
+
+    public Workbook stringifyContents(XSSFWorkbook wb) {
+        FormulaEvaluator inputWbEvaluator = wb.getCreationHelper().createFormulaEvaluator();
+        Iterator<Sheet> i = wb.sheetIterator();
+        while(i.hasNext()) {
+            Sheet sheet = i.next();
+            Iterator<Row> r = sheet.rowIterator();
+            while(r.hasNext()) {
+                Row row = r.next();
+                Iterator<Cell> c = row.cellIterator();
+                while(c.hasNext()) {
+                    Cell cell = c.next();
+                    CellValue cellValue = inputWbEvaluator.evaluate(cell);
+                    switch(cellValue.getCellTypeEnum()) {
+                        case NUMERIC:
+                            cell.setCellType(CellType.NUMERIC);
+                            cell.setCellValue(cellValue.getNumberValue());
+                            setNumericCellStyle(wb, cell, cell.getCellStyle());
+                            cell.setCellFormula(null);
+                            break;
+                        default:
+                            try {
+                                // try String for anything else
+                                cell.setCellType(CellType.STRING);
+                                cell.setCellValue(cellValue.getStringValue());
+                                cell.setCellFormula(null);
+                            } catch (Exception e2) {
+                                logger.log(Level.WARNING, "cannot evaluate cell with formula: " + cell.getCellFormula() + ". CellType=" + cell.getCellTypeEnum().name());
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+        return wb;
+    }
+
+//    public Workbook deleteSections(Workbook wb) {
+//
+//    }
+
+
 }

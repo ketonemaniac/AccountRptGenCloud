@@ -7,6 +7,9 @@ import net.ketone.accrptgen.entity.SectionElement;
 import net.ketone.accrptgen.entity.Table;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,9 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * You need at least TWO files in the files/ folder
+ * 1. credentials.properties
+ * 2. All documents.xlsm
  * Run with VM options
  * -Dpoi.log.level=1 -Dorg.apache.poi.util.POILogger=org.apache.poi.util.SystemOutLogger
  */
+// @Ignore
 @RunWith(SpringRunner.class)
 @ActiveProfiles("local")
 @SpringBootTest
@@ -146,12 +153,20 @@ public class ParserTest {
         templateWb.write(os);
         AccountData data = svc.readFile(os.toByteArray());
         System.out.println(data.getCompanyName());
-
-        data.setGenerationTime(new Date());
-        byte[] output =  genSvc.generate(data);
-        // storageSvc.store(new ByteArrayInputStream(output), "testParse.docx");
     }
 
 
 
+    @Test
+    public void testStringifyContents() throws IOException {
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("formulaToText.xlsx");
+        XSSFWorkbook workbook = new XSSFWorkbook(in);
+        Workbook outputWb = svc.stringifyContents(workbook);
+        Cell c = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
+        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.NUMERIC);
+        assertThat(c.getNumericCellValue()).isEqualTo(5);
+        c = outputWb.getSheet("Sheet1").getRow(1).getCell(0);
+        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.STRING);
+        assertThat(c.getStringCellValue()).isEqualTo("hello world");
+    }
 }

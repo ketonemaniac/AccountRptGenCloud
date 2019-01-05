@@ -36,6 +36,7 @@ import static org.mockito.Matchers.eq;
  * 1. credentials.properties
  * 2. All documents.xlsm
  * which both contains sensitive information and is excluded
+ * output is in target/test-output folder
  */
 // @Ignore
 @RunWith(SpringRunner.class)
@@ -83,7 +84,7 @@ public class AccrptgenApplicationTests {
 		assertThat(attachments).hasSize(3);
 
 		for(Attachment attachment : attachments) {
-			FileUtils.writeByteArrayToFile(new File("files/" + attachment.getAttachmentName()), attachment.getData());
+			FileUtils.writeByteArrayToFile(new File("target/test-output/" + attachment.getAttachmentName()), attachment.getData());
 		}
 
 	}
