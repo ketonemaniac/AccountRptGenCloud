@@ -8,6 +8,7 @@ import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.threading.ThreadingService;
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -76,10 +77,20 @@ public class Pipeline implements Runnable {
             data.setGenerationTime(generationTime);
             logger.info("template finished parsing, sections=" + data.getSections().size());
 
+            // remove sheets and stringify contents
+            XSSFWorkbook allDocs = new XSSFWorkbook(new ByteArrayInputStream(preParseOutput));
+            Workbook allDocsFinal = parsingService.deleteSheets(
+                parsingService.stringifyContents(allDocs), Arrays.asList(
+                        "metadata", "Cover", "Contents",
+                        "Section1", "Section2", "Section3",
+                            "Section4", "Section5", "Section6"));
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            allDocsFinal.write(os);
+
             byte[] generatedDoc = generationService.generate(data);
             logger.info("Generated doc. " + generatedDoc.length + "_bytes");
             Attachment doc = new Attachment(filename + ".docx", generatedDoc);
-            Attachment template = new Attachment(filename + "-allDocs.xlsm", preParseOutput);
+            Attachment template = new Attachment(filename + "-allDocs.xlsm", os.toByteArray());
             emailService.sendEmail(companyName, Arrays.asList(doc, template, inputXlsx));
 
             AccountFileDto dto = new AccountFileDto();

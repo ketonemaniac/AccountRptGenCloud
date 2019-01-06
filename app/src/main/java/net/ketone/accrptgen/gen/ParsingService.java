@@ -567,24 +567,21 @@ public class ParsingService {
                 Iterator<Cell> c = row.cellIterator();
                 while(c.hasNext()) {
                     Cell cell = c.next();
-                    CellValue cellValue = inputWbEvaluator.evaluate(cell);
-                    switch(cellValue.getCellTypeEnum()) {
-                        case NUMERIC:
-                            cell.setCellType(CellType.NUMERIC);
-                            cell.setCellValue(cellValue.getNumberValue());
-                            setNumericCellStyle(wb, cell, cell.getCellStyle());
-                            cell.setCellFormula(null);
-                            break;
-                        default:
-                            try {
-                                // try String for anything else
-                                cell.setCellType(CellType.STRING);
+                    if(cell.getCellTypeEnum() == CellType.FORMULA) {
+                        CellValue cellValue = inputWbEvaluator.evaluate(cell);
+                        cell.setCellType(cellValue.getCellTypeEnum());
+                        switch(cellValue.getCellTypeEnum()) {
+                            case NUMERIC:
+                                cell.setCellValue(cellValue.getNumberValue());
+                                break;
+                            case BOOLEAN:
+                                cell.setCellValue(cellValue.getBooleanValue());
+                                break;
+                            case STRING:
+                            default:
                                 cell.setCellValue(cellValue.getStringValue());
-                                cell.setCellFormula(null);
-                            } catch (Exception e2) {
-                                logger.log(Level.WARNING, "cannot evaluate cell with formula: " + cell.getCellFormula() + ". CellType=" + cell.getCellTypeEnum().name());
-                            }
-                            break;
+                                break;
+                        }
                     }
                 }
             }
@@ -592,9 +589,15 @@ public class ParsingService {
         return wb;
     }
 
-//    public Workbook deleteSections(Workbook wb) {
-//
-//    }
+    public Workbook deleteSheets(Workbook wb, List<String> sheetsToDelete) {
+        for(String sheetName : sheetsToDelete) {
+            int i = wb.getSheetIndex(sheetName);
+            if(i != -1) {   // -1 = not exist
+                wb.removeSheetAt(i);
+            }
+        }
+        return wb;
+    }
 
 
 }

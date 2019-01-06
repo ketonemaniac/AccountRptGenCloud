@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -162,11 +163,31 @@ public class ParserTest {
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("formulaToText.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(in);
         Workbook outputWb = svc.stringifyContents(workbook);
+        // number
         Cell c = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
         assertThat(c.getCellTypeEnum()).isEqualTo(CellType.NUMERIC);
         assertThat(c.getNumericCellValue()).isEqualTo(5);
+        // string
         c = outputWb.getSheet("Sheet1").getRow(1).getCell(0);
         assertThat(c.getCellTypeEnum()).isEqualTo(CellType.STRING);
         assertThat(c.getStringCellValue()).isEqualTo("hello world");
+        // boolean
+        c = outputWb.getSheet("Sheet1").getRow(2).getCell(0);
+        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.BOOLEAN);
+        assertThat(c.getBooleanCellValue()).isEqualTo(true);
+        // date
+        c = outputWb.getSheet("Sheet1").getRow(3).getCell(0);
+        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.NUMERIC);    // date is stored as numeric
     }
+
+    @Test
+    public void testDeleteSheets() throws IOException {
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("deleteSheet.xlsx");
+        XSSFWorkbook workbook = new XSSFWorkbook(in);
+        Workbook outputWb = svc.deleteSheets(workbook, Arrays.asList("Sheet1", "Sheet2","Sheet4"));
+        assertThat(outputWb.getNumberOfSheets()).isEqualTo(1);
+        assertThat(outputWb.getSheet("Sheet3")).isNotNull();
+    }
+
+
 }
