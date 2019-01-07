@@ -21,6 +21,19 @@ To deploy to google cloud
 * make sure you have the right enviromenet set in appengine-web.xml.
 * Run `mvn appengine:deploy`
 
+## Setup google services ## 
+
+### View ###
+- all projects: `gcloud projects list`
+- current configuration: `gcloud config list`
+
+### Set ###
+1. set project: `gcloud config set project accountrptgen`
+2. Setup queues:, run the following in app/src/main/webapp/WEB-INF: `gcloud app deploy queue.yaml`
+Reference:
+https://cloud.google.com/appengine/docs/standard/python/config/queueref
+
+
 
 ## Switching Google App Engine Plans ##
 There are two flavors from Google, the standard accepting a WAR and hosting it in a bunch of shared webservers, and flexible which is basically dedicated docker instances.
