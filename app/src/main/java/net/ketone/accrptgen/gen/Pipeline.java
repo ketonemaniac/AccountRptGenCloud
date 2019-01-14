@@ -7,7 +7,6 @@ import net.ketone.accrptgen.mail.Attachment;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.threading.ThreadingService;
-import org.apache.commons.io.IOUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Level;
@@ -80,10 +78,10 @@ public class Pipeline implements Runnable {
             // remove sheets and stringify contents
             XSSFWorkbook allDocs = new XSSFWorkbook(new ByteArrayInputStream(preParseOutput));
             Workbook allDocsFinal = parsingService.deleteSheets(
-                parsingService.stringifyContents(allDocs), Arrays.asList(
-                        "metadata", "Cover", "Contents",
-                        "Section1", "Section2", "Section3",
-                            "Section4", "Section5", "Section6"));
+                parsingService.postProcess(allDocs), Arrays.asList(
+                        "metadata", "Cover", "Contents", "Control", "Dir info", "Doc list",
+                        "Section1", "Section2", "Section3", "Section4", "Section5", "Section6",
+                            "Accounts (3)"));
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             allDocsFinal.write(os);
 

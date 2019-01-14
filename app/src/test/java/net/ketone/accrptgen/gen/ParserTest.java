@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.gen;
 
+import com.google.common.io.FileBackedOutputStream;
 import net.ketone.accrptgen.admin.StatisticsService;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.entity.Section;
@@ -9,7 +10,9 @@ import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,10 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -162,7 +162,7 @@ public class ParserTest {
     public void testStringifyContents() throws IOException {
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("formulaToText.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(in);
-        Workbook outputWb = svc.stringifyContents(workbook);
+        Workbook outputWb = svc.postProcess(workbook);
         // number
         Cell c = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
         assertThat(c.getCellTypeEnum()).isEqualTo(CellType.NUMERIC);
@@ -178,6 +178,25 @@ public class ParserTest {
         // date
         c = outputWb.getSheet("Sheet1").getRow(3).getCell(0);
         assertThat(c.getCellTypeEnum()).isEqualTo(CellType.NUMERIC);    // date is stored as numeric
+    }
+
+    @Test
+    public void testRemoveColors() throws IOException {
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("removeColors.xlsx");
+        XSSFWorkbook workbook = new XSSFWorkbook(in);
+        Workbook outputWb = svc.postProcess(workbook);
+        Cell cell = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
+        XSSFColor color = XSSFColor.toXSSFColor(cell.getCellStyle().getFillForegroundColorColor());
+        assertThat(color.getIndex()).isEqualTo(IndexedColors.AUTOMATIC.index);
+        cell = outputWb.getSheet("Sheet1").getRow(1).getCell(0);
+        color = XSSFColor.toXSSFColor(cell.getCellStyle().getFillForegroundColorColor());
+        assertThat(color.getIndex()).isEqualTo(IndexedColors.AUTOMATIC.index);
+        outputWorkbook(outputWb);
+    }
+
+    private void outputWorkbook(Workbook wb) throws IOException {
+        wb.write(new FileOutputStream("target/test.xlsx"));
+        wb.close();
     }
 
     @Test

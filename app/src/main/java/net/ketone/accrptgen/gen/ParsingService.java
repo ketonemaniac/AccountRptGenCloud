@@ -7,6 +7,7 @@ import net.ketone.accrptgen.entity.Table;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -415,7 +416,7 @@ public class ParsingService {
                 }
                 // rest of contents
                 else if (isStart) {
-                    Paragraph p = parseContentRow(sectionSheet, section, i);
+                     Paragraph p = parseContentRow(sectionSheet, section, i);
                     // indent should automatically add 1 if this is inside numeric lists
                     if(p != null && isInItem) {
                         p.setIndent(p.getIndent()+1);
@@ -556,7 +557,7 @@ public class ParsingService {
     }
 
 
-    public Workbook stringifyContents(XSSFWorkbook wb) {
+    public Workbook postProcess(XSSFWorkbook wb) {
         FormulaEvaluator inputWbEvaluator = wb.getCreationHelper().createFormulaEvaluator();
         Iterator<Sheet> i = wb.sheetIterator();
         while(i.hasNext()) {
@@ -567,27 +568,40 @@ public class ParsingService {
                 Iterator<Cell> c = row.cellIterator();
                 while(c.hasNext()) {
                     Cell cell = c.next();
-                    if(cell.getCellTypeEnum() == CellType.FORMULA) {
-                        CellValue cellValue = inputWbEvaluator.evaluate(cell);
-                        cell.setCellType(cellValue.getCellTypeEnum());
-                        switch(cellValue.getCellTypeEnum()) {
-                            case NUMERIC:
-                                cell.setCellValue(cellValue.getNumberValue());
-                                break;
-                            case BOOLEAN:
-                                cell.setCellValue(cellValue.getBooleanValue());
-                                break;
-                            case STRING:
-                            default:
-                                cell.setCellValue(cellValue.getStringValue());
-                                break;
-                        }
-                    }
+                    stringifyContents(cell, inputWbEvaluator);
+                    removeColors(cell);
                 }
             }
         }
         return wb;
     }
+
+    private void stringifyContents(Cell cell, FormulaEvaluator inputWbEvaluator) {
+        if(cell.getCellTypeEnum() == CellType.FORMULA) {
+            CellValue cellValue = inputWbEvaluator.evaluate(cell);
+            cell.setCellType(cellValue.getCellTypeEnum());
+            switch(cellValue.getCellTypeEnum()) {
+                case NUMERIC:
+                    cell.setCellValue(cellValue.getNumberValue());
+                    break;
+                case BOOLEAN:
+                    cell.setCellValue(cellValue.getBooleanValue());
+                    break;
+                case STRING:
+                default:
+                    cell.setCellValue(cellValue.getStringValue());
+                    break;
+            }
+        }
+    }
+
+    private void removeColors(Cell cell) {
+        if(cell.getCellStyle() != null && cell.getCellStyle().getFillPatternEnum() != FillPatternType.NO_FILL) {
+            cell.getCellStyle().setFillPattern(FillPatternType.NO_FILL);
+            cell.getCellStyle().setFillForegroundColor(IndexedColors.AUTOMATIC.getIndex());
+        }
+    }
+
 
     public Workbook deleteSheets(Workbook wb, List<String> sheetsToDelete) {
         for(String sheetName : sheetsToDelete) {
