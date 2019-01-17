@@ -190,7 +190,7 @@ public class ParserTest {
         assertThat(color.getIndex()).isEqualTo(IndexedColors.AUTOMATIC.index);
         cell = outputWb.getSheet("Sheet1").getRow(1).getCell(0);
         color = XSSFColor.toXSSFColor(cell.getCellStyle().getFillForegroundColorColor());
-        assertThat(color.getIndex()).isEqualTo(IndexedColors.AUTOMATIC.index);
+        assertThat(cell.getCellStyle().getFillForegroundColorColor()).isNull();
         outputWorkbook(outputWb);
     }
 
