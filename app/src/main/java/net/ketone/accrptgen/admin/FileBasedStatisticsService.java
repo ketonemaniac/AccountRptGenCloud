@@ -5,6 +5,8 @@ import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.dto.StatisticDto;
 import net.ketone.accrptgen.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -24,9 +26,9 @@ public class FileBasedStatisticsService implements StatisticsService {
     public static String STATS_FILE = "statistics.txt";
     // all history, latest first
     public static String HISTORY_FILE = "history.txt";
-    public static int MAX_RECENTS = 10;
 
     @Autowired
+    @Qualifier("persistentStorage")
     private StorageService storageService;
 
 
@@ -40,7 +42,7 @@ public class FileBasedStatisticsService implements StatisticsService {
         // TODO: read from cache instead of file
         try {
             Deque<AccountFileDto> lines = loadHistoryFileToDeque();
-            return lines.stream().limit(10).collect(Collectors.toList());
+            return lines.stream().limit(StatisticsService.MAX_RECENTS).collect(Collectors.toList());
         } catch (IOException e) {
             logger.log(Level.WARNING, "Cannot read from " + HISTORY_FILE, e);
         }
@@ -48,20 +50,20 @@ public class FileBasedStatisticsService implements StatisticsService {
     }
 
     @Override
-    public List<AccountFileDto> getGenerationsByYearMonth(String yyyyMM) {
-        return null;
-    }
-
-    @Override
     public void updateAccountReport(AccountFileDto dto) throws IOException {
-
+        logger.info("dto: " + objectMapper.writeValueAsString(dto) );
+        // do not store null filename entries
+        if(dto.getFilename() == null) return;
         Deque<AccountFileDto> lines = loadHistoryFileToDeque();
 
         // TODO: determine from cache instead of file
         // check whether this is the update of an existing line
         boolean isUpdate = false;
         for(AccountFileDto lineDto : lines) {
-            if(lineDto.getFilename().equals(dto.getFilename())) {
+            if(lineDto.getFilename() == null) {
+                logger.warning("lineDto: " + objectMapper.writeValueAsString(lineDto));
+            }
+            else if(lineDto.getFilename().equals(dto.getFilename())) {
                 lineDto.setStatus(dto.getStatus());
                 isUpdate = true;
             }
@@ -73,8 +75,13 @@ public class FileBasedStatisticsService implements StatisticsService {
         writeHistoryFileFromQueue(lines);
     }
 
+    @Override
+    public AccountFileDto getAccountReport(String handleName) {
+        return null;
+    }
+
     private Deque<AccountFileDto> loadHistoryFileToDeque() throws IOException {
-        InputStream is = storageService.load(HISTORY_FILE);
+        InputStream is = storageService.loadAsInputStream(HISTORY_FILE);
         BufferedReader buf = new BufferedReader(new InputStreamReader(is));
         Deque<AccountFileDto> lines = buf.lines()
                 .map(line -> {
@@ -95,9 +102,7 @@ public class FileBasedStatisticsService implements StatisticsService {
         for(AccountFileDto lineDto : dtos) {
             sb.append(objectMapper.writeValueAsString(lineDto)).append(System.lineSeparator());
         }
-        InputStream output = new ByteArrayInputStream(sb.toString().getBytes());
-        storageService.store(output, HISTORY_FILE);
-        output.close();
+        storageService.store(sb.toString().getBytes(), HISTORY_FILE);
     }
 
 }

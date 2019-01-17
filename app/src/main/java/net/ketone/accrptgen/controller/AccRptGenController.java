@@ -1,7 +1,5 @@
 package net.ketone.accrptgen.controller;
 
-import com.google.api.client.util.DateTime;
-import com.google.appengine.repackaged.com.google.common.collect.ImmutableMap;
 import net.ketone.accrptgen.admin.StatisticsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.dto.DownloadFileDto;
@@ -20,14 +18,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -62,29 +59,24 @@ public class AccRptGenController {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime localDateTime = LocalDateTime.parse(buildTimestamp, df);
         String timestamp = df.format(localDateTime.toInstant(ZoneOffset.UTC).atOffset(ZoneOffset.of("+8")));
-        return ImmutableMap.of("version", buildVersion, "timestamp" , timestamp);
+        Map<String, String> verMap = new HashMap<>();
+        verMap.put("version", buildVersion);
+        verMap.put("timestamp" , timestamp);
+        return verMap;
     }
 
     @PostMapping("/uploadFile")
     public AccountFileDto handleFileUploadTest(@RequestParam("file") MultipartFile file,
                                            RedirectAttributes redirectAttributes) throws IOException {
         final byte[] fileBytes = file.getBytes();
-        InputStream is = new ByteArrayInputStream(fileBytes);
+//        InputStream is = new ByteArrayInputStream(fileBytes);
         final Date generationTime = new Date();
-        String companyName = parsingService.extractCompanyName(is);
-        String filename = companyName + "-" + GenerationService.sdf.format(generationTime);
+//        String companyName = parsingService.extractCompanyName(is);
+//        String filename = companyName + "-" + GenerationService.sdf.format(generationTime);
 
-        storageService.store(new ByteArrayInputStream(fileBytes), filename + ".xlsm");
-        AccountFileDto dto = new AccountFileDto();
-        dto.setCompany(companyName);
-        dto.setFilename(filename + ".docx");
-        dto.setGenerationTime(new Date());
-        dto.setStatus(AccountFileDto.Status.GENERATING.name());
-        statisticsService.updateAccountReport(dto);
-
-        threadingService.runPipeline(companyName, generationTime, filename);
-
-        return dto;
+//        storageService.store(new ByteArrayInputStream(fileBytes), filename + ".xlsm");
+        storageService.store(fileBytes, generationTime.getTime()+".xlsm");
+        return threadingService.runPipeline(generationTime);
     }
 
 
@@ -92,7 +84,7 @@ public class AccRptGenController {
     @PostMapping("/downloadFile")
     public ResponseEntity<Resource> downloadFile(@RequestBody DownloadFileDto dto) throws IOException {
         logger.info("filename is " + dto.getFilename());
-        InputStream is = storageService.load(dto.getFilename());
+        InputStream is = storageService.loadAsInputStream(dto.getFilename());
         Resource resource = new InputStreamResource(is);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + dto.getFilename() + "\"").body(resource);

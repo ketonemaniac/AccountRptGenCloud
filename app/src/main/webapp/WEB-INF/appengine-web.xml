@@ -5,10 +5,16 @@
     <threadsafe>true</threadsafe>
     <runtime>java8</runtime>
     <sessions-enabled>true</sessions-enabled>
+    <async-session-persistence enabled="true" />
     <system-properties>
         <property name="java.util.logging.config.file" value="WEB-INF/classes/logging.properties"/>
-        <property name="spring.profiles.active" value="prod,gCloudStandard" />
+        <!-- switch between environments -->
+        <!-- staging -->
+        <property name="spring.profiles.active" value="staging,gCloudStandard" />
+        <!-- prod -->
+        <!-- property name="spring.profiles.active" value="prod,gCloudStandard" / -->
     </system-properties>
+    <instance-class>B4_1G</instance-class>
     <basic-scaling>
         <max-instances>1</max-instances>
         <!-- idle-timeout>5m</idle-timeout -->

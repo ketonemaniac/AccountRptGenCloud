@@ -5,17 +5,17 @@ import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.mail.Attachment;
 import net.ketone.accrptgen.mail.EmailService;
-import net.ketone.accrptgen.mail.SendgridEmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.threading.ThreadingService;
-import org.apache.commons.io.IOUtils;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Level;
@@ -49,45 +49,51 @@ public class Pipeline implements Runnable {
     private Date generationTime;
     private String filename;
 
-    public Pipeline(String companyName, Date generationTime, String filename) {
-        this.companyName = companyName;
+    public Pipeline(Date generationTime) {
         this.generationTime = generationTime;
-        this.filename = filename;
     }
 
     @Override
     public void run() {
-        String inputFileName = filename + ".xlsm";
-        String preParsedFileName = filename + "-allDocs.xlsm";
-        String outputDocName = filename + ".docx";
+        String inputFileName = generationTime.getTime() + ".xlsm";
+        logger.info("Opening file: " + inputFileName);
         try {
-            InputStream is1 = storageService.load(inputFileName);
-            byte[] preParseOutput = parsingService.preParse(is1);
+            byte[] workbookArr = storageService.load(inputFileName);
+            XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(workbookArr));
+            companyName = parsingService.extractCompanyName(workbook);
+            filename = companyName + "-" + GenerationService.sdf.format(generationTime);
 
-            InputStream is2 = storageService.load(inputFileName);
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            IOUtils.copy(is2, os);
-            Attachment inputXlsx = new Attachment(filename + "-plain.xlsm", os.toByteArray());
-            is2.close();
+            byte[] preParseOutput = parsingService.preParse(workbook);
+
+            Attachment inputXlsx = new Attachment(filename + "-plain.xlsm", workbookArr);
             // no need to use the template anymore, delete it.
             storageService.delete(inputFileName);
 
             logger.info("template Closing input file stream, " + preParseOutput.length + "_bytes");
-            is1.close();
             logger.info("Start parse operation for " + filename);
             AccountData data = parsingService.readFile(preParseOutput);
             data.setGenerationTime(generationTime);
             logger.info("template finished parsing, sections=" + data.getSections().size());
 
+            // remove sheets and stringify contents
+            XSSFWorkbook allDocs = new XSSFWorkbook(new ByteArrayInputStream(preParseOutput));
+            Workbook allDocsFinal = parsingService.deleteSheets(
+                parsingService.postProcess(allDocs), Arrays.asList(
+                        "metadata", "Cover", "Contents", "Control", "Dir info", "Doc list",
+                        "Section1", "Section2", "Section3", "Section4", "Section5", "Section6",
+                            "Accounts (3)"));
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            allDocsFinal.write(os);
+
             byte[] generatedDoc = generationService.generate(data);
             logger.info("Generated doc. " + generatedDoc.length + "_bytes");
-            Attachment doc = new Attachment(outputDocName, generatedDoc);
-            Attachment template = new Attachment(preParsedFileName, preParseOutput);
+            Attachment doc = new Attachment(filename + ".docx", generatedDoc);
+            Attachment template = new Attachment(filename + "-allDocs.xlsm", os.toByteArray());
             emailService.sendEmail(companyName, Arrays.asList(doc, template, inputXlsx));
 
             AccountFileDto dto = new AccountFileDto();
             dto.setCompany(companyName);
-            dto.setFilename(outputDocName);
+            dto.setFilename(filename);
             dto.setGenerationTime(generationTime);
             dto.setStatus(AccountFileDto.Status.EMAIL_SENT.name());
             logger.info("Updating statistics for " + filename);
@@ -98,7 +104,7 @@ public class Pipeline implements Runnable {
             logger.log(Level.WARNING, "Generation failed", e);
             AccountFileDto dto = new AccountFileDto();
             dto.setCompany(companyName);
-            dto.setFilename(outputDocName);
+            dto.setFilename(filename);
             dto.setGenerationTime(generationTime);
             dto.setStatus(AccountFileDto.Status.FAILED.name());
             try {

@@ -4,6 +4,7 @@ import net.ketone.accrptgen.admin.CredentialsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -24,6 +25,7 @@ public class AdminController {
     private static final Logger logger = Logger.getLogger(AdminController.class.getName());
 
     @Autowired
+    @Qualifier("persistentStorage")
     private StorageService storageService;
     @Autowired
     private CredentialsService credentialsService;
@@ -47,7 +49,7 @@ public class AdminController {
                                            RedirectAttributes redirectAttributes) throws IOException {
 
         logger.info("uploading template file=" + file.getOriginalFilename());
-        storageService.store(new ByteArrayInputStream(file.getBytes()), file.getOriginalFilename());
+        storageService.store(file.getBytes(), file.getOriginalFilename());
         credentialsService.saveCredential(CredentialsService.PREPARSE_TEMPLATE_PROP, file.getOriginalFilename());
         AccountFileDto dto = new AccountFileDto();
         dto.setFilename(file.getOriginalFilename());

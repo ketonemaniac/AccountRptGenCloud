@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.gen;
 
+import com.google.common.io.FileBackedOutputStream;
 import net.ketone.accrptgen.admin.StatisticsService;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.entity.Section;
@@ -7,6 +8,11 @@ import net.ketone.accrptgen.entity.SectionElement;
 import net.ketone.accrptgen.entity.Table;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,11 +21,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
+import java.io.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,9 +31,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * You need at least TWO files in the files/ folder
+ * 1. credentials.properties
+ * 2. All documents.xlsm
  * Run with VM options
  * -Dpoi.log.level=1 -Dorg.apache.poi.util.POILogger=org.apache.poi.util.SystemOutLogger
  */
+// @Ignore
 @RunWith(SpringRunner.class)
 @ActiveProfiles("local")
 @SpringBootTest
@@ -54,8 +61,10 @@ public class ParserTest {
 
     @Test
     public void testPreParse() throws Exception {
-        InputStream inputStream = this.getClass().getResourceAsStream("/" + PLAIN_FILENAME);
-        byte[] preParseOutput = svc.preParse(inputStream);
+        InputStream in = this.getClass().getClassLoader()
+                .getResourceAsStream(PLAIN_FILENAME);
+        XSSFWorkbook workbook = new XSSFWorkbook(in);
+        byte[] preParseOutput = svc.preParse(workbook);
         AccountData data = svc.readFile(preParseOutput);
         assertThat(data.getCompanyName()).isEqualTo("MOP ENTERTAINMENT LIMITED");
 
@@ -139,18 +148,65 @@ public class ParserTest {
 
     @Test
     public void testParse() throws IOException {
-        InputStream templateStream = storageSvc.load(TEMPLATE_FILENAME);
+        InputStream templateStream = storageSvc.loadAsInputStream(TEMPLATE_FILENAME);
         XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         templateWb.write(os);
         AccountData data = svc.readFile(os.toByteArray());
         System.out.println(data.getCompanyName());
-
-        data.setGenerationTime(new Date());
-        byte[] output =  genSvc.generate(data);
-        // storageSvc.store(new ByteArrayInputStream(output), "testParse.docx");
     }
 
+
+
+    @Test
+    public void testStringifyContents() throws IOException {
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("formulaToText.xlsx");
+        XSSFWorkbook workbook = new XSSFWorkbook(in);
+        Workbook outputWb = svc.postProcess(workbook);
+        // number
+        Cell c = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
+        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.NUMERIC);
+        assertThat(c.getNumericCellValue()).isEqualTo(5);
+        // string
+        c = outputWb.getSheet("Sheet1").getRow(1).getCell(0);
+        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.STRING);
+        assertThat(c.getStringCellValue()).isEqualTo("hello world");
+        // boolean
+        c = outputWb.getSheet("Sheet1").getRow(2).getCell(0);
+        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.BOOLEAN);
+        assertThat(c.getBooleanCellValue()).isEqualTo(true);
+        // date
+        c = outputWb.getSheet("Sheet1").getRow(3).getCell(0);
+        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.NUMERIC);    // date is stored as numeric
+    }
+
+    @Test
+    public void testRemoveColors() throws IOException {
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("removeColors.xlsx");
+        XSSFWorkbook workbook = new XSSFWorkbook(in);
+        Workbook outputWb = svc.postProcess(workbook);
+        Cell cell = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
+        XSSFColor color = XSSFColor.toXSSFColor(cell.getCellStyle().getFillForegroundColorColor());
+        assertThat(color.getIndex()).isEqualTo(IndexedColors.AUTOMATIC.index);
+        cell = outputWb.getSheet("Sheet1").getRow(1).getCell(0);
+        color = XSSFColor.toXSSFColor(cell.getCellStyle().getFillForegroundColorColor());
+        assertThat(cell.getCellStyle().getFillForegroundColorColor()).isNull();
+        outputWorkbook(outputWb);
+    }
+
+    private void outputWorkbook(Workbook wb) throws IOException {
+        wb.write(new FileOutputStream("target/test.xlsx"));
+        wb.close();
+    }
+
+    @Test
+    public void testDeleteSheets() throws IOException {
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("deleteSheet.xlsx");
+        XSSFWorkbook workbook = new XSSFWorkbook(in);
+        Workbook outputWb = svc.deleteSheets(workbook, Arrays.asList("Sheet1", "Sheet2","Sheet4"));
+        assertThat(outputWb.getNumberOfSheets()).isEqualTo(1);
+        assertThat(outputWb.getSheet("Sheet3")).isNotNull();
+    }
 
 
 }

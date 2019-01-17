@@ -3,13 +3,14 @@ package net.ketone.accrptgen.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
-public class AccountFileDto {
+public class AccountFileDto implements Serializable {
 
     public enum Status {
-        GENERATING, EMAIL_SENT, FAILED
+        PENDING, GENERATING, EMAIL_SENT, FAILED
     }
 
     private String company;
@@ -20,4 +21,5 @@ public class AccountFileDto {
     private Date generationTime;
     private String status;
 
+    private String handleName;      // For GCloudStandard, ID in queue
 }

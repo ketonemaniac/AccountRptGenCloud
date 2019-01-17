@@ -5,13 +5,13 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-@Component
-@Profile("local")
 public class FileStorageService implements StorageService {
 
 //    private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
@@ -21,23 +21,30 @@ public class FileStorageService implements StorageService {
     List<String> filenames = new ArrayList<>();
 
     @Override
-    public String store(InputStream is, String filename) throws IOException {
+    public String store(byte[] input, String filename) throws IOException {
         logger.info("Writing to local file " + STORAGE_FOLDER + filename);
         File output= new File(STORAGE_FOLDER + filename);
         FileOutputStream out = new FileOutputStream(output);
-        byte[] bytes = new byte[is.available()];
-        is.read(bytes);
-        out.write(bytes);
+        out.write(input);
         out.close();
         return filename;
     }
 
     @Override
-    public InputStream load(String filename) {
+    public InputStream loadAsInputStream(String filename) {
         try {
             return new FileInputStream(STORAGE_FOLDER + filename);
         } catch (FileNotFoundException e) {
             return new NullInputStream(0);
+        }
+    }
+
+    @Override
+    public byte[] load(String filename) {
+        try {
+            return Files.readAllBytes(new File(STORAGE_FOLDER + filename).toPath());
+        } catch (IOException e) {
+            return new byte[0];
         }
     }
 

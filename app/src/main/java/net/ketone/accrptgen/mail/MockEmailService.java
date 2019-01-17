@@ -2,6 +2,7 @@ package net.ketone.accrptgen.mail;
 
 import net.ketone.accrptgen.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -23,9 +24,7 @@ public class MockEmailService implements EmailService {
     public void sendEmail(String companyName, List<Attachment> attachments) throws Exception {
         for(Attachment attachment : attachments) {
             logger.info("storing file " + attachment.getAttachmentName());
-            ByteArrayInputStream is = new ByteArrayInputStream(attachment.getData());
-            storageSvc.store(is, attachment.getAttachmentName());
-            is.close();
+            storageSvc.store(attachment.getData(), attachment.getAttachmentName());
         }
     }
 }

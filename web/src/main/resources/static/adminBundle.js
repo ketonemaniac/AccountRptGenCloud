@@ -242,12 +242,17 @@ var listFiles = function () {
             var regen = false;
             histTable.clear();
             $.each(dataArr, function (idx, data) {
+                var statusText = "";
                 switch (data.status) {
                     case "EMAIL_SENT":
-                        var statusText = "<span><i class=\"fas fa-envelope\" style=\"color:green\"></i></span>&nbsp;Email Sent";
+                        statusText = "<span><i class=\"fas fa-envelope\" style=\"color:green\"></i></span>&nbsp;Email Sent";
                         break;
                     case "FAILED":
                         statusText = "<span><i class=\"fas fa-exclamation-circle\" style=\"color:red\"></i></span>&nbsp;Failed";
+                        break;
+                    case "PENDING":
+                        statusText = "<span><i class=\"fas fa-cog blink\" style=\"color:grey\"></i></span>&nbsp;Pending";
+                        regen = true;
                         break;
                     case "GENERATING":
                         statusText = "<span><i class=\"fas fa-cog blink\" style=\"color:grey\"></i></span>&nbsp;Generating";

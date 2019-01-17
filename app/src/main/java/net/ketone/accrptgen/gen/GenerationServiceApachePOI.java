@@ -8,6 +8,7 @@ import org.apache.poi.xwpf.usermodel.*;
 import org.apache.xmlbeans.XmlCursor;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
  * since Apache POI does not support multiple sections
  */
 @Component
+@Scope(value = "prototype")
 public class GenerationServiceApachePOI implements GenerationService {
 
 //    private static final Logger logger = LoggerFactory.getLogger(GenerationServiceApachePOI.class);
@@ -75,7 +77,7 @@ public class GenerationServiceApachePOI implements GenerationService {
         XWPFDocument document = null;
         try {
 //            document = new XWPFDocument(new FileInputStream(file));
-            document = new XWPFDocument(storageService.load("template.docx"));
+            document = new XWPFDocument(storageService.loadAsInputStream("template.docx"));
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error in opening template.docx", e);
             throw new RuntimeException(e);
@@ -381,7 +383,6 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     /**
      * Clear list at the end of every section
-     * TODO: concurrency problems. Make this class prototype.
      */
     private void clearNumeberedList() {
         numberedLists.clear();

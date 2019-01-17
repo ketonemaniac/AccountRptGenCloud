@@ -18,12 +18,14 @@ public interface StorageService {
     /**
      * Write the doc
      * @param filename
-     * @return
+     * @return the filename saved
      * @throws IOException
      */
-    String store(InputStream is, String filename) throws IOException;
+    String store(byte[] input, String filename) throws IOException;
 
-    InputStream load(String filename);
+    InputStream loadAsInputStream(String filename);
+
+    byte[] load(String filename);
 
     List<String> list();
 

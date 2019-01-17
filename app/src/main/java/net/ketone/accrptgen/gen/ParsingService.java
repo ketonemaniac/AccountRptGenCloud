@@ -7,6 +7,7 @@ import net.ketone.accrptgen.entity.Table;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -56,22 +57,17 @@ public class ParsingService {
         return sheetMap;
     }
 
-    public String extractCompanyName(InputStream excelFile) throws IOException {
-        XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
-        return extractCompanyName(workbook);
-    }
-
-    private String extractCompanyName(Workbook workbook) throws IOException {
+    public String extractCompanyName(Workbook workbook) throws IOException {
         Sheet controlSheet = workbook.getSheet("Control");
         // this is D5, put as Row 5 Column D (0 = A1)
         return controlSheet.getRow(1).getCell(3).getStringCellValue();
     }
 
-    public byte[] preParse(InputStream excelFile) throws IOException {
+    public byte[] preParse(Workbook workbook) throws IOException {
 
         String templateName = credentialsService.getCredentials().getProperty(CredentialsService.PREPARSE_TEMPLATE_PROP);
         logger.info("starting pre-parse to template " + templateName);
-        InputStream templateStream = storageService.load(templateName);
+        InputStream templateStream = storageService.loadAsInputStream(templateName);
         XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
         templateStream.close();
         if(templateWb == null) {
@@ -79,7 +75,6 @@ public class ParsingService {
         }
         Map<String, Sheet> templateSheetMap = initSheetMap(templateWb);
 
-        XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
         Map<String, Sheet> inputSheetMap = initSheetMap(workbook);
 
         FormulaEvaluator inputWbEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
@@ -421,7 +416,7 @@ public class ParsingService {
                 }
                 // rest of contents
                 else if (isStart) {
-                    Paragraph p = parseContentRow(sectionSheet, section, i);
+                     Paragraph p = parseContentRow(sectionSheet, section, i);
                     // indent should automatically add 1 if this is inside numeric lists
                     if(p != null && isInItem) {
                         p.setIndent(p.getIndent()+1);
@@ -560,5 +555,63 @@ public class ParsingService {
         String output = myFormatter.format(value);
         return output;
     }
+
+
+    public Workbook postProcess(XSSFWorkbook wb) {
+        FormulaEvaluator inputWbEvaluator = wb.getCreationHelper().createFormulaEvaluator();
+        Iterator<Sheet> i = wb.sheetIterator();
+        while(i.hasNext()) {
+            Sheet sheet = i.next();
+            Iterator<Row> r = sheet.rowIterator();
+            while(r.hasNext()) {
+                Row row = r.next();
+                Iterator<Cell> c = row.cellIterator();
+                while(c.hasNext()) {
+                    Cell cell = c.next();
+                    stringifyContents(cell, inputWbEvaluator);
+                    removeColors(cell);
+                }
+            }
+        }
+        return wb;
+    }
+
+    private void stringifyContents(Cell cell, FormulaEvaluator inputWbEvaluator) {
+        if(cell.getCellTypeEnum() == CellType.FORMULA) {
+            CellValue cellValue = inputWbEvaluator.evaluate(cell);
+            cell.setCellType(cellValue.getCellTypeEnum());
+            switch(cellValue.getCellTypeEnum()) {
+                case NUMERIC:
+                    cell.setCellValue(cellValue.getNumberValue());
+                    break;
+                case BOOLEAN:
+                    cell.setCellValue(cellValue.getBooleanValue());
+                    break;
+                case STRING:
+                default:
+                    cell.setCellValue(cellValue.getStringValue());
+                    break;
+            }
+        }
+    }
+
+    private void removeColors(Cell cell) {
+        if(cell.getCellStyle() != null && cell.getCellStyle().getFillPatternEnum() != FillPatternType.NO_FILL) {
+            cell.getCellStyle().setFillPattern(FillPatternType.NO_FILL);
+            cell.getCellStyle().setFillForegroundColor(IndexedColors.AUTOMATIC.getIndex());
+        }
+    }
+
+
+    public Workbook deleteSheets(Workbook wb, List<String> sheetsToDelete) {
+        for(String sheetName : sheetsToDelete) {
+            int i = wb.getSheetIndex(sheetName);
+            if(i != -1) {   // -1 = not exist
+                wb.removeSheetAt(i);
+            }
+        }
+        return wb;
+    }
+
 
 }
