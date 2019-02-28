@@ -91,15 +91,22 @@
 			<artifactId>spring-cloud-gcp-starter-storage</artifactId>
 			<version>${spring-starter-gcp.version}</version>
 		</dependency -->
-		<dependency>
+		<!-- dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud</artifactId>
 			<version>0.44.0-alpha</version>
+		</dependency -->
+		<!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-storage -->
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-storage</artifactId>
+			<version>1.63.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-1.0-sdk</artifactId>
-			<version>1.9.50</version>
+			<!-- version>1.9.50</version -->
+			<version>1.9.71</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
