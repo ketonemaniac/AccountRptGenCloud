@@ -1,7 +1,8 @@
-package net.ketone.accrptgen.admin;
+package net.ketone.accrptgen.store;
 
 import net.ketone.accrptgen.dto.AccountFileDto;
-import net.ketone.accrptgen.store.StorageService;
+import net.ketone.accrptgen.stats.FileBasedStatisticsService;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,26 +10,29 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("local")
 @SpringBootTest
-public class FileBasedStatisticsServiceTest {
+public class StorageServiceTest {
 
-    @Autowired
-    private FileBasedStatisticsService svc;
     @Autowired
     private StorageService storageService;
 
+    private static final String HISTORY_FILE = "target" + File.separator + FileBasedStatisticsService.HISTORY_FILE;
+
     @Test
     public void testSaveEmptyFile() throws IOException {
-        storageService.delete(FileBasedStatisticsService.HISTORY_FILE);
+        storageService.delete(HISTORY_FILE);
         doSave();
     }
 
@@ -45,28 +49,6 @@ public class FileBasedStatisticsServiceTest {
         dto.setStatus(AccountFileDto.Status.EMAIL_SENT.name());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         dto.setFilename("ABC-"+ sdf.format(dto.getGenerationTime()) + ".docx");
-        svc.updateAccountReport(dto);
         return dto;
     }
-
-    @Test
-    public void testSaveExceedingMax() throws IOException {
-        testSaveEmptyFile();
-        for(int i = 0; i <= FileBasedStatisticsService.MAX_RECENTS; i++) {
-            doSave();
-        }
-        List<AccountFileDto> dtos = svc.getRecentGenerations();
-        assertEquals(FileBasedStatisticsService.MAX_RECENTS, dtos.size());
-    }
-
-
-    @Test
-    public void testUpdate() throws IOException {
-        storageService.delete(FileBasedStatisticsService.HISTORY_FILE);
-        AccountFileDto dto = doSave();
-        svc.updateAccountReport(dto);
-        List<AccountFileDto> dtos = svc.getRecentGenerations();
-        assertEquals(1, dtos.size());
-    }
-
 }

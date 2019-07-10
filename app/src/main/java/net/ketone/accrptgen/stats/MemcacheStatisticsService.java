@@ -1,12 +1,10 @@
-package net.ketone.accrptgen.admin;
+package net.ketone.accrptgen.stats;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import net.ketone.accrptgen.dto.AccountFileDto;
-import net.ketone.accrptgen.dto.StatisticDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
@@ -44,29 +42,32 @@ public class MemcacheStatisticsService implements StatisticsService {
     private StatisticsService fileBasedStatisticsService;
 
     @Override
-    public Map<String, StatisticDto> getGenerationStatistic() {
-        return null;
-    }
-
-    @Override
-    public List<AccountFileDto> getRecentGenerations() {
+    public List<AccountFileDto> getRecentTasks() {
         TreeMap<String, AccountFileDto> recents = (TreeMap<String, AccountFileDto>)
                 cache.get(RECENTS);
         if(recents == null) {
             // default getting from service
-            recents = fileBasedStatisticsService.getRecentGenerations().stream().collect(
+            logger.info("Populating memcache...");
+            recents = fileBasedStatisticsService.getRecentTasks().stream().collect(
                     Collectors.toMap(dto -> ""+dto.getGenerationTime().getTime(),
                             Function.identity(),
                             (v1,v2) -> v1,
                             TreeMap::new));
             cache.put(RECENTS, recents);
         }
-        logger.info("Recent length " + recents.size());
         return new ArrayList<>(recents.descendingMap().values());
     }
 
     @Override
-    public void updateAccountReport(AccountFileDto dto) throws IOException {
+    public Map<String, Integer> housekeepTasks() throws IOException {
+        // clean cache because housekeeping is underway
+        cache.clear();
+        // just give the responsibility to the file
+        return fileBasedStatisticsService.housekeepTasks();
+    }
+
+    @Override
+    public void updateTask(AccountFileDto dto) throws IOException {
         String key = ""+dto.getGenerationTime().getTime();
         TreeMap<String, AccountFileDto> recents =(TreeMap<String, AccountFileDto>)
                 cache.getOrDefault(RECENTS, new TreeMap<String, AccountFileDto>());
@@ -84,20 +85,23 @@ public class MemcacheStatisticsService implements StatisticsService {
             existingDto.setCompany(dto.getCompany());
             existingDto.setStatus(dto.getStatus());
         }
-        Queue queue = QueueFactory.getQueue("statistics-queue");
-        TaskOptions task = TaskOptions.Builder
-                .withMethod(TaskOptions.Method.POST)
-                .url("/updateStat")
-                .param("dto", mapper.writeValueAsString(recents.get(key)));
-                // .payload(mapper.writeValueAsString(recents.get(key)))
-//                .method(TaskOptions.Method.POST);
-//        task.header("Content-type", "application/json");
-        queue.add(task);
+        if(AccountFileDto.Status.EMAIL_SENT.equals(dto.getStatus()) ||
+            AccountFileDto.Status.FAILED.equals(dto.getStatus())) {
+            // only put TERMINAL status to file
+            Queue queue = QueueFactory.getQueue("statistics-queue");
+            TaskOptions task = TaskOptions.Builder
+                    .withMethod(TaskOptions.Method.POST)
+                    .url("/updateStat")
+                    .param("dto", mapper.writeValueAsString(recents.get(key)));
+            queue.add(task);
+        }
+        // update cache
         cache.put(RECENTS, recents);
+        cache.put(dto.getHandleName(), existingDto == null ? dto : existingDto);
     }
 
     @Override
-    public AccountFileDto getAccountReport(String handleName) {
+    public AccountFileDto getTask(String handleName) {
         if(cache.containsKey(handleName)) {
             return (AccountFileDto) cache.get(handleName);
         }
@@ -105,11 +109,18 @@ public class MemcacheStatisticsService implements StatisticsService {
 
     }
 
+    /**
+     * Update file asynchronously
+     * @param dto
+     * @return
+     * @throws IOException
+     */
     @PostMapping("/updateStat")
     public String doSaveStat(@RequestParam("dto") String dto) throws IOException {
         logger.info("Updating statistics for " + dto);
-        fileBasedStatisticsService.updateAccountReport(mapper.readValue(dto, AccountFileDto.class));
+        fileBasedStatisticsService.updateTask(mapper.readValue(dto, AccountFileDto.class));
         return "OK";
     }
 
 }
+

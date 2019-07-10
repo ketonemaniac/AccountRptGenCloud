@@ -1,13 +1,16 @@
 package net.ketone.accrptgen.controller;
 
-import net.ketone.accrptgen.admin.StatisticsService;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import net.ketone.accrptgen.exception.ValidationException;
+import net.ketone.accrptgen.stats.StatisticsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.dto.DownloadFileDto;
 import net.ketone.accrptgen.gen.GenerationService;
 import net.ketone.accrptgen.gen.ParsingService;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
-import net.ketone.accrptgen.threading.ThreadingService;
+import net.ketone.accrptgen.tasks.TasksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -16,7 +19,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +34,6 @@ import java.util.logging.Logger;
 @RestController
 public class AccRptGenController {
 
-//    private static final Logger logger = LoggerFactory.getLogger(AccRptGenController.class);
     private static final Logger logger = Logger.getLogger(AccRptGenController.class.getName());
 
     @Autowired
@@ -46,7 +47,7 @@ public class AccRptGenController {
     @Autowired
     private StatisticsService statisticsService;
     @Autowired
-    private ThreadingService threadingService;
+    private TasksService tasksService;
 
     @Value("${build.version}")
     private String buildVersion;
@@ -55,7 +56,7 @@ public class AccRptGenController {
     private String buildTimestamp;
 
     @RequestMapping("/version")
-    public Map<String, String> greeting() {
+    public Map<String, String> getVersion() {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime localDateTime = LocalDateTime.parse(buildTimestamp, df);
         String timestamp = df.format(localDateTime.toInstant(ZoneOffset.UTC).atOffset(ZoneOffset.of("+8")));
@@ -66,17 +67,15 @@ public class AccRptGenController {
     }
 
     @PostMapping("/uploadFile")
-    public AccountFileDto handleFileUploadTest(@RequestParam("file") MultipartFile file,
-                                           RedirectAttributes redirectAttributes) throws IOException {
+    public AccountFileDto handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
+        if(file.getOriginalFilename().lastIndexOf(".") == -1) {
+            throw new ValidationException("sadfa");
+        }
+        file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")+1, file.getOriginalFilename().length());
         final byte[] fileBytes = file.getBytes();
-//        InputStream is = new ByteArrayInputStream(fileBytes);
-        final Date generationTime = new Date();
-//        String companyName = parsingService.extractCompanyName(is);
-//        String filename = companyName + "-" + GenerationService.sdf.format(generationTime);
-
-//        storageService.store(new ByteArrayInputStream(fileBytes), filename + ".xlsm");
-        storageService.store(fileBytes, generationTime.getTime()+".xlsm");
-        return threadingService.runPipeline(generationTime);
+        final long generationTime = new Date().getTime();
+        storageService.store(fileBytes, generationTime+".xlsm");
+        return tasksService.submitTask(new Date(generationTime));
     }
 
 
@@ -92,7 +91,20 @@ public class AccRptGenController {
 
     @GetMapping("/listFiles")
     public List<AccountFileDto> listFiles() {
-        return statisticsService.getRecentGenerations();
+        return statisticsService.getRecentTasks();
+    }
+
+    @GetMapping("/terminateTask/{id}")
+    public int deleteTask(@PathVariable("id") String id) {
+        return tasksService.terminateTask(id) ? 1 : 0;
+    }
+
+
+    @GetMapping("/purgeQueue")
+    public boolean purgeQueue() {
+        Queue q = QueueFactory.getQueue("accountrptgen-queue");
+        q.purge();
+        return true;
     }
 
 

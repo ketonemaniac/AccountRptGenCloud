@@ -1,7 +1,7 @@
 package net.ketone.accrptgen.gen;
 
-import com.google.common.io.FileBackedOutputStream;
-import net.ketone.accrptgen.admin.StatisticsService;
+import net.ketone.accrptgen.AccrptgenApplication;
+import net.ketone.accrptgen.stats.StatisticsService;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.entity.Section;
 import net.ketone.accrptgen.entity.SectionElement;
@@ -17,7 +17,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -40,7 +42,7 @@ import static org.junit.Assert.assertTrue;
 // @Ignore
 @RunWith(SpringRunner.class)
 @ActiveProfiles("local")
-@SpringBootTest
+@SpringBootTest(classes = AccrptgenApplication.class)
 public class ParserTest {
 
     @Autowired

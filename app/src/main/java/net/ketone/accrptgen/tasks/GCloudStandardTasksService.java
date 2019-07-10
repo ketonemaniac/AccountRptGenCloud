@@ -1,18 +1,16 @@
-package net.ketone.accrptgen.threading;
+package net.ketone.accrptgen.tasks;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
-import net.ketone.accrptgen.admin.StatisticsService;
+import net.ketone.accrptgen.stats.StatisticsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.gen.Pipeline;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -25,10 +23,10 @@ import java.util.logging.Logger;
  */
 @Profile("gCloudStandard")
 @RestController
-public class GCloudStandardThreadingService implements ThreadingService {
+public class GCloudStandardTasksService implements TasksService {
 
-    private static final Logger logger = Logger.getLogger(GCloudStandardThreadingService.class.getName());
-    private ObjectMapper mapper = new ObjectMapper();
+    private static final Logger logger = Logger.getLogger(GCloudStandardTasksService.class.getName());
+    private static final String QUEUE_NAME= "accountrptgen-queue";
 
     @Autowired
     private StatisticsService statisticsService;
@@ -40,27 +38,26 @@ public class GCloudStandardThreadingService implements ThreadingService {
     private ApplicationContext ctx;
 
     @Override
-    public AccountFileDto runPipeline(Date generationTime) throws IOException {
-        // Queue queue = QueueFactory.getDefaultQueue();
-        Queue queue = QueueFactory.getQueue("accountrptgen-queue");
-//        String genTimeStr = GenerationService.sdf.format(generationTime);
+    public AccountFileDto submitTask(Date generationTime) throws IOException {
+        Queue queue = QueueFactory.getQueue(QUEUE_NAME);
         TaskHandle handle = queue.add(TaskOptions.Builder.withUrl("/worker")
-//                .param("companyName", companyName)
                 .param("generationTime", ""+generationTime.getTime())
-//                .param("filename", filename)
         );
         logger.info("Handle Created: " + handle.getName());
 
         AccountFileDto dto = new AccountFileDto();
-//        dto.setCompany(companyName);
-//        dto.setFilename(filename);
         dto.setGenerationTime(generationTime);
         dto.setStatus(AccountFileDto.Status.PENDING.name());
         dto.setHandleName(handle.getName());
-        statisticsService.updateAccountReport(dto);
+        statisticsService.updateTask(dto);
         return dto;
     }
 
+    @Override
+    public boolean terminateTask(String task) {
+        Queue q = QueueFactory.getQueue(QUEUE_NAME);
+        return q.deleteTask(task);
+    }
 
     @PostMapping("/worker")
     public String doWork(// @RequestParam("companyName") String companyName,
@@ -75,7 +72,7 @@ public class GCloudStandardThreadingService implements ThreadingService {
         dto.setGenerationTime(new Date(Long.parseLong(generationTime)));
         dto.setStatus(AccountFileDto.Status.GENERATING.name());
 //        logger.info("Updating statistics for " + filename);
-        statisticsService.updateAccountReport(dto);
+        statisticsService.updateTask(dto);
         Pipeline pipeline = ctx.getBean(Pipeline.class, dto.getGenerationTime());
         pipeline.run();
         return "OK";

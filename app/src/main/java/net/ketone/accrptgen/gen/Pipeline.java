@@ -1,12 +1,12 @@
 package net.ketone.accrptgen.gen;
 
-import net.ketone.accrptgen.admin.StatisticsService;
+import net.ketone.accrptgen.stats.StatisticsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.mail.Attachment;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
-import net.ketone.accrptgen.threading.ThreadingService;
+import net.ketone.accrptgen.tasks.TasksService;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public class Pipeline implements Runnable {
     @Autowired
     private StatisticsService statisticsService;
     @Autowired
-    private ThreadingService threadingService;
+    private TasksService tasksService;
 
     private String companyName;
     private Date generationTime;
@@ -97,7 +97,7 @@ public class Pipeline implements Runnable {
             dto.setGenerationTime(generationTime);
             dto.setStatus(AccountFileDto.Status.EMAIL_SENT.name());
             logger.info("Updating statistics for " + filename);
-            statisticsService.updateAccountReport(dto);
+            statisticsService.updateTask(dto);
             logger.info("Operation complete for " + filename);
 
         } catch (Exception e) {
@@ -108,7 +108,7 @@ public class Pipeline implements Runnable {
             dto.setGenerationTime(generationTime);
             dto.setStatus(AccountFileDto.Status.FAILED.name());
             try {
-                statisticsService.updateAccountReport(dto);
+                statisticsService.updateTask(dto);
             } catch (IOException e1) {
                 logger.log(Level.WARNING, "History file write failed", e1);
             }

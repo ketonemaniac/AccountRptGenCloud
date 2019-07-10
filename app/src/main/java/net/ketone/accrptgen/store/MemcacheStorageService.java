@@ -13,6 +13,11 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * 1st level cache
+ * Will NOT persist when store is called
+ * But will try to find from peristent storage on retrieval
+ */
 public class MemcacheStorageService implements StorageService {
 
     @Autowired
@@ -29,10 +34,10 @@ public class MemcacheStorageService implements StorageService {
     @Override
     public String store(byte[] input, String filename) throws IOException {
         logger.info("******** STORING " + FILE_PREFIX + filename);
-        logger.info("cache size before " + cache.size());
+        logger.fine("cache size before " + cache.size());
         cache.put(FILE_PREFIX + filename, input);
-        logger.info("cache size after " + cache.size());
-        logger.info("cache contains at store " + cache.containsKey(FILE_PREFIX + filename));
+        logger.fine("cache size after " + cache.size());
+        logger.fine("cache contains at store " + cache.containsKey(FILE_PREFIX + filename));
         return filename;
     }
 
@@ -44,8 +49,8 @@ public class MemcacheStorageService implements StorageService {
     @Override
     public byte[] load(String filename) {
         logger.info("******** FETCHING " + FILE_PREFIX + filename);
-        logger.info("cache size for fetch " + cache.size());
-        logger.info("cache contains at fetch " + cache.containsKey(FILE_PREFIX + filename));
+        logger.fine("cache size for fetch " + cache.size());
+        logger.fine("cache contains at fetch " + cache.containsKey(FILE_PREFIX + filename));
         if(cache.containsKey(FILE_PREFIX + filename)) {
             byte[] data = (byte[]) cache.get(FILE_PREFIX + filename);
             return data;
