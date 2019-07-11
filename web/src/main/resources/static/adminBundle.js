@@ -140,7 +140,7 @@ var startDownload = function (filename) {
         if (req.readyState === 4 && req.status === 200) {
             // test for IE
             if (typeof window.navigator.msSaveBlob === 'function') {
-                window.navigator.msSaveBlob(req.response, "PdfName-" + new Date().getTime() + ".pdf");
+                window.navigator.msSaveBlob(req.response, filename + ".zip");
             } else {
                 var blob = req.response;
                 var link = document.createElement('a');
@@ -208,7 +208,7 @@ var init = function (path, msgFn) {
 
 
     $(document).on('click', '#genHistoryTable .dlbtn', function () {
-        startDownload($(this).closest("tr").children('td:nth-child(3)').text());
+        startDownload($(this).closest("tr").children('td:nth-child(4)').text());
     });
 }
 
@@ -263,6 +263,7 @@ var listFiles = function () {
                     data.company,
                     DateFormat(new Date(data.generationTime), "yyyy-mm-dd HH:MM:ss"),
                     statusText,
+                    "<button type=\"button\" class=\"btn btn-primary dlbtn\">" + data.filename + ".zip</button>",
                 ]);
             });
             histTable.draw(false);

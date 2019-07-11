@@ -5,9 +5,9 @@
   "description": "account report generation",
   "main": "main.js",
   "scripts": {
-    "clean" : "rm -rf generated && mkdir generated",
-    "test" : "npm run-script clean && browserify test/tests.js > generated/tests-bundle.js && node-qunit-phantomjs test/tests.html",
-    "build" : "npm run-script buildMain && npm run-script buildAdmin",
+    "clean": "rm -rf generated && mkdir generated",
+    "test": "npm run-script clean && browserify test/tests.js > generated/tests-bundle.js && node-qunit-phantomjs test/tests.html",
+    "build": "npm run-script buildMain && npm run-script buildAdmin",
     "prebuild": "npm install",
     "buildMain": "browserify app/main.js --debug | exorcist ./src/main/resources/static/mainBundle.js.map > ./src/main/resources/static/mainBundle.js",
     "buildAdmin": "browserify app/admin.js --debug | exorcist ./src/main/resources/static/adminBundle.js.map > ./src/main/resources/static/adminBundle.js"
@@ -29,9 +29,8 @@
     "exorcist": "^1.0.0",
     "spin": "^0.0.1",
     "watchify": "^3.9.0",
-    "qunit" : "^2.6.1",
-    "datatables" : "^1.10.18",
-    "sinon" : "^6.1.5"
+    "qunit": "^2.6.1",
+    "datatables": "^1.10.18",
+    "sinon": "^6.1.5"
   }
 }
-

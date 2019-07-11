@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -82,11 +83,14 @@ public class AccRptGenController {
 
     @PostMapping("/downloadFile")
     public ResponseEntity<Resource> downloadFile(@RequestBody DownloadFileDto dto) throws IOException {
-        logger.info("filename is " + dto.getFilename());
-        InputStream is = storageService.loadAsInputStream(dto.getFilename());
+        String fileName = dto.getFilename();
+        logger.info("filename is " + fileName);
+        InputStream is = storageService.loadAsInputStream(fileName);
         Resource resource = new InputStreamResource(is);
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + dto.getFilename() + "\"").body(resource);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + fileName + "\"").body(resource);
     }
 
     @GetMapping("/listFiles")

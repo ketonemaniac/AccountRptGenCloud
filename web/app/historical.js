@@ -46,6 +46,7 @@ var listFiles = function () {
                     data.company,
                     DateFormat(new Date(data.generationTime), "yyyy-mm-dd HH:MM:ss"),
                     statusText,
+                    "<button type=\"button\" class=\"btn btn-primary dlbtn\">" + data.filename + ".zip</button>",
                 ]);
             });
             histTable.draw(false);

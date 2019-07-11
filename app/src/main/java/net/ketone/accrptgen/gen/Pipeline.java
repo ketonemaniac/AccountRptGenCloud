@@ -7,6 +7,7 @@ import net.ketone.accrptgen.mail.Attachment;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.tasks.TasksService;
+import net.ketone.accrptgen.util.ZipUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,10 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * File generation batch processes pipeline
@@ -89,7 +90,13 @@ public class Pipeline implements Runnable {
             logger.info("Generated doc. " + generatedDoc.length + "_bytes");
             Attachment doc = new Attachment(filename + ".docx", generatedDoc);
             Attachment template = new Attachment(filename + "-allDocs.xlsm", os.toByteArray());
-            emailService.sendEmail(companyName, Arrays.asList(doc, template, inputXlsx));
+            List<Attachment> attachments = Arrays.asList(doc, template, inputXlsx);
+            emailService.sendEmail(companyName, attachments);
+
+            // zip files and store them just in case needed
+            Map<String, byte[]> zipInput = attachments.stream()
+                    .collect(Collectors.toMap(Attachment::getAttachmentName, Attachment::getData));
+            storageService.store(ZipUtils.zipFiles(zipInput), filename + ".zip");
 
             AccountFileDto dto = new AccountFileDto();
             dto.setCompany(companyName);

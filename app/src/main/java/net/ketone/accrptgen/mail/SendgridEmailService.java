@@ -86,7 +86,7 @@ public class SendgridEmailService implements EmailService {
 
         SendGrid.Response response = sendgrid.send(email);
         if (response.getCode() != 200) {
-            logger.warning(String.format("An error occured: %s", response.getMessage()));
+            logger.warning(String.format("An error occured: %s Code=%d", response.getMessage(), response.getCode()));
             return;
         }
         logger.info("Email sent to " + sendTo + " BCC " + EMAIL_BCC);
