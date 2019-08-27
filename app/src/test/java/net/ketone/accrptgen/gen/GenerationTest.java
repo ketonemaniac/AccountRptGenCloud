@@ -6,6 +6,8 @@ import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.store.FileStorageService;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -66,11 +68,15 @@ public class GenerationTest {
         }
     }
 
-
-    // TODO: use profiles
     @Autowired
-    @Qualifier("generationServiceApachePOI")
     private GenerationService svc;
+
+    public static final String TEST_OUTPUT = "target/GenerationTest.docx";
+
+    @Before
+    public void init() {
+        new File(TEST_OUTPUT).delete();
+    }
 
     @Test
     public void testGeneration() throws IOException {
@@ -116,7 +122,15 @@ public class GenerationTest {
         header2.setText("COMPANY HEADER 2");
         s.addSectionElement(header2);
 
-        svc.generate(data);
+        byte[] outBytes = svc.generate(data);
+        Assertions.assertThat(outBytes.length).isGreaterThan(0);
 
+        // visiualize output
+        File output= new File(TEST_OUTPUT);
+        FileOutputStream out = new FileOutputStream(output);
+        out.write(outBytes);
+        out.close();
+
+        // manual assertion to see if file is valid...
     }
 }
