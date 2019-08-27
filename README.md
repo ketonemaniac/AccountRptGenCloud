@@ -8,6 +8,7 @@ In the root module run the following to run browsify the web content (main.js)
 `mvn clean install`
 
 Running locally in IDE without google services
+* Include spring-boot-starter-tomcat in app's pom.xml
 * Main class: net.ketone.accrptgen.AccrptgenApplication
 * VM options: `-Dspring.profiles.active=local`
 * Run in app folder
@@ -15,7 +16,7 @@ Running locally in IDE without google services
 Local run with google services
 * make sure you have the right enviromenet set in appengine-web.xml. Default points to staging
 * Put in Enviroment variable GOOGLE_APPLICATION_CREDENTIALS for access to different buckets
-* Run `mvn appengine:run`
+* Run `mvn appengine:run` in app folder
 
 To deploy to google cloud
 * make sure you have the right enviromenet set in appengine-web.xml.
