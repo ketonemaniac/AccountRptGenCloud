@@ -21,10 +21,13 @@
 .jumbotron {
   /* background-image: url("jumbotron_bg.jpg"); */
   background-size: cover;
+  padding-top: 15%;
+  padding-bottom: 15%;
 }
 
-.card {
+.loadedForm {
   border: none;
+  background-color: #bbbbbb;
 }
 
 .App-link {
@@ -38,4 +41,16 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+
+.bigButton {
+  padding: 25px 40px;
+  font-size: 25px;
+  border-radius: 10px;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 900;
 }

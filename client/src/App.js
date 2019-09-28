@@ -7,10 +7,12 @@ import Done from './Done.js';
 import './App.css';
 import {
   Container, Row, Col,
-  Jumbotron, Button,
+  Jumbotron,
   Card, CardHeader, CardImg, CardText, CardBody,
-  CardTitle, CardSubtitle, Media
+  CardTitle, CardSubtitle, Media,
+  Form, FormGroup, Label, Input
 } from 'reactstrap';
+import Button from 'reactstrap-button-loader';
 import { faRedo } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Moment from 'react-moment';
@@ -22,7 +24,8 @@ class App extends Component {
   state = {
     isAdmin: false,
     date: new Date(),
-    companies : []
+    companies : [],
+    progress: "init"
   }
 
   componentDidMount() {
@@ -36,6 +39,7 @@ class App extends Component {
     return axios.get('/listFiles')
     .catch(error => {console.log(error); throw Error(error)})
     .then(res => {this.setState({ companies: res.data })});
+
   }
 
 
@@ -61,14 +65,19 @@ class App extends Component {
           },
         })
         .then(res => {
-          console.log(res.statusText)
+          console.log()
+          this.setState({progress: "loaded",
+                  loadedFile: res.data.company});
         })
     }
     );
+    this.setState({progress: "uploading"});
   }
 
   render() {
     const dropzoneRef = React.createRef();
+    const showFileButton = this.state.progress == "init" || this.state.progress == "uploading";
+    const showAddDetail = this.state.progress == "loaded";
     return (
       <div>
         <AppHeader isAdmin={this.state.isAdmin} setAdmin={this.setAdmin} />
@@ -79,42 +88,51 @@ class App extends Component {
               <input {...getInputProps()} />
               <Container>
                 <h1 className="display-3">Instant Report Generation</h1>
-                <p className="lead">Drag your input file over this area, or click to select the file from the file picker below</p>
+                <div style={{display : showFileButton ? "block" : "none"}}>
                 <p className="lead">
-                    <Button color="primary" onClick={() => dropzoneRef.current.open()}>
+                  Drag your input file over this area, or click to select the file from the file picker below
+              </p>
+                <p className="lead">
+                    <Button color="primary" className="bigButton" onClick={() => dropzoneRef.current.open()}
+                      loading={this.state.progress == "uploading"}>
                       Select File
                     </Button>
+                </p>
+              </div>
+
+                <p className="lead" style={{display: showAddDetail ? "block" : "none"}} >
+                  <Container className="py-5 loadedForm">
+                    <Row>
+                    <Col><h3>{this.state.loadedFile}</h3></Col>
+                    </Row>
+                    <Row>
+                    <Col>Add additional details before generating the final report</Col>
+                    </Row>
+                  <Form className="form">
+                    <FormGroup row>
+                      <Label for="referrer" sm={2}>Referrer</Label>
+                      <Col sm={10}>
+                        <Input type="text" name="referrerText" id="referrer" placeholder="The referrer's name to appear in email" />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                      <Col sm={12}>
+                      <Button color="success" className="mr-2">Generate</Button><Button color="danger">Start Over</Button>
+                      </Col>
+                    </FormGroup>
+                  </Form>
+
+                  </Container>
+                
                 </p>
               </Container>
             </Jumbotron>
           )
           }}
         </Dropzone>
-        <Container>
-          <Row>
-            <Col md="5" xs="12">
-              <Card>
-                <CardHeader>Recently Completed</CardHeader>
-                <CardBody>
-                  <Done companies={this.state.companies} />
-                </CardBody>
-              </Card>
-            </Col>
-            <Col md="7" xs="12">
-              <Card>
-                <CardHeader>In Progress 
-                  <div className="float-right">
-                    <i className="mr-1">Last Updated <Moment interval={1000} diff={this.state.date} unit="seconds"></Moment> secs ago</i>
-                    <Button onClick={() => {this.setState({date: new Date(), number : this.state.number + 1} )}}><FontAwesomeIcon icon={faRedo} /> Refresh</Button>
-                  </div>
-                  </CardHeader>
-                <CardBody>
-                  <Progress companies={this.state.companies} />
-              </CardBody>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
+        <Container className="footer text-center">
+          <span className="text-muted"> © Ketone Maniac @ 2019</span>
+        </Container>        
       </div>
     );
   }
