@@ -2,6 +2,7 @@ package net.ketone.accrptgen.controller;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
+import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.exception.ValidationException;
 import net.ketone.accrptgen.stats.StatisticsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
@@ -11,6 +12,7 @@ import net.ketone.accrptgen.gen.ParsingService;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.tasks.TasksService;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -21,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -74,16 +77,40 @@ public class AccRptGenController {
         }
         file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")+1, file.getOriginalFilename().length());
         final byte[] fileBytes = file.getBytes();
-        final long generationTime = new Date().getTime();
-        storageService.store(fileBytes, generationTime+".xlsm");
-        return tasksService.submitTask(new Date(generationTime));
+        final Date generationTime = new Date();
+        storageService.store(fileBytes, generationTime.getTime()+".xlsm");
+
+        AccountFileDto dto = new AccountFileDto();
+        XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
+        dto.setCompany(parsingService.extractCompanyName(workbook));
+        dto.setFilename(String.valueOf(generationTime.getTime()));
+        dto.setGenerationTime(generationTime);
+        dto.setStatus(Constants.Status.PRELOADED.name());
+        statisticsService.updateTask(dto);
+        return dto;
     }
 
+    @PostMapping("/startGeneration")
+    public AccountFileDto startGeneration(@RequestParam("filename") String cacheFilename,
+                                          @RequestParam("company") String company,
+                                          @RequestParam("referredBy") String referredBy) throws IOException {
+        logger.info("cacheFilename=" + cacheFilename + "; referredBy=" + referredBy);
+        try {
+            return tasksService.submitTask(cacheFilename, company, referredBy);
+        } catch (Exception e) {
+            AccountFileDto dto = new AccountFileDto();
+            dto.setCompany(company);
+            dto.setFilename(cacheFilename);
+            dto.setStatus(Constants.Status.FAILED.name());
+            statisticsService.updateTask(dto);
+            return dto;
+        }
+    }
 
 
     @PostMapping("/downloadFile")
     public ResponseEntity<Resource> downloadFile(@RequestBody DownloadFileDto dto) throws IOException {
-        String fileName = dto.getFilename();
+        String fileName = dto.getFilename() + ".zip";
         logger.info("filename is " + fileName);
         InputStream is = storageService.loadAsInputStream(fileName);
         Resource resource = new InputStreamResource(is);
@@ -106,7 +133,7 @@ public class AccRptGenController {
 
     @GetMapping("/purgeQueue")
     public boolean purgeQueue() {
-        Queue q = QueueFactory.getQueue("accountrptgen-queue");
+        Queue q = QueueFactory.getQueue(Constants.GEN_QUEUE_NAME);
         q.purge();
         return true;
     }

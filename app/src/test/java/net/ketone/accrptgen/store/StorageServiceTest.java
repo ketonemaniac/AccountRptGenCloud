@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.store;
 
+import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.stats.FileBasedStatisticsService;
 import org.assertj.core.api.Assertions;
@@ -28,7 +29,7 @@ public class StorageServiceTest {
     @Autowired
     private StorageService storageService;
 
-    private static final String HISTORY_FILE = "target" + File.separator + FileBasedStatisticsService.HISTORY_FILE;
+    private static final String HISTORY_FILE = "target" + File.separator + Constants.HISTORY_FILE;
 
     @Test
     public void testSaveEmptyFile() throws IOException {
@@ -46,7 +47,7 @@ public class StorageServiceTest {
         AccountFileDto dto = new AccountFileDto();
         dto.setGenerationTime(new Date());
         dto.setCompany("ABC Company Limited");
-        dto.setStatus(AccountFileDto.Status.EMAIL_SENT.name());
+        dto.setStatus(Constants.Status.EMAIL_SENT.name());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         dto.setFilename("ABC-"+ sdf.format(dto.getGenerationTime()) + ".docx");
         return dto;

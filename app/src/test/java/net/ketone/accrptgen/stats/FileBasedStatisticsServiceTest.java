@@ -2,6 +2,7 @@ package net.ketone.accrptgen.stats;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.stats.FileBasedStatisticsService;
 import net.ketone.accrptgen.store.StorageService;
@@ -27,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static net.ketone.accrptgen.config.Constants.HISTORY_FILE;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 
@@ -59,7 +61,7 @@ public class FileBasedStatisticsServiceTest {
         AccountFileDto dto = new AccountFileDto();
         dto.setGenerationTime(new Date());
         dto.setCompany("ABC Company Limited");
-        dto.setStatus(AccountFileDto.Status.EMAIL_SENT.name());
+        dto.setStatus(Constants.Status.EMAIL_SENT.name());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         dto.setFilename("ABC-"+ sdf.format(dto.getGenerationTime()) + ".docx");
         svc.updateTask(dto);
@@ -79,7 +81,7 @@ public class FileBasedStatisticsServiceTest {
 
     @Test
     public void testUpdate() throws IOException {
-        storageService.delete(FileBasedStatisticsService.HISTORY_FILE);
+        storageService.delete(HISTORY_FILE);
         AccountFileDto dto = doSave();
         svc.updateTask(dto);
         List<AccountFileDto> dtos = svc.getRecentTasks();

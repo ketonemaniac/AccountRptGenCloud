@@ -8,7 +8,7 @@ import './App.css';
 import {
   Container, Row, Col,
   Jumbotron,
-  Card, CardHeader, CardImg, CardText, CardBody,
+  CardDeck, Card, CardHeader, CardImg, CardText, CardBody,
   CardTitle, CardSubtitle, Media,
   Form, FormGroup, Label, Input
 } from 'reactstrap';
@@ -24,21 +24,26 @@ class App extends Component {
   state = {
     isAdmin: false,
     date: new Date(),
-    companies : [],
-    progress: "init"
+    companies: [],
+    fileUploadBlock: false
   }
 
   componentDidMount() {
     axios.get('/version')
-      .catch(error => {console.log(error); throw Error(error)})
+      .catch(error => { console.log(error); throw Error(error) })
       .then(res => this.setState({ response: res.data.version }));
     this.getProgress();
   }
 
   getProgress = () => {
     return axios.get('/listFiles')
-    .catch(error => {console.log(error); throw Error(error)})
-    .then(res => {this.setState({ companies: res.data })});
+      .catch(error => { console.log(error); throw Error(error) })
+      .then(res => { 
+        var inProgress = res.data
+        .filter(company => company.status != null)
+        // .filter(company => company.status != "EMAIL_SENT") ;
+        this.setState({ companies: inProgress }) 
+      });
 
   }
 
@@ -54,85 +59,162 @@ class App extends Component {
       console.log("acceptedFile=" + file.name + " size=" + file.size);
       const data = new FormData()
       data.append('file', file, file.name)
-  
+
       axios
         .post("uploadFile", data, {
           onUploadProgress: ProgressEvent => {
-            console.log("loaded" + (ProgressEvent.loaded / ProgressEvent.total*100));
+            console.log("loaded" + (ProgressEvent.loaded / ProgressEvent.total * 100));
             /*this.setState({
               loaded: (ProgressEvent.loaded / ProgressEvent.total*100),
             })*/
           },
         })
         .then(res => {
-          console.log()
-          this.setState({progress: "loaded",
-                  loadedFile: res.data.company});
+
+          this.setState(state => {
+            const companies = [ {
+              company: res.data.company,
+              filename: res.data.filename,
+              status: "PRELOADED"
+            }, ...state.companies ];
+            return {
+              companies : companies,
+              fileUploadBlock: false
+
+            };
+          });
+
         })
     }
     );
-    this.setState({progress: "uploading"});
+    this.setState({ fileUploadBlock: true });
+  }
+
+  handleStartGeneration = (event) => {
+    event.preventDefault();
+    const data = new FormData(event.target);
+
+    axios
+      .post("startGeneration", data)
+      .then(res => this.getProgress());
+  }
+
+
+  handleDownload(company) {
+    console.log("company=" + company.filename);
+    // ajax doesn't handle file downloads elegantly
+    var req = new XMLHttpRequest();
+    req.open("POST", "/downloadFile", true);
+    req.setRequestHeader("Content-Type", "application/json");
+    req.responseType = "blob";
+    req.onreadystatechange = function () {
+        if (req.readyState === 4 && req.status === 200) {
+            // test for IE
+            if (typeof window.navigator.msSaveBlob === 'function') {
+                window.navigator.msSaveBlob(req.response, company.filename + ".zip");
+            } else {
+                var blob = req.response;
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = company.filename + ".zip";
+                // append the link to the document body
+                document.body.appendChild(link);
+                link.click();
+                link.remove();// you need to remove that elelment which is created before
+            }
+        }
+    };
+    req.send(JSON.stringify({ "filename": company.filename }));
   }
 
   render() {
     const dropzoneRef = React.createRef();
-    const showFileButton = this.state.progress == "init" || this.state.progress == "uploading";
-    const showAddDetail = this.state.progress == "loaded";
+    const showAddDetail = this.state.companies.length > 0;
     return (
       <div>
         <AppHeader isAdmin={this.state.isAdmin} setAdmin={this.setAdmin} />
         <Dropzone ref={dropzoneRef} onDrop={this.onDrop.bind(this)}>
-          {({getRootProps, getInputProps, isDragActive}) => { 
+          {({ getRootProps, getInputProps, isDragActive }) => {
             return (
-            <Jumbotron fluid {...getRootProps({onClick: evt => evt.preventDefault()})}>
-              <input {...getInputProps()} />
-              <Container>
-                <h1 className="display-3">Instant Report Generation</h1>
-                <div style={{display : showFileButton ? "block" : "none"}}>
-                <p className="lead">
-                  Drag your input file over this area, or click to select the file from the file picker below
-              </p>
-                <p className="lead">
-                    <Button color="primary" className="bigButton" onClick={() => dropzoneRef.current.open()}
-                      loading={this.state.progress == "uploading"}>
-                      Select File
+              <Jumbotron style={{
+                paddingTop: showAddDetail ? "5%" : "15%",
+                paddingBottom: showAddDetail ? "5%" : "15%"
+              }}
+                fluid {...getRootProps({ onClick: evt => evt.preventDefault() })}>
+                <input {...getInputProps()} />
+                <Container>
+                  <h1 className="display-3">Instant Report Generation</h1>
+                  <div>
+                    <span className="lead">
+                      Drag your input file over this area, or click to select the file from the file picker below
+              </span>
+                    <span className="lead" ><p />
+                      <Button color="primary" className="bigButton" onClick={() => dropzoneRef.current.open()}
+                        loading={this.state.fileUploadBlock}>
+                        Select File
                     </Button>
-                </p>
-              </div>
 
-                <p className="lead" style={{display: showAddDetail ? "block" : "none"}} >
-                  <Container className="py-5 loadedForm">
-                    <Row>
-                    <Col><h3>{this.state.loadedFile}</h3></Col>
-                    </Row>
-                    <Row>
-                    <Col>Add additional details before generating the final report</Col>
-                    </Row>
-                  <Form className="form">
-                    <FormGroup row>
-                      <Label for="referrer" sm={2}>Referrer</Label>
-                      <Col sm={10}>
-                        <Input type="text" name="referrerText" id="referrer" placeholder="The referrer's name to appear in email" />
-                      </Col>
-                    </FormGroup>
-                    <FormGroup row>
-                      <Col sm={12}>
-                      <Button color="success" className="mr-2">Generate</Button><Button color="danger">Start Over</Button>
-                      </Col>
-                    </FormGroup>
-                  </Form>
-
-                  </Container>
-                
-                </p>
-              </Container>
-            </Jumbotron>
-          )
+                    </span>
+                  </div>
+                </Container>
+              </Jumbotron>
+            )
           }}
         </Dropzone>
+        <CardDeck className="px-5">
+        {this.state.companies
+        .map((c, i) => {
+          return (
+              <Card body>
+                <CardHeader>{c.company}</CardHeader>
+                <CardBody>
+                <Form className="form" onSubmit={this.handleStartGeneration}>
+                  <Container>
+                    <Row>
+                    <Col xs="12" lg="10">
+                    <Container>
+                      <Input type="hidden" name="filename" value={c.filename} />
+                      <Input type="hidden" name="company" value={c.company} />
+                      <FormGroup row>
+                        <Label sm={3} for="referredBy">Referrer <span className="text-muted">(Optional)</span></Label>
+                        <Col sm={9}>
+                          <Input type="text" name="referredBy" id="referredBy" placeholder="The referrer's name to appear in email" />
+                          </Col>
+                      </FormGroup>
+                      <FormGroup row>
+                        <Label sm={3} for="status">Status</Label>
+                        <Col sm={9}>
+                          <Input className="input-text-borderless" type="text" disabled name="status" id="status" value={c.status} />
+                          </Col>
+                      </FormGroup>
+                      <FormGroup row>
+                        <Label sm={3} for="status">Generation time</Label>
+                        <Col sm={9}>
+                          <Input className="input-text-borderless" type="text" disabled name="generationTime" id="generationTime" value={c.generationTime} />
+                          </Col>
+                      </FormGroup>
+                    </Container>
+                    </Col>
+                    <Col xs="2">
+                      <Button style={{display: c.status == "PRELOADED" ? "block" : "none"}} 
+                          type="submit" color="success" className="generate-button mr-2">Generate</Button>
+                          <Button style={{display: c.status == "EMAIL_SENT" ? "block" : "none"}}
+                          onClick={this.handleDownload.bind(this, c)}
+                          color="secondary" className="generate-button mr-2">Download</Button>
+                    </Col>
+                        </Row>
+                  </Container>
+                  </Form>
+                </CardBody>
+              </Card>
+
+          )
+        })}
+      </CardDeck>
+
         <Container className="footer text-center">
           <span className="text-muted"> © Ketone Maniac @ 2019</span>
-        </Container>        
+        </Container>
       </div>
     );
   }

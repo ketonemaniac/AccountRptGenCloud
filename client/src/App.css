@@ -19,15 +19,8 @@
 }
 
 .jumbotron {
-  /* background-image: url("jumbotron_bg.jpg"); */
+  background-image: url("background.jpg");
   background-size: cover;
-  padding-top: 15%;
-  padding-bottom: 15%;
-}
-
-.loadedForm {
-  border: none;
-  background-color: #bbbbbb;
 }
 
 .App-link {
@@ -44,13 +37,62 @@
 }
 
 
+/* Jumbotron Styling */
 .bigButton {
   padding: 25px 40px;
   font-size: 25px;
-  border-radius: 10px;
+  border-radius: 50px;
 }
 
 h3 {
   font-size: 18px;
   font-weight: 900;
 }
+
+/* Status card styling */
+.card-deck .card {
+  min-width: 80vw;
+  font-size: 14px;
+}
+
+input[type="text"]
+{
+    font-size:14px;
+}
+
+.card-body {
+  padding: 0px;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+}
+
+.form-group,  .card-title {
+    margin-bottom: 0.1px;
+  }
+
+.input-text-borderless:disabled {
+  border: none;
+  border-color: transparent;
+  background: transparent;
+}
+
+
+
+
+  label {
+    margin: 0px;
+    display: flex;
+    align-items: center;
+    /* justify-content: flex-end; */
+    
+  }
+
+  input {
+    margin: 0px;
+  }
+
+  .generate-button {
+    padding: 20px 30px;
+    font-size: 20px;
+    border-radius: 50px;
+  }

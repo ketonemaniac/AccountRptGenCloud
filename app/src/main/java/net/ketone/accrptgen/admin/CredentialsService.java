@@ -5,10 +5,9 @@ import java.util.Properties;
 
 public interface CredentialsService {
 
-    public static final String SENDGRID_API_KEY_PROP = "mail.sendgrid.api-key";
-    public static final String SEND_TO_PROP = "mail.sendto";
-    public static final String PREPARSE_TEMPLATE_PROP = "xlsx.template.name";
-
+    String SENDGRID_API_KEY_PROP = "mail.sendgrid.api-key";
+    String SEND_TO_PROP = "mail.sendto";
+    String PREPARSE_TEMPLATE_PROP = "xlsx.template.name";
 
     Properties getCredentials();
 

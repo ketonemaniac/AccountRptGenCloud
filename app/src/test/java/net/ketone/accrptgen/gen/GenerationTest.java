@@ -27,6 +27,8 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.Date;
 
+import static net.ketone.accrptgen.config.Constants.CREDENTIALS_FILE;
+import static net.ketone.accrptgen.config.Constants.TEMPLATE_FILE;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
@@ -60,9 +62,9 @@ public class GenerationTest {
                 }
             });
             String apiKey = CredentialsService.SENDGRID_API_KEY_PROP + "=1234567890";
-            Mockito.when(storageService.loadAsInputStream(eq(FileBasedCredentialsService.CREDENTIALS_FILE))).thenReturn(new ByteArrayInputStream(apiKey.getBytes()));
+            Mockito.when(storageService.loadAsInputStream(eq(CREDENTIALS_FILE))).thenReturn(new ByteArrayInputStream(apiKey.getBytes()));
 
-            Mockito.when(storageService.loadAsInputStream(eq("template.docx"))).thenCallRealMethod();
+            Mockito.when(storageService.loadAsInputStream(eq(TEMPLATE_FILE))).thenCallRealMethod();
 
             return storageService;
         }

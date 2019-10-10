@@ -23,6 +23,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static net.ketone.accrptgen.config.Constants.TEMPLATE_FILE;
+
 /**
  * Try http://www.javatechblog.com/java/create-header-and-footer-for-word-documents-using-docx4j/
  * https://stackoverflow.com/questions/23601516/create-docx-using-docx4j-with-multiple-headers
@@ -77,9 +79,9 @@ public class GenerationServiceApachePOI implements GenerationService {
         XWPFDocument document = null;
         try {
 //            document = new XWPFDocument(new FileInputStream(file));
-            document = new XWPFDocument(storageService.loadAsInputStream("template.docx"));
+            document = new XWPFDocument(storageService.loadAsInputStream(TEMPLATE_FILE));
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error in opening template.docx", e);
+            logger.log(Level.SEVERE, "Error in opening " + TEMPLATE_FILE, e);
             throw new RuntimeException(e);
         }
         List<XWPFParagraph> contentParagraphs = document.getParagraphs();

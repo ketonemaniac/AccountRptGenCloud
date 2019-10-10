@@ -69,4 +69,9 @@ public class MemcacheStorageService implements StorageService {
     public void delete(String filename) {
         cache.remove(FILE_PREFIX+filename);
     }
+
+    @Override
+    public boolean hasFile(String filename) {
+        return cache.containsKey(FILE_PREFIX + filename);
+    }
 }

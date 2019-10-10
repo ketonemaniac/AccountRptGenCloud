@@ -10,10 +10,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 
+import static net.ketone.accrptgen.config.Constants.CREDENTIALS_FILE;
+
 @Service
 public class FileBasedCredentialsService implements CredentialsService {
-
-    public static String CREDENTIALS_FILE = "credentials.properties";
 
     @Autowired
     @Qualifier("persistentStorage")

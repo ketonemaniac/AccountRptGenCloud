@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
+import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,6 +24,9 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import static net.ketone.accrptgen.config.Constants.STATUS_QUEUE_ENDPOINT;
+import static net.ketone.accrptgen.config.Constants.STATUS_QUEUE_NAME;
 
 @Service
 @Profile({"gCloudStandard","gCloudFlexible"})
@@ -68,6 +72,8 @@ public class MemcacheStatisticsService implements StatisticsService {
 
     @Override
     public void updateTask(AccountFileDto dto) throws IOException {
+        logger.info("update task company=" + dto.getCompany() + " status=" + dto.getStatus()
+         + " generationTime=" + dto.getGenerationTime());
         String key = ""+dto.getGenerationTime().getTime();
         TreeMap<String, AccountFileDto> recents =(TreeMap<String, AccountFileDto>)
                 cache.getOrDefault(RECENTS, new TreeMap<String, AccountFileDto>());
@@ -85,13 +91,14 @@ public class MemcacheStatisticsService implements StatisticsService {
             existingDto.setCompany(dto.getCompany());
             existingDto.setStatus(dto.getStatus());
         }
-        if(AccountFileDto.Status.EMAIL_SENT.equals(dto.getStatus()) ||
-            AccountFileDto.Status.FAILED.equals(dto.getStatus())) {
+        if(Constants.Status.EMAIL_SENT.name().equals(dto.getStatus()) ||
+            Constants.Status.FAILED.name().equals(dto.getStatus())) {
+            logger.info("queuing status=" + dto.getStatus());
             // only put TERMINAL status to file
-            Queue queue = QueueFactory.getQueue("statistics-queue");
+            Queue queue = QueueFactory.getQueue(STATUS_QUEUE_NAME);
             TaskOptions task = TaskOptions.Builder
                     .withMethod(TaskOptions.Method.POST)
-                    .url("/updateStat")
+                    .url(STATUS_QUEUE_ENDPOINT)
                     .param("dto", mapper.writeValueAsString(recents.get(key)));
             queue.add(task);
         }
@@ -115,7 +122,7 @@ public class MemcacheStatisticsService implements StatisticsService {
      * @return
      * @throws IOException
      */
-    @PostMapping("/updateStat")
+    @PostMapping(STATUS_QUEUE_ENDPOINT)
     public String doSaveStat(@RequestParam("dto") String dto) throws IOException {
         logger.info("Updating statistics for " + dto);
         fileBasedStatisticsService.updateTask(mapper.readValue(dto, AccountFileDto.class));

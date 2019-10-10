@@ -7,7 +7,7 @@ import java.util.Date;
 
 public interface TasksService {
 
-    AccountFileDto submitTask(Date generationTime) throws IOException;
+    AccountFileDto submitTask(String cacheFilename, String company, String referredBy) throws IOException;
 
     boolean terminateTask(String task);
 }

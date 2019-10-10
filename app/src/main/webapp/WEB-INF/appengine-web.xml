@@ -10,9 +10,9 @@
         <property name="java.util.logging.config.file" value="WEB-INF/classes/logging.properties"/>
         <!-- switch between environments -->
         <!-- staging -->
-        <!-- property name="spring.profiles.active" value="staging,gCloudStandard" / -->
+        <property name="spring.profiles.active" value="staging,gCloudStandard" />
         <!-- prod -->
-        <property name="spring.profiles.active" value="prod,gCloudStandard" />
+        <!-- property name="spring.profiles.active" value="prod,gCloudStandard" / -->
     </system-properties>
     <instance-class>B4_1G</instance-class>
     <basic-scaling>

@@ -1,21 +1,22 @@
 package net.ketone.accrptgen.stats;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.dto.AccountFileDto;
-import net.ketone.accrptgen.dto.StatisticDto;
 import net.ketone.accrptgen.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import static net.ketone.accrptgen.config.Constants.HISTORY_FILE;
 
 @Service
 public class FileBasedStatisticsService implements StatisticsService {
@@ -24,19 +25,22 @@ public class FileBasedStatisticsService implements StatisticsService {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    // all history, latest first
-    public static String HISTORY_FILE = "history.txt";
-
     @Autowired
     @Qualifier("persistentStorage")
     private StorageService storageService;
+    @Autowired
+    private StorageService cache;
 
 
     @Override
     public List<AccountFileDto> getRecentTasks() {
         try {
             Deque<AccountFileDto> lines = loadHistoryFileToDeque();
-            return lines.stream().limit(StatisticsService.MAX_RECENTS).collect(Collectors.toList());
+            return lines.stream()
+                    .limit(StatisticsService.MAX_RECENTS)
+                    .filter(dto -> (dto.getStatus() != null && !dto.getStatus().equals(Constants.Status.EMAIL_SENT.name()))
+                            || cache.hasFile(dto.getFilename()+".zip"))
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             logger.log(Level.WARNING, "Cannot read from " + HISTORY_FILE, e);
         }
@@ -69,7 +73,8 @@ public class FileBasedStatisticsService implements StatisticsService {
     }
 
     private String getFilenameOfDate(LocalDate lineDate) {
-        return "history-" + lineDate.format(DateTimeFormatter.ofPattern("yyyyMM")) + ".txt";
+        String[] historyFileStr = HISTORY_FILE.split(".");
+        return historyFileStr[0] + lineDate.format(DateTimeFormatter.ofPattern("yyyyMM")) + "\\." + historyFileStr[1];
     }
 
     @Override

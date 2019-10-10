@@ -4,22 +4,23 @@ Accounting Report Generator on Google Cloud. Runs with Spring boot with a Bootst
 *Since this is a public domain, Google account keys and the Proprietory Accounting Excel is not uploaded to Github* 
 
 ## Run ##
-In the root module run the following to run browsify the web content (main.js)
+In the root module run the following to run react build the web content (main.js)
 `mvn clean install`
 
 Running locally in IDE without google services
 * Include spring-boot-starter-tomcat in app's pom.xml
+* Use war in packaging
 * Main class: net.ketone.accrptgen.AccrptgenApplication
 * VM options: `-Dspring.profiles.active=local`
 * Run in app folder
 
 Local run with google services
-* make sure you have the right enviromenet set in appengine-web.xml. Default points to staging
+* make sure you have the right environment set in appengine-web.xml. Default points to staging
 * Put in Enviroment variable GOOGLE_APPLICATION_CREDENTIALS for access to different buckets
-* Run `mvn appengine:run` in app folder
+* Run `mvn clean package` then `mvn appengine:run` in app folder
 
 To deploy to google cloud
-* make sure you have the right enviromenet set in appengine-web.xml.
+* make sure you have the right environment set in appengine-web.xml.
 * Run `mvn appengine:deploy`
 
 ## Setup google services ## 

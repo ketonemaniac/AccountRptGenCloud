@@ -8,11 +8,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 public interface GenerationService {
 
-    final static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA);
+    static String getFileName(String companyName, Date generationTime) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA);
+        return companyName + "-" + sdf.format(generationTime);
+    }
 
     byte[] generate(AccountData data) throws IOException;
 

@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.gen;
 
+import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.stats.StatisticsService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.entity.AccountData;
@@ -37,6 +38,7 @@ public class Pipeline implements Runnable {
     private GenerationService generationService;
     @Autowired
     private ParsingService parsingService;
+    // in cloud this is just the cache
     @Autowired
     private StorageService storageService;
     @Autowired
@@ -49,21 +51,23 @@ public class Pipeline implements Runnable {
     private String companyName;
     private Date generationTime;
     private String filename;
+    private String cacheFilename;
 
-    public Pipeline(Date generationTime) {
+    public Pipeline(String cacheFilename, Date generationTime, String companyName) {
         this.generationTime = generationTime;
+        this.cacheFilename = cacheFilename;
+        this.companyName = companyName;
     }
 
     @Override
     public void run() {
-        String inputFileName = generationTime.getTime() + ".xlsm";
+        String inputFileName = cacheFilename + ".xlsm";
         logger.info("Opening file: " + inputFileName);
         try {
+            filename = GenerationService.getFileName(companyName, generationTime);
+
             byte[] workbookArr = storageService.load(inputFileName);
             XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(workbookArr));
-            companyName = parsingService.extractCompanyName(workbook);
-            filename = companyName + "-" + GenerationService.sdf.format(generationTime);
-
             byte[] preParseOutput = parsingService.preParse(workbook);
 
             Attachment inputXlsx = new Attachment(filename + "-plain.xlsm", workbookArr);
@@ -102,7 +106,7 @@ public class Pipeline implements Runnable {
             dto.setCompany(companyName);
             dto.setFilename(filename);
             dto.setGenerationTime(generationTime);
-            dto.setStatus(AccountFileDto.Status.EMAIL_SENT.name());
+            dto.setStatus(Constants.Status.EMAIL_SENT.name());
             logger.info("Updating statistics for " + filename);
             statisticsService.updateTask(dto);
             logger.info("Operation complete for " + filename);
@@ -113,13 +117,13 @@ public class Pipeline implements Runnable {
             dto.setCompany(companyName);
             dto.setFilename(filename);
             dto.setGenerationTime(generationTime);
-            dto.setStatus(AccountFileDto.Status.FAILED.name());
+            dto.setStatus(Constants.Status.FAILED.name());
             try {
                 statisticsService.updateTask(dto);
             } catch (IOException e1) {
                 logger.log(Level.WARNING, "History file write failed", e1);
             }
-            throw new RuntimeException(e);
+//            throw new RuntimeException(e);
         }
 
     }
