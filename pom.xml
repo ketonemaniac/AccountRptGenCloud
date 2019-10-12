@@ -5,8 +5,15 @@
 
 	<groupId>net.ketone</groupId>
 	<artifactId>accrptgen</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.1.1.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
 
 	<name>accrptgen</name>
 	<description>Demo project for Spring Boot</description>
@@ -14,6 +21,28 @@
 	<modules>
 		<module>client</module>
 		<module>app</module>
+        <module>cloud</module>
+		<module>local</module>
 	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>net.ketone</groupId>
+				<artifactId>accrptgen-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.ketone</groupId>
+				<artifactId>accrptgen-app</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.ketone</groupId>
+				<artifactId>accrptgen-cloud</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 </project>

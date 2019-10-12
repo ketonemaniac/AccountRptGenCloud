@@ -5,8 +5,16 @@
 
 	<groupId>net.ketone</groupId>
 	<artifactId>accrptgen-client</artifactId>
-	<version>1.0.2-SNAPSHOT</version>
+
+	<parent>
+		<artifactId>accrptgen</artifactId>
+		<groupId>net.ketone</groupId>
+		<version>1.0.1-SNAPSHOT</version>
+	</parent>
+
 	<packaging>jar</packaging>
+
+
 
 	<name>accrptgen client</name>
 	<description>Accounting Report Generator React Client</description>

@@ -26,3 +26,8 @@ nbdist/
 /files
 /.mvn
 /.metadata
+
+/web
+/local/files/**
+**/accountrptgen.log*
+client/out
