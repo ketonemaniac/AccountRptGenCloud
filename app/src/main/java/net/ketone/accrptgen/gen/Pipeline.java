@@ -48,15 +48,13 @@ public class Pipeline implements Runnable {
     @Autowired
     private TasksService tasksService;
 
-    private String companyName;
-    private Date generationTime;
     private String filename;
     private String cacheFilename;
+    private AccountFileDto dto;
 
-    public Pipeline(String cacheFilename, Date generationTime, String companyName) {
-        this.generationTime = generationTime;
-        this.cacheFilename = cacheFilename;
-        this.companyName = companyName;
+    public Pipeline(AccountFileDto dto) {
+        this.cacheFilename = String.valueOf(dto.getGenerationTime().getTime());
+        this.dto = dto;
     }
 
     @Override
@@ -64,7 +62,7 @@ public class Pipeline implements Runnable {
         String inputFileName = cacheFilename + ".xlsm";
         logger.info("Opening file: " + inputFileName);
         try {
-            filename = GenerationService.getFileName(companyName, generationTime);
+            filename = GenerationService.getFileName(dto.getCompany(), dto.getGenerationTime());
 
             byte[] workbookArr = storageService.load(inputFileName);
             XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(workbookArr));
@@ -77,7 +75,7 @@ public class Pipeline implements Runnable {
             logger.info("template Closing input file stream, " + preParseOutput.length + "_bytes");
             logger.info("Start parse operation for " + filename);
             AccountData data = parsingService.readFile(preParseOutput);
-            data.setGenerationTime(generationTime);
+            data.setGenerationTime(dto.getGenerationTime());
             logger.info("template finished parsing, sections=" + data.getSections().size());
 
             // remove sheets and stringify contents
@@ -95,28 +93,23 @@ public class Pipeline implements Runnable {
             Attachment doc = new Attachment(filename + ".docx", generatedDoc);
             Attachment template = new Attachment(filename + "-allDocs.xlsm", os.toByteArray());
             List<Attachment> attachments = Arrays.asList(doc, template, inputXlsx);
-            emailService.sendEmail(companyName, attachments);
+            emailService.sendEmail(dto, attachments);
 
             // zip files and store them just in case needed
             Map<String, byte[]> zipInput = attachments.stream()
                     .collect(Collectors.toMap(Attachment::getAttachmentName, Attachment::getData));
             storageService.store(ZipUtils.zipFiles(zipInput), filename + ".zip");
 
-            AccountFileDto dto = new AccountFileDto();
-            dto.setCompany(companyName);
             dto.setFilename(filename);
-            dto.setGenerationTime(generationTime);
             dto.setStatus(Constants.Status.EMAIL_SENT.name());
             logger.info("Updating statistics for " + filename);
             statisticsService.updateTask(dto);
             logger.info("Operation complete for " + filename);
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             logger.log(Level.WARNING, "Generation failed", e);
             AccountFileDto dto = new AccountFileDto();
-            dto.setCompany(companyName);
             dto.setFilename(filename);
-            dto.setGenerationTime(generationTime);
             dto.setStatus(Constants.Status.FAILED.name());
             try {
                 statisticsService.updateTask(dto);

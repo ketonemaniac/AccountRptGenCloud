@@ -1,10 +1,12 @@
 package net.ketone.accrptgen.mail;
 
+import net.ketone.accrptgen.dto.AccountFileDto;
+
 import java.io.InputStream;
 import java.util.List;
 
 public interface EmailService {
 
-    void sendEmail(String companyName, List<Attachment> attachments) throws Exception;
+    void sendEmail(AccountFileDto dto, List<Attachment> attachments) throws Exception;
 
 }

@@ -16,6 +16,8 @@ public class AccountFileDto implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "Asia/Shanghai")
     private Date generationTime;
     private String status;
+    private String referredBy;
+    private String submittedBy;
 
     private String handleName;      // For GCloudStandard, ID in queue
 }

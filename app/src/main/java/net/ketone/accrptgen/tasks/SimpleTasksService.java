@@ -24,16 +24,10 @@ public class SimpleTasksService implements TasksService {
 
 
     @Override
-    public AccountFileDto submitTask(String cacheFilename, String company, String referredBy) throws IOException {
+    public AccountFileDto submitTask(AccountFileDto dto) throws IOException {
 
-        AccountFileDto dto = new AccountFileDto();
-        dto.setGenerationTime(new Date(Long.parseLong(cacheFilename)));
-        dto.setFilename(GenerationService.getFileName(company, dto.getGenerationTime()));
-        dto.setCompany(company);
-        dto.setStatus(Constants.Status.GENERATING.name());
-        statisticsService.updateTask(dto);
 
-        Pipeline pipeline = ctx.getBean(Pipeline.class, cacheFilename, dto.getGenerationTime(), company);
+        Pipeline pipeline = ctx.getBean(Pipeline.class, dto);
         new Thread(pipeline).start();
 
         return dto;

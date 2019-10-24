@@ -16,6 +16,7 @@ Local run with google services (cloud)
 * make sure you have the right environment set in /cloud module's appengine-web.xml. Possible values are staging,prod
 * Put in Enviroment variable GOOGLE_APPLICATION_CREDENTIALS for access to different buckets
 * Run `mvn clean package` in root, then `mvn appengine:run` in cloud folder
+* go to http://localhost:8080/_ah/admin to see task queues being set up
 
 To deploy to google cloud
 * make sure you have the right environment set in appengine-web.xml.

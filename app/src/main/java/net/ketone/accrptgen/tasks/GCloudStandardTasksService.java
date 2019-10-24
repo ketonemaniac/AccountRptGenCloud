@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.tasks;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskHandle;
@@ -32,6 +33,8 @@ public class GCloudStandardTasksService implements TasksService {
 
     private static final Logger logger = Logger.getLogger(GCloudStandardTasksService.class.getName());
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     @Autowired
     private StatisticsService statisticsService;
     @Autowired
@@ -42,22 +45,14 @@ public class GCloudStandardTasksService implements TasksService {
     private ApplicationContext ctx;
 
     @Override
-    public AccountFileDto submitTask(String cacheFilename, String company, String referredBy) throws IOException {
+    public AccountFileDto submitTask(AccountFileDto dto) throws IOException {
         Queue queue = QueueFactory.getQueue(GEN_QUEUE_NAME);
-//        Queue queue = QueueFactory.getDefaultQueue();
+        logger.info("before submit:" + mapper.writeValueAsString(dto));
         TaskHandle handle = queue.add(TaskOptions.Builder.withUrl(GEN_QUEUE_ENDPOINT)
-                .param("companyName", company)
-                .param("generationTime", cacheFilename)
+                .payload(mapper.writeValueAsString(dto).getBytes(), "application/json")
+                // .param("accountFileDto", mapper.writeValueAsString(dto))
         );
         logger.info("Handle Created: " + handle.getName());
-
-        AccountFileDto dto = new AccountFileDto();
-        dto.setGenerationTime(new Date(Long.parseLong(cacheFilename)));
-        dto.setFilename(GenerationService.getFileName(company, dto.getGenerationTime()));
-        dto.setCompany(company);
-        dto.setStatus(Constants.Status.PENDING.name());
-        dto.setHandleName(handle.getName());
-        statisticsService.updateTask(dto);
         return dto;
     }
 
@@ -68,22 +63,20 @@ public class GCloudStandardTasksService implements TasksService {
     }
 
     @PostMapping(GEN_QUEUE_ENDPOINT)
-    public String doWork(@RequestParam("companyName") String companyName,
-                         @RequestParam("generationTime") String generationTime
-                         ) {
-
-        AccountFileDto dto = new AccountFileDto();
-        dto.setCompany(companyName);
-        dto.setFilename(generationTime);
-        dto.setGenerationTime(new Date(Long.parseLong(generationTime)));
+    // public String doWork(@RequestParam("accountFileDto") AccountFileDto dto) {
+    public String doWork(@RequestBody AccountFileDto dto) {
+        logger.info("inside doWork() " + dto.toString());
         dto.setStatus(Constants.Status.GENERATING.name());
         try {
             statisticsService.updateTask(dto);
+            logger.info("doWork() updated task");
         } catch (IOException e) {
             logger.log(Level.WARNING, "History file write failed (GENERATING)", e);
             return "NOT OK";
         }
-        Pipeline pipeline = ctx.getBean(Pipeline.class, dto.getFilename(), dto.getGenerationTime(), companyName);
+        logger.info("doWork() get bean");
+        Pipeline pipeline = ctx.getBean(Pipeline.class, dto);
+        logger.info("doWork() pipeline run");
         pipeline.run();
         return "OK";
     }

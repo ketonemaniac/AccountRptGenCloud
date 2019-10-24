@@ -20,6 +20,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,10 +34,8 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RestController
@@ -59,6 +62,15 @@ public class AccRptGenController {
     @Value("${build.timestamp}")
     private String buildTimestamp;
 
+    private String getAuthenticatedUser() {
+        try {
+            return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        } catch (Exception e) {
+            return "Anonymous";
+        }
+    }
+
+
     @RequestMapping("/version")
     public Map<String, String> getVersion() {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -67,6 +79,7 @@ public class AccRptGenController {
         Map<String, String> verMap = new HashMap<>();
         verMap.put("version", buildVersion);
         verMap.put("timestamp" , timestamp);
+        verMap.put("user" , getAuthenticatedUser());
         return verMap;
     }
 
@@ -86,25 +99,31 @@ public class AccRptGenController {
         dto.setFilename(String.valueOf(generationTime.getTime()));
         dto.setGenerationTime(generationTime);
         dto.setStatus(Constants.Status.PRELOADED.name());
+        dto.setSubmittedBy(getAuthenticatedUser());
         statisticsService.updateTask(dto);
         return dto;
     }
 
     @PostMapping("/startGeneration")
-    public AccountFileDto startGeneration(@RequestParam("filename") String cacheFilename,
-                                          @RequestParam("company") String company,
-                                          @RequestParam("referredBy") String referredBy) throws IOException {
-        logger.info("cacheFilename=" + cacheFilename + "; referredBy=" + referredBy);
+    public AccountFileDto startGeneration(AccountFileDto requestDto) throws IOException {
+        logger.info("cacheFilename=" + requestDto.getFilename() + "; referredBy=" + requestDto.getReferredBy());
+        AccountFileDto dto = new AccountFileDto();
         try {
-            return tasksService.submitTask(cacheFilename, company, referredBy);
+            dto.setCompany(requestDto.getCompany());
+            dto.setGenerationTime(new Date(Long.parseLong(requestDto.getFilename())));
+            dto.setFilename(GenerationService.getFileName(requestDto.getFilename(), dto.getGenerationTime()));
+            dto.setStatus(Constants.Status.PENDING.name());
+            dto.setReferredBy(requestDto.getReferredBy());
+            dto.setSubmittedBy(getAuthenticatedUser());
+            tasksService.submitTask(dto);
+            statisticsService.updateTask(dto);
         } catch (Exception e) {
-            AccountFileDto dto = new AccountFileDto();
-            dto.setCompany(company);
-            dto.setFilename(cacheFilename);
+            logger.log(Level.SEVERE, "Error in startGeneration", e);
             dto.setStatus(Constants.Status.FAILED.name());
             statisticsService.updateTask(dto);
-            return dto;
         }
+        return dto;
+
     }
 
 

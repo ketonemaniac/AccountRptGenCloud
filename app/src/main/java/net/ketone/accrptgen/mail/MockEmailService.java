@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.mail;
 
+import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,7 +22,7 @@ public class MockEmailService implements EmailService {
     private static final Logger logger = Logger.getLogger(MockEmailService.class.getName());
 
     @Override
-    public void sendEmail(String companyName, List<Attachment> attachments) throws Exception {
+    public void sendEmail(AccountFileDto dto, List<Attachment> attachments) throws Exception {
         for(Attachment attachment : attachments) {
             logger.info("storing file " + attachment.getAttachmentName());
             storageSvc.store(attachment.getData(), attachment.getAttachmentName());

@@ -18,6 +18,7 @@ package net.ketone.accrptgen.mail;
 
 import com.sendgrid.SendGrid;
 import net.ketone.accrptgen.admin.CredentialsService;
+import net.ketone.accrptgen.dto.AccountFileDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -63,7 +64,7 @@ public class SendgridEmailService implements EmailService {
     }
 
     @Override
-    public void sendEmail(String companyName, List<Attachment> attachments) throws Exception {
+    public void sendEmail(AccountFileDto dto, List<Attachment> attachments) throws Exception {
         if(!SENDGRID_ENABLE) return;
         SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
         SendGrid.Email email = new SendGrid.Email();
@@ -74,8 +75,8 @@ public class SendgridEmailService implements EmailService {
         if(!StringUtils.isEmpty(EMAIL_BCC)) {
             email.setBcc(new String[]{EMAIL_BCC});
         }
-        email.setSubject("Accounting Report For " + companyName);
-        email.setText("Please find the accounting report for " + companyName + " as attached.");
+        email.setSubject("Accounting Report For " + dto.getCompany());
+        email.setText("Please find the accounting report for " + dto.getCompany() + " as attached. Referred by " + dto.getReferredBy());
 
         for(Attachment attachment : attachments) {
             InputStream data = new ByteArrayInputStream(attachment.getData());
