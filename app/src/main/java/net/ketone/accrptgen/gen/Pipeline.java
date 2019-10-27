@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.gen;
 
+import net.ketone.accrptgen.auth.service.UserService;
 import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.stats.StatisticsService;
 import net.ketone.accrptgen.dto.AccountFileDto;

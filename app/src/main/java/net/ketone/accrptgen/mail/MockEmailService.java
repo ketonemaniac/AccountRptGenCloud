@@ -1,5 +1,7 @@
 package net.ketone.accrptgen.mail;
 
+import net.ketone.accrptgen.auth.model.User;
+import net.ketone.accrptgen.auth.service.UserService;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import net.ketone.accrptgen.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,13 +9,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 @Profile("local")
-public class MockEmailService implements EmailService {
+public class MockEmailService extends AbstractEmailService {
 
     @Autowired
     private StorageService storageSvc;
@@ -23,6 +30,10 @@ public class MockEmailService implements EmailService {
 
     @Override
     public void sendEmail(AccountFileDto dto, List<Attachment> attachments) throws Exception {
+        Map<String, String[]> recipients = getEmailAddresses(dto);
+        recipients.forEach((k,v) -> {
+            logger.info(k + ":" + Arrays.asList(v).stream().collect(Collectors.joining(";")));
+        });
         for(Attachment attachment : attachments) {
             logger.info("storing file " + attachment.getAttachmentName());
             storageSvc.store(attachment.getData(), attachment.getAttachmentName());

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -85,20 +86,17 @@ public class FileBasedStatisticsService implements StatisticsService {
         Deque<AccountFileDto> lines = loadHistoryFileToDeque();
 
         // check whether this is the update of an existing line
-        boolean isUpdate = false;
-        for(AccountFileDto lineDto : lines) {
-            if(lineDto.getFilename() == null) {
-                logger.warning("lineDto: " + objectMapper.writeValueAsString(lineDto));
-            }
-            else if(lineDto.getFilename().equals(dto.getFilename())) {
-                lineDto.setStatus(dto.getStatus());
-                isUpdate = true;
-            }
+        Optional<AccountFileDto> existingDto = lines.stream()
+                .filter(lineDto -> Optional.ofNullable(lineDto.getGenerationTime())
+                .orElse(Date.from(Instant.EPOCH)).equals(
+                        Optional.ofNullable(dto.getGenerationTime()).orElse(new Date())))
+                .findFirst();
+        if(existingDto.isPresent()) {
+            lines.remove(existingDto.get());
         }
-        if(!isUpdate) {
-            // we need to put the task at the first line, that is why we need Deque
-            lines.offerFirst(dto);
-        }
+        // we need to put the task at the first line, that is why we need Deque
+        lines.offerFirst(dto);
+
 
         writeHistoryFileFromQueue(lines);
     }

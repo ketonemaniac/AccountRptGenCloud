@@ -36,9 +36,9 @@ public class InitialDataLoader {
                 new InputStreamReader(resource)) ) {
                     reader.lines().forEach(line -> {
                         String[] userPass = line.split(",");
-                        User user = new User();
-                        user.setUsername(userPass[0]);
-                        user.setPassword(userPass[1]);
+                        User user = User.builder().username(userPass[0])
+                                .password(userPass[1])
+                                .email(userPass[2]).build();
 //                        userStr.add(line);
                         logger.info("saving user " + user.getUsername());
                         userService.save(user);
