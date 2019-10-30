@@ -67,6 +67,7 @@ public class AccRptGenController {
         return Optional.ofNullable(SecurityContextHolder.getContext())
                 .map(SecurityContext::getAuthentication)
                 .map(Authentication::getPrincipal)
+                .filter(User.class::isInstance)
                 .map(User.class::cast)
                 .map(User::getUsername)
                 .orElse("Anonymous");

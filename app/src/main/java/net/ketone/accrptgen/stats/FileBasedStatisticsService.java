@@ -39,8 +39,9 @@ public class FileBasedStatisticsService implements StatisticsService {
             Deque<AccountFileDto> lines = loadHistoryFileToDeque();
             return lines.stream()
                     .limit(StatisticsService.MAX_RECENTS)
-                    .filter(dto -> (dto.getStatus() != null && !dto.getStatus().equals(Constants.Status.EMAIL_SENT.name()))
-                            || cache.hasFile(dto.getFilename()+".zip"))
+                    .filter(dto -> (dto.getStatus() != null && (dto.getStatus().equals(Constants.Status.PENDING.name()) || dto.getStatus().equals(Constants.Status.GENERATING.name())))
+                            || cache.hasFile(dto.getFilename()+".zip")
+                            || cache.hasFile(dto.getFilename()+".xlsm"))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             logger.log(Level.WARNING, "Cannot read from " + HISTORY_FILE, e);

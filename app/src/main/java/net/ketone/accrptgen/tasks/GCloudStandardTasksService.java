@@ -69,14 +69,11 @@ public class GCloudStandardTasksService implements TasksService {
         dto.setStatus(Constants.Status.GENERATING.name());
         try {
             statisticsService.updateTask(dto);
-            logger.info("doWork() updated task");
         } catch (IOException e) {
             logger.log(Level.WARNING, "History file write failed (GENERATING)", e);
             return "NOT OK";
         }
-        logger.info("doWork() get bean");
         Pipeline pipeline = ctx.getBean(Pipeline.class, dto);
-        logger.info("doWork() pipeline run");
         pipeline.run();
         return "OK";
     }
