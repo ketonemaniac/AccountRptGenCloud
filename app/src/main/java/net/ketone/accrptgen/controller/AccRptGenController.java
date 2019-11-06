@@ -98,9 +98,9 @@ public class AccRptGenController {
 
         AccountFileDto dto = new AccountFileDto();
         XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
+        dto.setId(UUID.randomUUID());
         dto.setCompany(parsingService.extractCompanyName(workbook));
         dto.setFilename(String.valueOf(generationTime.getTime()));
-        dto.setGenerationTime(generationTime);
         dto.setStatus(Constants.Status.PRELOADED.name());
         dto.setSubmittedBy(getAuthenticatedUser());
         statisticsService.updateTask(dto);
@@ -112,12 +112,13 @@ public class AccRptGenController {
         logger.info("cacheFilename=" + requestDto.getFilename() + "; referredBy=" + requestDto.getReferredBy());
         AccountFileDto dto = new AccountFileDto();
         try {
+            dto.setId(requestDto.getId());
             dto.setCompany(requestDto.getCompany());
-            dto.setGenerationTime(new Date(Long.parseLong(requestDto.getFilename())));
-            dto.setFilename(GenerationService.getFileName(requestDto.getFilename(), dto.getGenerationTime()));
+            dto.setFilename(requestDto.getFilename());
             dto.setStatus(Constants.Status.PENDING.name());
             dto.setReferredBy(requestDto.getReferredBy());
             dto.setSubmittedBy(getAuthenticatedUser());
+            dto.setGenerationTime(new Date());
             tasksService.submitTask(dto);
             statisticsService.updateTask(dto);
         } catch (Exception e) {
@@ -144,7 +145,7 @@ public class AccRptGenController {
 
     @GetMapping("/listFiles")
     public List<AccountFileDto> listFiles() {
-        return statisticsService.getRecentTasks();
+        return statisticsService.getRecentTasks(getAuthenticatedUser());
     }
 
     @GetMapping("/terminateTask/{id}")

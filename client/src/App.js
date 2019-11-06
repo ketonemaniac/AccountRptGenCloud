@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
 import logo from './logo.svg';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import AppHeader from './AppHeader.js';
@@ -19,6 +19,7 @@ import { faRedo } from '@fortawesome/free-solid-svg-icons'
 import Moment from 'react-moment';
 import Dropzone from 'react-dropzone';
 import axios from 'axios';
+import moment from 'moment';
 
 
 class App extends Component {
@@ -30,7 +31,8 @@ class App extends Component {
     fileUploadBlock: false,
     uploadError: null,
     isModalOpen: false
-  }
+  };
+  timer = null;
 
   // INIT ======================
   componentDidMount() {
@@ -44,12 +46,22 @@ class App extends Component {
     return axios.get('/listFiles')
       .catch(error => { console.log(error); throw Error(error) })
       .then(res => { 
-        var inProgress = res.data
-        .filter(company => company.status != null)
+        var inProgress = res.data.filter(company => company.status != null);
         // .filter(company => company.status != "EMAIL_SENT") ;
         this.setState({ companies: inProgress }) 
       });
 
+  }
+
+  componentDidUpdate() {
+    if(this.timer != null) {
+      clearTimeout(this.timer);      
+    }
+    if(this.state.companies.filter(c => (c.status == "PENDING" || c.status == "GENERATING")).length > 0) {
+      this.timer = setTimeout(() => {
+        this.getProgress();
+      }, 10000);
+    }
   }
 
 
@@ -80,7 +92,8 @@ class App extends Component {
             const companies = [ {
               company: res.data.company,
               filename: res.data.filename,
-              status: "PRELOADED"
+              status: "PRELOADED",
+              id: res.data.id
             }, ...state.companies ];
             return {
               companies : companies,
@@ -89,7 +102,6 @@ class App extends Component {
           });
         })
         .catch(e => {
-          console.log("gosh gosh");
           this.setState({
             uploadError: e.response.status + " " + JSON.stringify(e.response.data),
             fileUploadBlock: false,
@@ -200,7 +212,7 @@ class App extends Component {
         {this.state.companies
         .map((c, i) => {
           return (
-              <Card body outline color={c.status == "PRELOADED" ? "warning" : "default"}>
+              <Card key={c.id} body outline color={c.status == "PRELOADED" ? "warning" : "default"}>
                 <CardHeader>{c.company}</CardHeader>
                 <CardBody>
                 <Form className="form" onSubmit={this.handleStartGeneration}>
@@ -208,19 +220,14 @@ class App extends Component {
                     <Row>
                     <Col xs="12" lg="10">
                     <Container>
-                      <Input key={c.generationTime + "-filename"} type="hidden" name="filename" value={c.filename} />
-                      <Input key={c.generationTime + "-company"} type="hidden" name="company" value={c.company} />
+                      <Input key={c.id + "-id"} type="hidden" name="id" value={c.id} />
+                      <Input key={c.id + "-filename"} type="hidden" name="filename" value={c.filename} />
+                      <Input key={c.id + "-company"} type="hidden" name="company" value={c.company} />
+                      <Input key={c.id + "-submittedBy"} type="hidden" name="submittedBy" value={c.submittedBy} />
                       <FormGroup row>
                         <Label sm={3} for="referredBy">Referrer 
                           <span style={{"display": c.status == "PRELOADED" ? "block" : "none"}} className="text-muted">(Optional)</span></Label>
                           {this.renderReferredBy(c)}
-                      </FormGroup>
-                      <FormGroup row>
-                        <Label sm={3} for="status">Submitted By</Label>
-                        <Col sm={9}>
-                          <Input key={c.generationTime + "-submittedBy"} 
-                          className="input-text-borderless" type="text" disabled name="status" id="status" value={c.submittedBy} />
-                          </Col>
                       </FormGroup>
                       <FormGroup row>
                         <Label sm={3} for="status">Status</Label>
@@ -230,11 +237,8 @@ class App extends Component {
                           </Col>
                       </FormGroup>
                       <FormGroup row>
-                        <Label sm={3} for="status">Generation time</Label>
-                        <Col sm={9}>
-                          <Input key={c.generationTime + "-generationTime"} 
-                          className="input-text-borderless" type="text" disabled name="generationTime" id="generationTime" value={c.generationTime} />
-                          </Col>
+                        <Label sm={3} for="generationTime">Generation time</Label>
+                        {this.renderGenerationTime(c)}
                       </FormGroup>
                     </Container>
                     </Col>
@@ -261,14 +265,15 @@ class App extends Component {
     );
   }
 
-  renderGenerating() {
+
+  renderGenerating() {    
     if(this.state.companies.filter(c => (c.status == "PENDING" || c.status == "GENERATING")).length > 0) {
       return (
         <div>
         <Alert color="warning" className="px-5">
           A report generation is under progress. Please click to refresh 
-          <Button color="warning" className="mx-2" onClick={this.getProgress.bind(this)}
-          ><FontAwesomeIcon icon={faRedo} /></Button>
+          <Button color="warning" className="mx-2" onClick={this.getProgress.bind(this)}>
+            <FontAwesomeIcon icon={faRedo} /></Button>
         </Alert>
       </div>
       )
@@ -281,14 +286,14 @@ class App extends Component {
       case "PRELOADED":
         return (
           <Col sm={9}>
-            <Input key={company.generationTime + "-referredBy"}
+            <Input key={company.id + "-referredBy"}
             type="text" name="referredBy" id="referredBy" placeholder="The referrer's name to appear in email" />
           </Col>
         )
       default:
           return (
             <Col sm={9}>
-              <Input key={company.generationTime + "-referredBy"} className="input-text-borderless"
+              <Input key={company.id + "-referredBy"} className="input-text-borderless"
               disabled="disabled"
               type="text" name="referredBy" id="referredBy"
               value={company.referredBy} />
@@ -296,6 +301,30 @@ class App extends Component {
           )
       }            
   }
+
+  renderGenerationTime(company) {
+    moment.relativeTimeThreshold('ss', 0);
+    switch(company.status) {
+      case "PENDING":    
+      case "GENERATING":        
+        return (
+          <Col sm={9}>
+            <Input key={company.id + "-generationTime" } 
+            className="input-text-borderless" type="text" disabled name="generationTime" id="generationTime" 
+            value={company.generationTime  + " (Elapsed " + moment(company.generationTime).fromNow(true) + ")"} />
+          </Col>
+        )
+      default:
+        return (
+          <Col sm={9}>
+            <Input key={company.id + "-generationTime" } 
+            className="input-text-borderless" type="text" disabled name="generationTime" id="generationTime" 
+            value={company.generationTime} />
+          </Col>
+        )
+    }
+  }
+
 
   renderButton(company) {
     switch(company.status) {

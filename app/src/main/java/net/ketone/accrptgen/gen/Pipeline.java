@@ -54,7 +54,7 @@ public class Pipeline implements Runnable {
     private AccountFileDto dto;
 
     public Pipeline(AccountFileDto dto) {
-        this.cacheFilename = String.valueOf(dto.getGenerationTime().getTime());
+        this.cacheFilename = String.valueOf(dto.getFilename());
         this.dto = dto;
     }
 

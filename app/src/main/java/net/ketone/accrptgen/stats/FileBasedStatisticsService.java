@@ -34,10 +34,12 @@ public class FileBasedStatisticsService implements StatisticsService {
 
 
     @Override
-    public List<AccountFileDto> getRecentTasks() {
+    public List<AccountFileDto> getRecentTasks(String authenticatedUser) {
         try {
             Deque<AccountFileDto> lines = loadHistoryFileToDeque();
             return lines.stream()
+                    .filter(dto -> Optional.ofNullable(dto.getSubmittedBy()).isPresent())
+                    .filter(dto -> dto.getSubmittedBy().equals(authenticatedUser))
                     .limit(StatisticsService.MAX_RECENTS)
                     .filter(dto -> (dto.getStatus() != null && (dto.getStatus().equals(Constants.Status.PENDING.name()) || dto.getStatus().equals(Constants.Status.GENERATING.name())))
                             || cache.hasFile(dto.getFilename()+".zip")

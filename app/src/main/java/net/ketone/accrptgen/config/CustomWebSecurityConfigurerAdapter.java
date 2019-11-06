@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 
 import static net.ketone.accrptgen.config.Constants.GEN_QUEUE_ENDPOINT;
 import static net.ketone.accrptgen.config.Constants.STATUS_QUEUE_ENDPOINT;
@@ -39,9 +41,10 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
 //                .authorities("ROLE_USER");
 //    }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+
     }
 
     @Override
@@ -49,28 +52,26 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
         http
                 .csrf().disable()
                 .authorizeRequests()
-//                .antMatchers("/login").permitAll()
-//                .antMatchers("/doLogin").permitAll()
-//                .antMatchers("/admin.html").authenticated()
                 .antMatchers("/_ah/**").permitAll()
                 .antMatchers(GEN_QUEUE_ENDPOINT).permitAll()
                 .antMatchers(STATUS_QUEUE_ENDPOINT).permitAll()
+                .antMatchers("/login").permitAll()
 
 //                .anyRequest().permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().hasAuthority("GENERAL_ACCESS") // .authenticated()
 
                 .and()
                 .formLogin()
-//                .loginPage("/login")
-//                .loginProcessingUrl("/doLogin")
                 .defaultSuccessUrl("/", true)
-                //.failureUrl("/login.html?error=true")
-//                .failureHandler(authenticationFailureHandler())
                 .and()
                 .logout()
-//                .logoutUrl("/doLogout")
                 .deleteCookies("JSESSIONID")
-//                .logoutSuccessHandler(logoutSuccessHandler());
         ;
+    }
+
+
+    @Bean
+    public SecurityContextHolderAwareRequestFilter securityContextHolderAwareRequestFilter() {
+        return new SecurityContextHolderAwareRequestFilter();
     }
 }

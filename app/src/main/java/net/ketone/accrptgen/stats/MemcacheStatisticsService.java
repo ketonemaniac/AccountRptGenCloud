@@ -35,7 +35,7 @@ import static net.ketone.accrptgen.config.Constants.STATUS_QUEUE_NAME;
 public class MemcacheStatisticsService implements StatisticsService {
 
     private static final Logger logger = Logger.getLogger(MemcacheStatisticsService.class.getName());
-    private static final String RECENTS = "Recents";
+    private static final String RECENTS = "Recents-";
     private ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
@@ -46,18 +46,18 @@ public class MemcacheStatisticsService implements StatisticsService {
     private StatisticsService fileBasedStatisticsService;
 
     @Override
-    public List<AccountFileDto> getRecentTasks() {
+    public List<AccountFileDto> getRecentTasks(final String authenticatedUser) {
         TreeMap<String, AccountFileDto> recents = (TreeMap<String, AccountFileDto>)
-                cache.get(RECENTS);
+                cache.get(RECENTS + authenticatedUser);
         if(recents == null) {
             // default getting from service
             logger.info("Populating memcache...");
-            recents = fileBasedStatisticsService.getRecentTasks().stream().collect(
+            recents = fileBasedStatisticsService.getRecentTasks(authenticatedUser).stream().collect(
                     Collectors.toMap(dto -> ""+dto.getGenerationTime().getTime(),
                             Function.identity(),
                             (v1,v2) -> v1,
                             TreeMap::new));
-            cache.put(RECENTS, recents);
+            cache.put(RECENTS + authenticatedUser, recents);
         }
         return new ArrayList<>(recents.descendingMap().values());
     }
@@ -73,10 +73,10 @@ public class MemcacheStatisticsService implements StatisticsService {
     @Override
     public void updateTask(AccountFileDto dto) throws IOException {
         logger.info("update task company=" + dto.getCompany() + " status=" + dto.getStatus()
-         + " generationTime=" + dto.getGenerationTime());
-        String key = ""+dto.getGenerationTime().getTime();
+         + " generationTime=" + dto.getGenerationTime() + " id=" + dto.getId());
+        String key = dto.getId().toString();
         TreeMap<String, AccountFileDto> recents =(TreeMap<String, AccountFileDto>)
-                cache.getOrDefault(RECENTS, new TreeMap<String, AccountFileDto>());
+                cache.getOrDefault(RECENTS + dto.getSubmittedBy(), new TreeMap<String, AccountFileDto>());
 
         AccountFileDto existingDto = recents.get(key);
         if(existingDto == null) {
@@ -90,6 +90,9 @@ public class MemcacheStatisticsService implements StatisticsService {
             existingDto.setFilename(dto.getFilename());
             existingDto.setCompany(dto.getCompany());
             existingDto.setStatus(dto.getStatus());
+            existingDto.setSubmittedBy(dto.getSubmittedBy());
+            existingDto.setReferredBy(dto.getReferredBy());
+            existingDto.setGenerationTime(dto.getGenerationTime());
         }
         if(Constants.Status.EMAIL_SENT.name().equals(dto.getStatus()) ||
             Constants.Status.FAILED.name().equals(dto.getStatus())) {
@@ -103,7 +106,7 @@ public class MemcacheStatisticsService implements StatisticsService {
             queue.add(task);
         }
         // update cache
-        cache.put(RECENTS, recents);
+        cache.put(RECENTS + dto.getSubmittedBy(), recents);
         cache.put(dto.getHandleName(), existingDto == null ? dto : existingDto);
     }
 

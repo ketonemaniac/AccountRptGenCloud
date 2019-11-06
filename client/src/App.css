@@ -58,6 +58,7 @@ h3 {
 input[type="text"]
 {
     font-size:14px;
+    margin: 0px;
 }
 
 .card-body {
@@ -76,7 +77,9 @@ input[type="text"]
   background: transparent;
 }
 
-
+.formText {
+  padding: 6px 12px;
+}
 
 
   label {

@@ -62,6 +62,7 @@ public class FileBasedStatisticsServiceTest {
         dto.setGenerationTime(new Date());
         dto.setCompany("ABC Company Limited");
         dto.setStatus(Constants.Status.EMAIL_SENT.name());
+        dto.setSubmittedBy("user");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         dto.setFilename("ABC-"+ sdf.format(dto.getGenerationTime()) + ".docx");
         svc.updateTask(dto);
@@ -74,7 +75,7 @@ public class FileBasedStatisticsServiceTest {
         for(int i = 0; i <= FileBasedStatisticsService.MAX_RECENTS; i++) {
             doSave();
         }
-        List<AccountFileDto> dtos = svc.getRecentTasks();
+        List<AccountFileDto> dtos = svc.getRecentTasks("user");
         assertEquals(FileBasedStatisticsService.MAX_RECENTS, dtos.size());
     }
 
@@ -84,7 +85,7 @@ public class FileBasedStatisticsServiceTest {
         storageService.delete(HISTORY_FILE);
         AccountFileDto dto = doSave();
         svc.updateTask(dto);
-        List<AccountFileDto> dtos = svc.getRecentTasks();
+        List<AccountFileDto> dtos = svc.getRecentTasks("user");
         assertEquals(1, dtos.size());
     }
 

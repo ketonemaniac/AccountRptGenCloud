@@ -10,7 +10,7 @@ public interface StatisticsService {
 
     int MAX_RECENTS = 10;
 
-    List<AccountFileDto> getRecentTasks();
+    List<AccountFileDto> getRecentTasks(String authenticatedUser);
 
     /**
      *
