@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.mail;
 
+import com.google.common.collect.ImmutableMap;
 import net.ketone.accrptgen.admin.CredentialsService;
 import net.ketone.accrptgen.auth.model.User;
 import net.ketone.accrptgen.auth.service.UserService;
@@ -25,7 +26,7 @@ public abstract class AbstractEmailService implements EmailService {
 
 
     protected Map<String, String[]> getEmailAddresses(AccountFileDto dto) {
-        return Map.of(
+        return ImmutableMap.of(
                 "to", Optional.ofNullable(
                         userService.findByUsername(dto.getSubmittedBy()))
                         .map(User::getEmail)
