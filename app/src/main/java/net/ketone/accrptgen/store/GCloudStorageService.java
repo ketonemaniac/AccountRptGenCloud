@@ -104,4 +104,11 @@ public class GCloudStorageService implements StorageService {
         }
     }
 
+    @Override
+    public boolean hasFile(String filename) {
+        BlobId blobId = BlobId.of(BUCKET_NAME, filename);
+        Blob blob = storage.get(blobId);
+        return (blob != null);
+    }
+
 }

@@ -5,17 +5,16 @@
 
 	<groupId>net.ketone</groupId>
 	<artifactId>accrptgen-app</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging> <!-- for local and flexible env -->
+	<packaging>jar</packaging> <!-- for local and flexible env -->
+
 
 	<name>accrptgen app</name>
 	<description>Account Report Generator App</description>
 
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.5.9.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<artifactId>accrptgen</artifactId>
+		<groupId>net.ketone</groupId>
+		<version>2.0.0</version>
 	</parent>
 
 	<properties>
@@ -36,7 +35,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<exclusions>
-				<!-- exclude this when running on gCloudStandard -->
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-tomcat</artifactId>
@@ -47,26 +45,53 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+
+		<!-- Database-related -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- end database-related -->
+
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
-			<version>3.17</version>
 		</dependency>
 		<dependency>
 			<groupId>org.docx4j</groupId>
 			<artifactId>docx4j</artifactId>
-			<version>3.3.6</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.google.guava</groupId>
 					<artifactId>guava</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
+		<!-- dependency>
 			<groupId>net.ketone</groupId>
 			<artifactId>accrptgen-web</artifactId>
 			<version>${project.version}</version>
+		</dependency -->
+		<dependency>
+			<groupId>net.ketone</groupId>
+			<artifactId>accrptgen-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -91,21 +116,29 @@
 			<artifactId>spring-cloud-gcp-starter-storage</artifactId>
 			<version>${spring-starter-gcp.version}</version>
 		</dependency -->
-		<dependency>
+		<!-- dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud</artifactId>
 			<version>0.44.0-alpha</version>
+		</dependency -->
+		<!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-storage -->
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-storage</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-1.0-sdk</artifactId>
-			<version>1.9.50</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-logging</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
-			<scope>provided</scope>
+ 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -115,20 +148,18 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.16.20</version>
+			<version>1.18.8</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.7</version>
 		</dependency>
 
 		<!-- mail client -->
 		<dependency>
 			<groupId>com.sendgrid</groupId>
 			<artifactId>sendgrid-java</artifactId>
-			<version>2.2.2</version>
 		</dependency>
 
 	</dependencies>
@@ -145,19 +176,18 @@
 		</resources>
 
 		<plugins>
-			<plugin>
+			<!-- plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
+			</plugin -->
 			<plugin>
-				<groupId>com.google.cloud.tools</groupId>
-				<artifactId>appengine-maven-plugin</artifactId>
-				<version>1.3.1</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
 			</plugin>
 
 			<!-- use this to skip packaging into executable -->
 			<!-- this diverts the executable to another jar -->
-			<plugin>
+			<!-- plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>1.4.1.RELEASE</version>
@@ -171,7 +201,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin -->
 
 		</plugins>
 	</build>

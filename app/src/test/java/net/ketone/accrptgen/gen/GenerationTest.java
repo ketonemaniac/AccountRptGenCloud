@@ -6,6 +6,8 @@ import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.store.FileStorageService;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -25,6 +27,8 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.Date;
 
+import static net.ketone.accrptgen.config.Constants.CREDENTIALS_FILE;
+import static net.ketone.accrptgen.config.Constants.TEMPLATE_FILE;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
@@ -58,19 +62,23 @@ public class GenerationTest {
                 }
             });
             String apiKey = CredentialsService.SENDGRID_API_KEY_PROP + "=1234567890";
-            Mockito.when(storageService.loadAsInputStream(eq(FileBasedCredentialsService.CREDENTIALS_FILE))).thenReturn(new ByteArrayInputStream(apiKey.getBytes()));
+            Mockito.when(storageService.loadAsInputStream(eq(CREDENTIALS_FILE))).thenReturn(new ByteArrayInputStream(apiKey.getBytes()));
 
-            Mockito.when(storageService.loadAsInputStream(eq("template.docx"))).thenCallRealMethod();
+            Mockito.when(storageService.loadAsInputStream(eq(TEMPLATE_FILE))).thenCallRealMethod();
 
             return storageService;
         }
     }
 
-
-    // TODO: use profiles
     @Autowired
-    @Qualifier("generationServiceApachePOI")
     private GenerationService svc;
+
+    public static final String TEST_OUTPUT = "target/GenerationTest.docx";
+
+    @Before
+    public void init() {
+        new File(TEST_OUTPUT).delete();
+    }
 
     @Test
     public void testGeneration() throws IOException {
@@ -116,7 +124,15 @@ public class GenerationTest {
         header2.setText("COMPANY HEADER 2");
         s.addSectionElement(header2);
 
-        svc.generate(data);
+        byte[] outBytes = svc.generate(data);
+        Assertions.assertThat(outBytes.length).isGreaterThan(0);
 
+        // visiualize output
+        File output= new File(TEST_OUTPUT);
+        FileOutputStream out = new FileOutputStream(output);
+        out.write(outBytes);
+        out.close();
+
+        // manual assertion to see if file is valid...
     }
 }

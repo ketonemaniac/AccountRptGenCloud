@@ -9,6 +9,8 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.assertj.core.api.Assertions;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.*;
@@ -19,6 +21,15 @@ import java.text.NumberFormat;
  * Independent Tests for Apache POI workings
  */
 public class ApachePoiTest {
+
+
+    public static final String TEST_OUTPUT = "target/decimalsPercentages-out.xlsx";
+
+    @BeforeClass
+    public static void init() {
+        new File(TEST_OUTPUT).delete();
+    }
+
 
     @Test
     public void testDecimalPercentages() throws IOException {
@@ -60,7 +71,7 @@ public class ApachePoiTest {
         tgt2.setCellValue(src.getNumericCellValue());
 
         // check using Excel
-        FileOutputStream os = new FileOutputStream("decimalsPercentages-out.xlsx");
+        FileOutputStream os = new FileOutputStream(TEST_OUTPUT);
         wb2.write(os);
 
         String output = "";

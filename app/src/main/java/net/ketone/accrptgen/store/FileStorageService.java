@@ -64,4 +64,10 @@ public class FileStorageService implements StorageService {
         }
     }
 
+    @Override
+    public boolean hasFile(String filename) {
+        File f = new File(STORAGE_FOLDER + filename);
+        return f.exists();
+    }
+
 }

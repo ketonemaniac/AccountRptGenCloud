@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>accrptgen</artifactId>
+        <groupId>net.ketone</groupId>
+        <version>2.0.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>accrptgen-cloud</artifactId>
+    <packaging>war</packaging> <!-- for standard env -->
+
+    <properties>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+        <java.version>8</java.version>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
+
+    <dependencies>
+        <!-- need this when running local, but exclude this when running on gCloudStandard -->
+        <dependency>
+            <groupId>net.ketone</groupId>
+            <artifactId>accrptgen-app</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-jetty-managed-runtime</artifactId>
+            <version>1.9.15</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+    <plugins>
+        <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>appengine-maven-plugin</artifactId>
+            <version>2.0.0</version>
+            <configuration>
+                <devserver.host>0.0.0.0</devserver.host>
+                <devserver.port>8080</devserver.port>
+                <deploy.projectId>accountrptgen-hk-test</deploy.projectId>
+                <deploy.version>1</deploy.version>
+            </configuration>
+        </plugin>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-war-plugin</artifactId>
+            <version>2.6</version>
+            <configuration>
+                <failOnMissingWebXml>false</failOnMissingWebXml>
+            </configuration>
+        </plugin>
+
+    </plugins>
+    </build>
+    
+</project>
