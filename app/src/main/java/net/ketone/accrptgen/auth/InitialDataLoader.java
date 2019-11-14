@@ -25,8 +25,6 @@ public class InitialDataLoader {
     @Qualifier("persistentStorage")
     private StorageService storageService;
 
-//    private List<String> userStr = new ArrayList<>();
-
     @Bean
     public CommandLineRunner init() {
         return args -> {
@@ -41,31 +39,12 @@ public class InitialDataLoader {
                                 .email(userPass[2]).build();
 //                        userStr.add(line);
                         logger.info("saving user " + user.getUsername());
-                        userService.save(user);
+                        userService.saveWithEncryptedPassword(user);
                     });
             } catch (Exception e) {
             logger.severe("Error loading " + USERS_FILE + " " + e.getMessage());
         }
     };
     }
-
-/*    public void save(String username, String password) {
-        try (OutputStream out = new FileOutputStream(new File("myData.txt"));
-             PrintWriter writer = new PrintWriter(out)) {
-            for(String oneUserStr : userStr) {
-                writer.println(oneUserStr);
-            }
-            writer.println(username + "," + password);
-            writer.flush();
-            writer.close();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
-
 
 }

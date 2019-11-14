@@ -99,3 +99,22 @@ input[type="text"]
     font-size: 20px;
     border-radius: 50px;
   }
+
+
+  .rpt-generation-enter {
+    opacity: 0.01;
+  }
+
+  .rpt-generation-enter.rpt-generation-enter-active {
+    opacity: 1;
+    transition: opacity 300ms ease-in;
+  }
+
+  .rpt-generation-leave {
+    opacity: 1;
+  }
+
+  .rpt-generation-leave.rpt-generation-leave-active {
+    opacity: 0.01;
+    transition: opacity 300ms ease-in;
+  }

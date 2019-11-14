@@ -6,3 +6,7 @@
   color: #000000;
 }
 
+.header-user:hover {
+  cursor: pointer;
+  color: #0056b3;
+}
