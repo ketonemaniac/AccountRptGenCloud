@@ -24,6 +24,7 @@ public class Constants {
     public static final String HISTORY_FILE = "history.txt";
     // login users
     public static final String USERS_FILE = "users.txt";
+    public static final String USERS_FILE_SEPARATOR = ",";
 
 
 

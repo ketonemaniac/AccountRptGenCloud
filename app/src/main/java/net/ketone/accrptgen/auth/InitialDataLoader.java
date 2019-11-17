@@ -13,6 +13,7 @@ import java.io.*;
 import java.util.logging.Logger;
 
 import static net.ketone.accrptgen.config.Constants.USERS_FILE;
+import static net.ketone.accrptgen.config.Constants.USERS_FILE_SEPARATOR;
 
 @Configuration
 public class InitialDataLoader {
@@ -33,7 +34,7 @@ public class InitialDataLoader {
         try ( BufferedReader reader = new BufferedReader(
                 new InputStreamReader(resource)) ) {
                     reader.lines().forEach(line -> {
-                        String[] userPass = line.split(",");
+                        String[] userPass = line.split(USERS_FILE_SEPARATOR);
                         User user = User.builder().username(userPass[0])
                                 .password(userPass[1])
                                 .email(userPass[2]).build();

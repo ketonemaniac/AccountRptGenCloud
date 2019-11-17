@@ -10,4 +10,6 @@ public interface UserService {
     User saveWithEncryptedPassword(User user);
 
     User findByUsername(String username);
+
+    void persistUsers();
 }
