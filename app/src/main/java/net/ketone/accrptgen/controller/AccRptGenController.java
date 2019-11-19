@@ -12,6 +12,7 @@ import net.ketone.accrptgen.gen.ParsingService;
 import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.tasks.TasksService;
+import net.ketone.accrptgen.util.UserUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,17 +64,6 @@ public class AccRptGenController {
     @Value("${build.timestamp}")
     private String buildTimestamp;
 
-    private String getAuthenticatedUser() {
-        return Optional.ofNullable(SecurityContextHolder.getContext())
-                .map(SecurityContext::getAuthentication)
-                .map(Authentication::getPrincipal)
-                .filter(User.class::isInstance)
-                .map(User.class::cast)
-                .map(User::getUsername)
-                .orElse("Anonymous");
-    }
-
-
     @RequestMapping("/version")
     public Map<String, String> getVersion() {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -82,7 +72,7 @@ public class AccRptGenController {
         Map<String, String> verMap = new HashMap<>();
         verMap.put("version", buildVersion);
         verMap.put("timestamp" , timestamp);
-        verMap.put("user" , getAuthenticatedUser());
+        verMap.put("user" , UserUtils.getAuthenticatedUser());
         return verMap;
     }
 
@@ -102,7 +92,7 @@ public class AccRptGenController {
         dto.setCompany(parsingService.extractCompanyName(workbook));
         dto.setFilename(String.valueOf(generationTime.getTime()));
         dto.setStatus(Constants.Status.PRELOADED.name());
-        dto.setSubmittedBy(getAuthenticatedUser());
+        dto.setSubmittedBy(UserUtils.getAuthenticatedUser());
         statisticsService.updateTask(dto);
         return dto;
     }
@@ -117,7 +107,7 @@ public class AccRptGenController {
             dto.setFilename(requestDto.getFilename());
             dto.setStatus(Constants.Status.PENDING.name());
             dto.setReferredBy(requestDto.getReferredBy());
-            dto.setSubmittedBy(getAuthenticatedUser());
+            dto.setSubmittedBy(UserUtils.getAuthenticatedUser());
             dto.setGenerationTime(new Date());
             tasksService.submitTask(dto);
             statisticsService.updateTask(dto);
@@ -145,7 +135,7 @@ public class AccRptGenController {
 
     @GetMapping("/listFiles")
     public List<AccountFileDto> listFiles() {
-        return statisticsService.getRecentTasks(getAuthenticatedUser());
+        return statisticsService.getRecentTasks(UserUtils.getAuthenticatedUser());
     }
 
     @GetMapping("/terminateTask/{id}")

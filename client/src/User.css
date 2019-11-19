@@ -1,0 +1,12 @@
+.user-modal {
+    margin-right: 5%;
+    margin-top: 60px;
+ }
+
+ .modal-backdrop.show {
+    opacity: 0.1;
+ }
+
+ .user-heading {
+    text-align: center;
+ }

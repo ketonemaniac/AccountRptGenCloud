@@ -5,7 +5,11 @@ import net.ketone.accrptgen.auth.model.User;
 
 public interface UserService {
 
-    void save(User user);
+    User save(User user);
+
+    User saveWithEncryptedPassword(User user);
 
     User findByUsername(String username);
+
+    void persistUsers();
 }
