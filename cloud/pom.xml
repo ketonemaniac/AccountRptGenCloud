@@ -5,7 +5,7 @@
     <parent>
         <artifactId>accrptgen</artifactId>
         <groupId>net.ketone</groupId>
-        <version>2.0.0</version>
+        <version>2.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -36,6 +36,20 @@
 
     <build>
     <plugins>
+        <!-- Make a replace of a Maven Property via Groovy Maven Plugin as workaround -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+                <execution>
+                    <id>parse-version</id>
+                    <goals>
+                        <goal>parse-version</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
         <plugin>
             <groupId>com.google.cloud.tools</groupId>
             <artifactId>appengine-maven-plugin</artifactId>
@@ -43,8 +57,8 @@
             <configuration>
                 <devserver.host>0.0.0.0</devserver.host>
                 <devserver.port>8080</devserver.port>
-                <deploy.projectId>accountrptgen-hk-test</deploy.projectId>
-                <deploy.version>1</deploy.version>
+                <deploy.projectId>GCLOUD_CONFIG</deploy.projectId>
+                <deploy.version>${parsedVersion.majorVersion}-${parsedVersion.minorVersion}-${parsedVersion.incrementalVersion}</deploy.version>
             </configuration>
         </plugin>
 
