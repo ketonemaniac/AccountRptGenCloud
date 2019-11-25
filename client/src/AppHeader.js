@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Navbar, NavbarBrand, Nav, NavItem, NavLink } from 'reactstrap';
+import { Navbar, NavbarBrand, Nav, NavItem, NavLink, NavbarToggler, Collapse  } from 'reactstrap';
 import './AppHeader.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserAlt } from '@fortawesome/free-solid-svg-icons';
@@ -23,13 +23,15 @@ class AppHeader extends Component {
     return body;
   };
 
-
   render() {
     return (
-      <Navbar>
+      <Navbar className="fixed-top" color="faded" light>
+        <Nav>
+        <NavbarToggler onClick={this.props.toggleSidebar} className="mr-2"/>
         <NavbarBrand href="/">
           Account Report Generator <span><small className="text-sm font-weight-light">{this.state.info.version}</small></span>
         </NavbarBrand>
+        </Nav>
         <Nav>
           <NavItem>
             <div className="header-user" onClick={this.props.toggleUserModal}>
