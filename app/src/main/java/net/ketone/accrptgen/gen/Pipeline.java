@@ -109,7 +109,6 @@ public class Pipeline implements Runnable {
 
         } catch (Throwable e) {
             logger.log(Level.WARNING, "Generation failed", e);
-            AccountFileDto dto = new AccountFileDto();
             dto.setFilename(filename);
             dto.setStatus(Constants.Status.FAILED.name());
             try {
@@ -117,7 +116,6 @@ public class Pipeline implements Runnable {
             } catch (IOException e1) {
                 logger.log(Level.WARNING, "History file write failed", e1);
             }
-//            throw new RuntimeException(e);
         }
 
     }

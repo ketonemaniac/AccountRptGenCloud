@@ -41,7 +41,10 @@ public class FileBasedStatisticsService implements StatisticsService {
                     .filter(dto -> Optional.ofNullable(dto.getSubmittedBy()).isPresent())
                     .filter(dto -> dto.getSubmittedBy().equals(authenticatedUser))
                     .limit(StatisticsService.MAX_RECENTS)
-                    .filter(dto -> (dto.getStatus() != null && (dto.getStatus().equals(Constants.Status.PENDING.name()) || dto.getStatus().equals(Constants.Status.GENERATING.name())))
+                    .filter(dto -> (dto.getStatus() != null && (dto.getStatus().equals(Constants.Status.PENDING.name())
+                            || dto.getStatus().equals(Constants.Status.GENERATING.name())
+                            || dto.getStatus().equals(Constants.Status.FAILED.name())
+                    ))
                             || cache.hasFile(dto.getFilename()+".zip")
                             || cache.hasFile(dto.getFilename()+".xlsm"))
                     .collect(Collectors.toList());
