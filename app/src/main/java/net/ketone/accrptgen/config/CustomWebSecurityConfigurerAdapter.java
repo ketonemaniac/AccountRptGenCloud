@@ -56,10 +56,9 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
                 .antMatchers(GEN_QUEUE_ENDPOINT).permitAll()
                 .antMatchers(STATUS_QUEUE_ENDPOINT).permitAll()
                 .antMatchers("/login").permitAll()
-
-//                .anyRequest().permitAll()
-                .anyRequest().hasAuthority("GENERAL_ACCESS") // .authenticated()
-
+                .antMatchers("/api/user/encode/**").permitAll()
+                .anyRequest().permitAll()
+//                .anyRequest().hasAuthority("GENERAL_ACCESS") // .authenticated()
                 .and()
                 .formLogin()
                 .defaultSuccessUrl("/", true)

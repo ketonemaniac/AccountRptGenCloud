@@ -28,7 +28,7 @@ public abstract class AbstractEmailService implements EmailService {
     protected Map<String, String[]> getEmailAddresses(AccountFileDto dto) {
         return ImmutableMap.of(
                 "to", Optional.ofNullable(
-                        userService.findByUsername(dto.getSubmittedBy()))
+                        userService.findByUsername(dto.getSubmittedBy()).block())  // code smell
                         .map(User::getEmail)
                         .map(s -> s.split(";"))
                         .orElse(new String[]{}),

@@ -44,29 +44,5 @@ class AppHeader extends Component {
   }
 }
 
-// <Nav>
-// <NavItem>
-//   <NavLink href="/" disabled={!this.props.isAdmin} 
-//   className={this.props.isAdmin ? "text-primary" : "text-secondary"}
-//   onClick={event => {
-//     // override native behavior
-//     event.preventDefault();
-//     window.history.pushState(null, null, '/');
-//     this.props.setAdmin(false);  
-//   }
-//   }>Home</NavLink>
-// </NavItem>
-// <NavItem>
-//   <NavLink href="/admin" disabled={this.props.isAdmin} 
-//   className={this.props.isAdmin ? "text-secondary" : "text-primary"}
-//     onClick={event => {
-//       // override native behavior
-//       event.preventDefault();
-//       window.history.pushState(null, null, 'admin');
-//       this.props.setAdmin(true);  
-//     }
-//   }>Admin</NavLink>
-// </NavItem>
-// </Nav>
 
 export default AppHeader;

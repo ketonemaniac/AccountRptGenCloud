@@ -15,7 +15,7 @@ class User extends Component {
   }
 
   componentDidMount() {
-    axios.get('/user')
+    axios.get('/api/user')
       .catch(error => { console.log(error); throw Error(error) })
       .then(res => this.setState({ user: res.data }));
   }
@@ -43,11 +43,11 @@ class User extends Component {
     const data = event.target;
     if(data.password.value.length === 0) {
       this.setState({passwordErr : "password cannot be empty"});
-    } if (data.password.value != data.confirmPassword.value) {
+    } else if (data.password.value != data.confirmPassword.value) {
       this.setState({passwordErr : "passwords do not match"});
     } else {
       axios
-        .post("user/password", {"password" : data.password.value})
+        .post("/api/user/password", {"password" : data.password.value})
         .then(res => {
           // on success
           toast.info('Password updated successfully');

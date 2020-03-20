@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import App from './App';
-import UserAdmin from './UserAdmin.js'
+import UserAdmin from './useradmin/UserAdmin.js'
 import Frame from './Frame.js';
 
 class Routing extends Component {

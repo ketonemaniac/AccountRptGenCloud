@@ -1,8 +1,5 @@
 import React, { Component, useEffect } from 'react';
-import logo from './logo.svg';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Progress from './Progress.js';
-import Done from './Done.js';
 import './App.css';
 import {
   Container, Row, Col,
@@ -19,8 +16,6 @@ import Moment from 'react-moment';
 import Dropzone from 'react-dropzone';
 import axios from 'axios';
 import moment from 'moment';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { CSSTransition } from 'react-transition-group';
 
 
@@ -76,7 +71,7 @@ class App extends Component {
       data.append('file', file, file.name)
 
       axios
-        .post("uploadFile", data, {
+        .post("/uploadFile", data, {
           onUploadProgress: ProgressEvent => {
             console.log("loaded" + (ProgressEvent.loaded / ProgressEvent.total * 100));
             /*this.setState({
@@ -140,7 +135,7 @@ class App extends Component {
     const data = new FormData(event.target);
 
     axios
-      .post("startGeneration", data)
+      .post("/startGeneration", data)
       .then(res => this.getProgress());
   }
 
@@ -177,102 +172,90 @@ class App extends Component {
     const showAddDetail = this.state.companies.length > 0;
     return (
       <div>
-              <main>
-              <Dropzone ref={dropzoneRef} onDrop={this.onDrop.bind(this)}>
-                {({ getRootProps, getInputProps, isDragActive }) => {
-                  return (
-                    <Jumbotron style={{
-                      paddingTop: showAddDetail ? "5%" : "15%",
-                      paddingBottom: showAddDetail ? "5%" : "15%"
-                    }}
-                      fluid {...getRootProps({ onClick: evt => evt.preventDefault() })}>
-                      <input {...getInputProps()} />
-                      <Container>
-                        <h1 className="display-3">Instant Report Generation</h1>
-                        <div>
-                          <span className="lead">
-                            Drag your input file over this area, or click to select the file from the file picker below
-              </span>
-                          <span className="lead" ><p />
-                            <Button color="primary" className="bigButton" onClick={() => dropzoneRef.current.open()}
-                              loading={this.state.fileUploadBlock}>
-                              Select File
-                    </Button>
-
-                          </span>
-                        </div>
-                      </Container>
-                    </Jumbotron>
-                  )
+        <main>
+          <Dropzone ref={dropzoneRef} onDrop={this.onDrop.bind(this)}>
+            {({ getRootProps, getInputProps, isDragActive }) => {
+              return (
+                <Jumbotron style={{
+                  paddingTop: showAddDetail ? "5%" : "15%",
+                  paddingBottom: showAddDetail ? "5%" : "15%"
                 }}
-              </Dropzone>
-              <CSSTransition transitionName="rpt-generation">
-                {this.renderGenerating()}
-              </CSSTransition>
-              <CardDeck className="px-5">
-                {this.state.companies
-                  .map((c, i) => {
-                    return (
-                      <Card key={c.id} body outline color={c.status == "PRELOADED" ? "warning" : "default"}>
-                        <CardHeader>{c.company}</CardHeader>
-                        <CardBody>
-                          <Form className="form" onSubmit={this.handleStartGeneration}>
-                            <Container>
-                              <Row>
-                                <Col xs="12" lg="10">
-                                  <Container>
-                                    <Input key={c.id + "-id"} type="hidden" name="id" value={c.id} />
-                                    <Input key={c.id + "-filename"} type="hidden" name="filename" value={c.filename} />
-                                    <Input key={c.id + "-company"} type="hidden" name="company" value={c.company} />
-                                    <Input key={c.id + "-submittedBy"} type="hidden" name="submittedBy" value={c.submittedBy} />
-                                    <FormGroup row>
-                                      <Label sm={3} for="referredBy">Referrer
+                  fluid {...getRootProps({ onClick: evt => evt.preventDefault() })}>
+                  <input {...getInputProps()} />
+                  <Container>
+                    <h1 className="display-3">Instant Report Generation</h1>
+                    <div>
+                      <span className="lead">
+                        Drag your input file over this area, or click to select the file from the file picker below
+                      </span>
+                      <span className="lead" ><p />
+                        <Button color="primary" className="bigButton" onClick={() => dropzoneRef.current.open()}
+                          loading={this.state.fileUploadBlock}>
+                          Select File
+                        </Button>
+                      </span>
+                    </div>
+                  </Container>
+                </Jumbotron>
+              )
+            }}
+          </Dropzone>
+          <CSSTransition transitionName="rpt-generation">
+            {this.renderGenerating()}
+          </CSSTransition>
+          <CardDeck className="px-5">
+            {this.state.companies
+              .map((c, i) => {
+                return (
+                  <Card key={c.id} body outline color={c.status == "PRELOADED" ? "warning" : "default"}>
+                    <CardHeader>{c.company}</CardHeader>
+                    <CardBody>
+                      <Form className="form" onSubmit={this.handleStartGeneration}>
+                        <Container>
+                          <Row>
+                            <Col xs="12" lg="10">
+                              <Container>
+                                <Input key={c.id + "-id"} type="hidden" name="id" value={c.id} />
+                                <Input key={c.id + "-filename"} type="hidden" name="filename" value={c.filename} />
+                                <Input key={c.id + "-company"} type="hidden" name="company" value={c.company} />
+                                <Input key={c.id + "-submittedBy"} type="hidden" name="submittedBy" value={c.submittedBy} />
+                                <FormGroup row>
+                                  <Label sm={3} for="referredBy">Referrer
                           <span style={{ "display": c.status == "PRELOADED" ? "block" : "none" }} className="text-muted">(Optional)</span></Label>
-                                      {this.renderReferredBy(c)}
-                                    </FormGroup>
-                                    <FormGroup row>
-                                      <Label sm={3} for="status">Status</Label>
-                                      <Col sm={9}>
-                                        <Input key={c.generationTime + "-status"}
-                                          className="input-text-borderless" type="text" disabled name="status" id="status" value={c.status} />
-                                      </Col>
-                                    </FormGroup>
-                                    <FormGroup row>
-                                      <Label sm={3} for="generationTime">Generation time</Label>
-                                      {this.renderGenerationTime(c)}
-                                    </FormGroup>
-                                  </Container>
-                                </Col>
-                                <Col xs="2">
-                                  {this.renderButton(c)}
-                                </Col>
-                              </Row>
-                            </Container>
-                          </Form>
-                        </CardBody>
-                      </Card>
+                                  {this.renderReferredBy(c)}
+                                </FormGroup>
+                                <FormGroup row>
+                                  <Label sm={3} for="status">Status</Label>
+                                  <Col sm={9}>
+                                    <Input key={c.generationTime + "-status"}
+                                      className="input-text-borderless" type="text" disabled name="status" id="status" value={c.status} />
+                                  </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                  <Label sm={3} for="generationTime">Generation time</Label>
+                                  {this.renderGenerationTime(c)}
+                                </FormGroup>
+                              </Container>
+                            </Col>
+                            <Col xs="2">
+                              {this.renderButton(c)}
+                            </Col>
+                          </Row>
+                        </Container>
+                      </Form>
+                    </CardBody>
+                  </Card>
 
-                    )
-                  })}
-              </CardDeck>
-              </main>
+                )
+              })}
+          </CardDeck>
+        </main>
         <Container className="footer text-center">
           <span className="text-muted"> © Ketone Maniac @ 2019</span>
         </Container>
 
 
         {this.uploadErrorModalAlert(this.state.uploadError)}
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnVisibilityChange
-          draggable
-          pauseOnHover
-        />
       </div>
     );
   }
