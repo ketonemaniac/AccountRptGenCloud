@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import { Table, Container ,Button, Row, Col } from 'reactstrap';
 import Endpoints from '../services/Endpoints.js';
 import UserEditModal from './UserEditModal.js'
+import UserDeleteModal from './UserDeleteModal.js'
 
 class UserAdmin extends Component {
 
     state = {
         users: [],
         isUserEditModalOpen: false,
+        isUserDeleteModalOpen: false,
         isEdit: false,
         selectedUser: null
     }
@@ -49,6 +51,16 @@ class UserAdmin extends Component {
             }
         })
     }
+
+    toggleUserDeleteModal(user) {
+        this.setState((oldState) => {
+            return {
+                isUserDeleteModalOpen: !oldState.isUserDeleteModalOpen,
+                selectedUser: user
+            }
+        })
+    }
+
     
     componentDidMount() {
         Endpoints.getAllUsers().then(data => this.setState({ users: data }));;
@@ -86,7 +98,8 @@ class UserAdmin extends Component {
                                         <Button outline color="primary" size="sm"
                                         onClick={this.toggleUserEditModal.bind(this,user)}>Edit</Button>&nbsp;
                                             <Button outline color="primary" size="sm">Reset Password</Button>&nbsp;
-                                        <Button outline color="danger" size="sm">Delete User</Button></td>
+                                        <Button outline color="danger" size="sm"
+                                        onClick={this.toggleUserDeleteModal.bind(this,user)}>Delete User</Button></td>
                                     </tr>
                                 )
                             })}
@@ -97,6 +110,9 @@ class UserAdmin extends Component {
                                 toggleUserEditModal={this.toggleUserEditModal.bind(this)}
                                 selectedUser={this.state.selectedUser}
                                 isEdit={this.state.isEdit} />
+                <UserDeleteModal isUserDeleteModalOpen={this.state.isUserDeleteModalOpen} 
+                                toggleUserDeleteModal={this.toggleUserDeleteModal.bind(this)}
+                                selectedUser={this.state.selectedUser} />
             </main>
         );
     }
