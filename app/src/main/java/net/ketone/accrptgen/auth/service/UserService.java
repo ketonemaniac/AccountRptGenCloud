@@ -15,7 +15,7 @@ public interface UserService {
 
     Mono<User> createUser(User user, boolean isInit);
 
-    Mono<Integer> deleteUser(String username);
+    Mono<User> deleteUser(String username);
 
     Mono<User> findByUsername(String username);
 

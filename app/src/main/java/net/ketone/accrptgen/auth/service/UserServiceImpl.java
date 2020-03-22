@@ -110,9 +110,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Mono<Integer> deleteUser(String username) {
+    public Mono<User> deleteUser(String username) {
         return Mono.fromCallable(() -> userRepository.deleteByUsername(username))
-                .doOnSuccess(r -> persistUsers());
+                .doOnSuccess(r -> persistUsers())
+                .map(list -> list.get(0));
     }
 
     @Override

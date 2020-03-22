@@ -50,7 +50,7 @@ public class UserController {
     }
 
     @DeleteMapping("{username}")
-    public Integer deleteUser(@PathVariable String username) {
+    public User deleteUser(@PathVariable String username) {
         return userService.deleteUser(username)
                 .block();
     }

@@ -30,7 +30,7 @@ class UserAdmin extends Component {
                 // returning from some successful operation
                 if(oldState.isEdit) {
                     newUsers = oldState.users.map(us => 
-                        (user != null && us.username == user.username) ? user : us);
+                        (us.username == user.username) ? user : us);
                 } else {
                     newUsers = oldState.users.concat(user);
                 }
@@ -53,10 +53,16 @@ class UserAdmin extends Component {
     }
 
     toggleUserDeleteModal(user) {
+        const userExist = user != null && user != undefined && user.username != undefined;
         this.setState((oldState) => {
+            var newUsers = oldState.users;
+            if(oldState.isUserDeleteModalOpen && userExist) {
+                newUsers = oldState.users.filter(us => us.username !== user.username);
+            }
             return {
                 isUserDeleteModalOpen: !oldState.isUserDeleteModalOpen,
-                selectedUser: user
+                selectedUser: oldState.isUserDeleteModalOpen ? null : user,
+                users: newUsers
             }
         })
     }
