@@ -6,6 +6,7 @@ import net.ketone.accrptgen.auth.model.Role;
 import net.ketone.accrptgen.auth.model.User;
 import net.ketone.accrptgen.auth.repository.RoleRepository;
 import net.ketone.accrptgen.auth.repository.UserRepository;
+import net.ketone.accrptgen.mail.EmailService;
 import net.ketone.accrptgen.store.StorageService;
 import net.ketone.accrptgen.util.UserUtils;
 import org.apache.poi.ss.formula.functions.T;
@@ -45,6 +46,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     @Qualifier("persistentStorage")
     private StorageService storageService;
+    @Autowired
+    private EmailService emailService;
+
 
     private static final Logger logger = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -129,6 +133,21 @@ public class UserServiceImpl implements UserService {
                 .map(this::ripPassword);
     }
 
+    @Override
+    public Mono<User> resetPassword(User user) throws Exception {
+        final String pwd = generatePassword(8);
+        return this.updatePassword(user.getUsername(), pwd)
+                .doOnNext(u -> {
+                    u.setPassword(pwd);
+                    try {
+                        emailService.sendResetPasswordEmail(u);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .map(this::ripPassword);
+    }
+
 
     private Role save(Role role) {
         return roleRepository.save(role);
@@ -166,4 +185,18 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    private static String generatePassword(int length) {
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < length; i++) {
+            char ch = (char) ((Math.random() * 10000) % (122 - 48) + 48);
+            sb.append(ch);
+        }
+        return sb.toString();
+    }
+
+
+    public static void main(String [] args) {
+        for(int i = 0; i < 100; i++)
+            System.out.println(generatePassword(8));
+    }
 }

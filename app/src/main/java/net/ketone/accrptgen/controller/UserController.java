@@ -37,6 +37,12 @@ public class UserController {
                 .block();
     }
 
+    @PostMapping("password/reset")
+    public User resetPassword(@RequestBody User user) throws Exception {
+        return userService.resetPassword(user)
+                .block();
+    }
+
     @PutMapping
     public User updateUser(@RequestBody User updatedUser) {
         return userService.updateUser(updatedUser)

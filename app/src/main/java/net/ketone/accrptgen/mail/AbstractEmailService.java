@@ -22,7 +22,7 @@ public abstract class AbstractEmailService implements EmailService {
     protected CredentialsService credentialsService;
 
     @Value("${mail.bcc}")
-    private String EMAIL_BCC;
+    protected String EMAIL_BCC;
 
 
     protected Map<String, String[]> getEmailAddresses(AccountFileDto dto) {

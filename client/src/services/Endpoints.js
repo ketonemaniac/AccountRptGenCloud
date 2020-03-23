@@ -21,6 +21,11 @@ export default {
         return axios.delete('/api/user/' + user.username)
             .catch(error => { console.log(error); throw Error(error) })
             .then(res => res.data);
-    }
+    },
+    passwordReset(user) {
+        return axios.post('/api/user/password/reset', user)
+            .catch(error => { console.log(error); throw Error(error) })
+            .then(res => res.data);
+    },
 
 }

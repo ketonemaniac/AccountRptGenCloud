@@ -3,6 +3,7 @@ import { Table, Container ,Button, Row, Col } from 'reactstrap';
 import Endpoints from '../services/Endpoints.js';
 import UserEditModal from './UserEditModal.js'
 import UserDeleteModal from './UserDeleteModal.js'
+import PasswordResetModal from './PasswordResetModal.js'
 
 class UserAdmin extends Component {
 
@@ -10,6 +11,7 @@ class UserAdmin extends Component {
         users: [],
         isUserEditModalOpen: false,
         isUserDeleteModalOpen: false,
+        isPasswordResetModalOpen: false,
         isEdit: false,
         selectedUser: null
     }
@@ -67,6 +69,15 @@ class UserAdmin extends Component {
         })
     }
 
+    togglePasswordResetModal(user) {
+        this.setState((oldState) => {
+            return {
+                isPasswordResetModalOpen: !oldState.isPasswordResetModalOpen,
+                selectedUser: oldState.isPasswordResetModalOpen ? null : user,
+            }
+        })
+    }
+
     
     componentDidMount() {
         Endpoints.getAllUsers().then(data => this.setState({ users: data }));;
@@ -103,7 +114,8 @@ class UserAdmin extends Component {
                                         <td>
                                         <Button outline color="primary" size="sm"
                                         onClick={this.toggleUserEditModal.bind(this,user)}>Edit</Button>&nbsp;
-                                            <Button outline color="primary" size="sm">Reset Password</Button>&nbsp;
+                                            <Button outline color="primary" size="sm"
+                                        onClick={this.togglePasswordResetModal.bind(this,user)}>Reset Password</Button>&nbsp;
                                         <Button outline color="danger" size="sm"
                                         onClick={this.toggleUserDeleteModal.bind(this,user)}>Delete User</Button></td>
                                     </tr>
@@ -118,6 +130,9 @@ class UserAdmin extends Component {
                                 isEdit={this.state.isEdit} />
                 <UserDeleteModal isUserDeleteModalOpen={this.state.isUserDeleteModalOpen} 
                                 toggleUserDeleteModal={this.toggleUserDeleteModal.bind(this)}
+                                selectedUser={this.state.selectedUser} />
+                <PasswordResetModal isPasswordResetModalOpen={this.state.isPasswordResetModalOpen} 
+                                togglePasswordResetModal={this.togglePasswordResetModal.bind(this)}
                                 selectedUser={this.state.selectedUser} />
             </main>
         );

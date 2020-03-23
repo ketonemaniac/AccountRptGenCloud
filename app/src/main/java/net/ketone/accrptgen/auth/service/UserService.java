@@ -21,4 +21,6 @@ public interface UserService {
 
     Flux<User> findAllUsers();
 
+    Mono<User> resetPassword(User user) throws Exception;
+
 }
