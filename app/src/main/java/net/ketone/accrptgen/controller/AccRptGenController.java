@@ -72,7 +72,6 @@ public class AccRptGenController {
         Map<String, String> verMap = new HashMap<>();
         verMap.put("version", buildVersion);
         verMap.put("timestamp" , timestamp);
-        verMap.put("user" , UserUtils.getAuthenticatedUser());
         return verMap;
     }
 

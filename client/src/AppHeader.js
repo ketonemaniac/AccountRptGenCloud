@@ -27,7 +27,9 @@ class AppHeader extends Component {
     return (
       <Navbar className="fixed-top" color="faded" light>
         <Nav>
-        <NavbarToggler onClick={this.props.toggleSidebar} className="mr-2"/>
+          {this.props.isAdmin ? (
+            <NavbarToggler onClick={this.props.toggleSidebar} className="mr-2"/>
+          ) : ""}
         <NavbarBrand href="/">
           Account Report Generator <span><small className="text-sm font-weight-light">{this.state.info.version}</small></span>
         </NavbarBrand>
@@ -35,7 +37,7 @@ class AppHeader extends Component {
         <Nav>
           <NavItem>
             <div className="header-user" onClick={this.props.toggleUserModal}>
-              <FontAwesomeIcon icon={faUserAlt} className="mr-2" />{this.state.info.user}
+              <FontAwesomeIcon icon={faUserAlt} className="mr-2" />{this.props.user.username}
             </div>
           </NavItem>
         </Nav>

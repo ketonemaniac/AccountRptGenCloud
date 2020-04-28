@@ -1,6 +1,7 @@
 package net.ketone.accrptgen.auth.service;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import net.ketone.accrptgen.auth.InitialDataLoader;
 import net.ketone.accrptgen.auth.model.Role;
 import net.ketone.accrptgen.auth.model.User;
@@ -123,7 +124,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public Mono<User> findByUsername(String username) {
         return Mono.fromCallable(() -> Optional.ofNullable(userRepository.findByUsername(username))
-                .orElse(User.builder().username("Anonymous").build()));
+                .orElse(User.builder().username("Anonymous")
+                        .email("anon@mail.com")
+                        .roles(Sets.newHashSet(Role.builder().name("User").build())).build()));
     }
 
     @Override

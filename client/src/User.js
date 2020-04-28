@@ -9,15 +9,8 @@ import './User.css'
 class User extends Component {
 
   state = {
-    user: null,
     isChangePasswordDialogOpen: false,
     passwordErr: null
-  }
-
-  componentDidMount() {
-    axios.get('/api/user')
-      .catch(error => { console.log(error); throw Error(error) })
-      .then(res => this.setState({ user: res.data }));
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -64,13 +57,13 @@ class User extends Component {
     if (!this.props.isUserModalOpen) {
       return "";
     }
-    console.log(this.state.user);
+    console.log(this.props.user);
     return (
       <Modal className="user-modal" isOpen={this.props.isUserModalOpen} toggle={this.props.toggleUserModal}>
         <ModalBody className="user-heading">
           <FontAwesomeIcon icon={faUserCircle} style={{ "fontSize": "3em" }} />
-          <p /><b>{this.state.user.username}</b>
-          <br />{this.state.user.email}
+          <p /><b>{this.props.user.username}</b>
+          <br />{this.props.user.email}
           <p />{this.renderPasswordError()}
           <p />{this.showChangePasswordDialog()}
         </ModalBody>
