@@ -72,7 +72,6 @@ public class AccRptGenController {
         Map<String, String> verMap = new HashMap<>();
         verMap.put("version", buildVersion);
         verMap.put("timestamp" , timestamp);
-        verMap.put("user" , UserUtils.getAuthenticatedUser());
         return verMap;
     }
 
@@ -109,6 +108,14 @@ public class AccRptGenController {
             dto.setReferredBy(requestDto.getReferredBy());
             dto.setSubmittedBy(UserUtils.getAuthenticatedUser());
             dto.setGenerationTime(new Date());
+
+            String inputFileName = dto.getFilename() + ".xlsm";
+            if(!storageService.hasFile(inputFileName)) {
+                logger.log(Level.WARNING, "File not present: " + inputFileName);
+                dto.setStatus(Constants.Status.FAILED.name());
+                return dto;
+            }
+
             tasksService.submitTask(dto);
             statisticsService.updateTask(dto);
         } catch (Exception e) {

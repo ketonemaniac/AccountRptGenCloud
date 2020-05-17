@@ -1,5 +1,7 @@
 package net.ketone.accrptgen.auth.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,14 +11,17 @@ import javax.persistence.*;
 import java.util.Set;
 
 @Data
-@Builder
+@Builder(toBuilder=true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "user")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private Long id;
 
     private String username;
@@ -25,9 +30,6 @@ public class User {
 
     private String email;
 
-    @Transient
-    private String passwordConfirm;
-
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 }

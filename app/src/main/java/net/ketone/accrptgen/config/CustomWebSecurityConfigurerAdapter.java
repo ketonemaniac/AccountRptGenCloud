@@ -33,14 +33,6 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
         return new BCryptPasswordEncoder();
     }
 
-//    @Autowired
-//    public void configureGlobal(AuthenticationManagerBuilder auth, CredentialsService credentialsService) throws Exception {
-//        String pwd = credentialsService.getCredentials().getProperty("admin.pwd");
-//        auth.inMemoryAuthentication()
-//                .withUser("admin").password(pwd)
-//                .authorities("ROLE_USER");
-//    }
-
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
@@ -56,17 +48,17 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
                 .antMatchers(GEN_QUEUE_ENDPOINT).permitAll()
                 .antMatchers(STATUS_QUEUE_ENDPOINT).permitAll()
                 .antMatchers("/login").permitAll()
+                .antMatchers("/api/user/encode/**").permitAll()
 
 //                .anyRequest().permitAll()
-                .anyRequest().hasAuthority("GENERAL_ACCESS") // .authenticated()
-
+                .antMatchers("/api/admin/user/**").hasAuthority("Admin") // .authenticated()
+                .anyRequest().hasAuthority("User")  //.authenticated()
                 .and()
                 .formLogin()
                 .defaultSuccessUrl("/", true)
                 .and()
                 .logout()
-                .deleteCookies("JSESSIONID")
-        ;
+                .deleteCookies("JSESSIONID");
     }
 
 

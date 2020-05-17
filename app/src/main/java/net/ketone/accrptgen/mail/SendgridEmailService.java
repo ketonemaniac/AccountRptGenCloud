@@ -18,6 +18,7 @@ package net.ketone.accrptgen.mail;
 
 import com.sendgrid.SendGrid;
 import net.ketone.accrptgen.admin.CredentialsService;
+import net.ketone.accrptgen.auth.model.User;
 import net.ketone.accrptgen.dto.AccountFileDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,10 +29,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -91,6 +89,28 @@ public class SendgridEmailService extends AbstractEmailService {
             logger.info("email " + k + ":" + Arrays.asList(v).stream().collect(Collectors.joining(";")));
         });
 
+    }
+
+    @Override
+    public void sendResetPasswordEmail(User user) throws Exception {
+        if(!SENDGRID_ENABLE) return;
+        SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
+        SendGrid.Email email = new SendGrid.Email();
+        email.addTo(user.getUsername());
+        email.setFrom(SENDGRID_SENDER);
+        email.setFromName("Accounting Report Generator");
+        email.setBcc(Optional.ofNullable(EMAIL_BCC)
+                .map(s -> s.split(";"))
+                .orElse(new String[]{}));
+        email.setSubject("Accounting Report Generator Password Reset");
+        email.setText(String.format("User %s password reset: %s . Please change your password once logged in.",
+                user.getUsername(), user.getPassword()));
+
+        SendGrid.Response response = sendgrid.send(email);
+        if (response.getCode() != 200) {
+            logger.warning(String.format("An error occured: %s Code=%d", response.getMessage(), response.getCode()));
+            return;
+        }
     }
 
 }

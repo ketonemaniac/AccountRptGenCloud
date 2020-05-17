@@ -9,15 +9,8 @@ import './User.css'
 class User extends Component {
 
   state = {
-    user: null,
     isChangePasswordDialogOpen: false,
     passwordErr: null
-  }
-
-  componentDidMount() {
-    axios.get('/user')
-      .catch(error => { console.log(error); throw Error(error) })
-      .then(res => this.setState({ user: res.data }));
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -43,11 +36,11 @@ class User extends Component {
     const data = event.target;
     if(data.password.value.length === 0) {
       this.setState({passwordErr : "password cannot be empty"});
-    } if (data.password.value != data.confirmPassword.value) {
+    } else if (data.password.value != data.confirmPassword.value) {
       this.setState({passwordErr : "passwords do not match"});
     } else {
       axios
-        .post("user/password", {"password" : data.password.value})
+        .post("/api/user/password", {"password" : data.password.value})
         .then(res => {
           // on success
           toast.info('Password updated successfully');
@@ -64,13 +57,13 @@ class User extends Component {
     if (!this.props.isUserModalOpen) {
       return "";
     }
-    console.log(this.state.user);
+    console.log(this.props.user);
     return (
       <Modal className="user-modal" isOpen={this.props.isUserModalOpen} toggle={this.props.toggleUserModal}>
         <ModalBody className="user-heading">
           <FontAwesomeIcon icon={faUserCircle} style={{ "fontSize": "3em" }} />
-          <p /><b>{this.state.user.username}</b>
-          <br />{this.state.user.email}
+          <p /><b>{this.props.user.username}</b>
+          <br />{this.props.user.email}
           <p />{this.renderPasswordError()}
           <p />{this.showChangePasswordDialog()}
         </ModalBody>

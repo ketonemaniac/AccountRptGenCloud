@@ -2,6 +2,10 @@
   font-size: 1.8vh;
 }
 
+.navbar {
+  background-color: #fbfbfb;
+}
+
 .navbar-brand, .nav-item {
   color: #000000;
 }

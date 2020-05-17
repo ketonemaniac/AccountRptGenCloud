@@ -2,14 +2,25 @@ package net.ketone.accrptgen.auth.service;
 
 
 import net.ketone.accrptgen.auth.model.User;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface UserService {
 
-    User save(User user);
+    Mono<User> save(User user);
 
-    User saveWithEncryptedPassword(User user);
+    Mono<User> updatePassword(String username, String clearPassword);
 
-    User findByUsername(String username);
+    Mono<User> updateUser(User user);
 
-    void persistUsers();
+    Mono<User> createUser(User user, boolean isInit);
+
+    Mono<User> deleteUser(String username);
+
+    Mono<User> findByUsername(String username);
+
+    Flux<User> findAllUsers();
+
+    Mono<User> resetPassword(User user) throws Exception;
+
 }

@@ -39,4 +39,10 @@ public class MockEmailService extends AbstractEmailService {
             storageSvc.store(attachment.getData(), attachment.getAttachmentName());
         }
     }
+
+    @Override
+    public void sendResetPasswordEmail(User user) throws Exception {
+        logger.info(String.format("User %s password reset: %s . Please change your password once logged in.",
+                user.getUsername(), user.getPassword()));
+    }
 }
