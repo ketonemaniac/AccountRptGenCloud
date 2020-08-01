@@ -178,9 +178,19 @@
 			<resource>
 				<filtering>true</filtering>
 				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>**/*.docx</exclude>
+				</excludes>
 				<!-- includes>
 					<include>application.properties</include>
 				</includes -->
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>**/*.docx</include>
+				</includes>
 			</resource>
 		</resources>
 
