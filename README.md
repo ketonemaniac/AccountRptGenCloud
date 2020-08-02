@@ -34,4 +34,7 @@ To deploy to google cloud
 Reference:
 https://cloud.google.com/appengine/docs/standard/python/config/queueref
 
+## CI/CD ##
 
+### Version Upgrade ###
+    versions:set -DnewVersion=<new_version> -DprocessAllModules -DgenerateBackupPoms=false
