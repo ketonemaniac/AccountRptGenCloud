@@ -22,6 +22,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Install dependencies
-      run: npm install
+      run: cd client && npm install
     - name: Build with Maven
       run: mvn -B package --file pom.xml
