@@ -1,6 +1,7 @@
 package net.ketone.accrptgen.store;
 
 import org.apache.commons.io.input.NullInputStream;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,9 @@ public class FileStorageService implements StorageService {
 //    private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
     private static final Logger logger = Logger.getLogger(FileStorageService.class.getName());
 
-    private static final String STORAGE_FOLDER = "files" + File.separator;
+    @Value("${storage.folder}")
+    private String STORAGE_FOLDER;
+
     List<String> filenames = new ArrayList<>();
 
     @Override

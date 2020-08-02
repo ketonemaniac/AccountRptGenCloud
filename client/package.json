@@ -25,7 +25,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && rm -r ./out/static && mkdir -p ./out/static && mv build/* ./out/static",
+    "build": "react-scripts build && rm -rf ./out/static && mkdir -p ./out/static && mv build/* ./out/static",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

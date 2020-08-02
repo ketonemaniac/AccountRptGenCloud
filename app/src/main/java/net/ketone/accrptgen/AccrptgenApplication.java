@@ -16,11 +16,4 @@ public class AccrptgenApplication {
 		SpringApplication.run(AccrptgenApplication.class, args);
 	}
 
-	/**
-	 * to speed up boot time
-	 */
-	@Configuration
-	@ComponentScan(lazyInit = true)
-	static class LocalConfig {
-	}
 }

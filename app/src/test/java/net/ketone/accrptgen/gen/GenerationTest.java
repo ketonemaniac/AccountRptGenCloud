@@ -2,9 +2,11 @@ package net.ketone.accrptgen.gen;
 
 import net.ketone.accrptgen.admin.CredentialsService;
 import net.ketone.accrptgen.admin.FileBasedCredentialsService;
+import net.ketone.accrptgen.auth.service.UserService;
 import net.ketone.accrptgen.entity.*;
 import net.ketone.accrptgen.store.FileStorageService;
 import net.ketone.accrptgen.store.StorageService;
+import org.apache.poi.util.IOUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -16,11 +18,11 @@ import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.*;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.*;
@@ -34,12 +36,11 @@ import static org.mockito.Matchers.eq;
 
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles("local, test")
-@SpringBootTest(classes = {GenerationTest.MockStorageConfiguration.class} )
+@ContextConfiguration(classes = {GenerationTest.MockStorageConfiguration.class, GenerationServiceApachePOI.class} )
+@ActiveProfiles("local")
 public class GenerationTest {
 
-    @Configuration
-    @ComponentScan(basePackages = {"net.ketone.accrptgen"})
+    @TestConfiguration
     static class MockStorageConfiguration {
 
         @Bean
@@ -64,7 +65,8 @@ public class GenerationTest {
             String apiKey = CredentialsService.SENDGRID_API_KEY_PROP + "=1234567890";
             Mockito.when(storageService.loadAsInputStream(eq(CREDENTIALS_FILE))).thenReturn(new ByteArrayInputStream(apiKey.getBytes()));
 
-            Mockito.when(storageService.loadAsInputStream(eq(TEMPLATE_FILE))).thenCallRealMethod();
+            InputStream inputStream = this.getClass().getResourceAsStream("/" + TEMPLATE_FILE);
+            Mockito.when(storageService.loadAsInputStream(eq(TEMPLATE_FILE))).thenReturn(inputStream);
 
             return storageService;
         }

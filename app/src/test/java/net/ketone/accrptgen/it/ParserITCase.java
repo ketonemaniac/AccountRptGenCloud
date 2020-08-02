@@ -1,12 +1,14 @@
-package net.ketone.accrptgen.gen;
+package net.ketone.accrptgen.it;
 
 import net.ketone.accrptgen.AccrptgenApplication;
-import net.ketone.accrptgen.stats.StatisticsService;
 import net.ketone.accrptgen.entity.AccountData;
 import net.ketone.accrptgen.entity.Section;
 import net.ketone.accrptgen.entity.SectionElement;
 import net.ketone.accrptgen.entity.Table;
+import net.ketone.accrptgen.gen.GenerationService;
+import net.ketone.accrptgen.gen.ParsingService;
 import net.ketone.accrptgen.mail.EmailService;
+import net.ketone.accrptgen.stats.StatisticsService;
 import net.ketone.accrptgen.store.StorageService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -17,13 +19,16 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
+import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -33,17 +38,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
- * You need at least TWO files in the files/ folder
+ * You need at least TWO files in the /local/files/ folder
  * 1. credentials.properties
  * 2. All documents.xlsm
  * Run with VM options
- * -Dpoi.log.level=1 -Dorg.apache.poi.util.POILogger=org.apache.poi.util.SystemOutLogger
+ * -Dspring.profiles.active=has_template
  */
-// @Ignore
+@IfProfileValue(name = "spring.profiles.active", values = {"itcase"})
 @RunWith(SpringRunner.class)
 @ActiveProfiles("local")
 @SpringBootTest(classes = AccrptgenApplication.class)
-public class ParserTest {
+public class ParserITCase {
 
     @Autowired
     private ParsingService svc;
@@ -57,9 +62,11 @@ public class ParserTest {
     private StatisticsService statisticsSvc;
 
 
+    @Value("${template.filename}")
+    private String TEMPLATE_FILENAME;
 
-    private final String PLAIN_FILENAME = "program (plain) 09.4.18.xlsm";
-    private final String TEMPLATE_FILENAME = "All documents 23.4.18.xlsm";
+    @Value("${plain.filename}${plain.filename.extension}")
+    private String PLAIN_FILENAME;
 
     @Test
     public void testPreParse() throws Exception {
@@ -146,20 +153,6 @@ public class ParserTest {
         }
     }
 
-
-
-    @Test
-    public void testParse() throws IOException {
-        InputStream templateStream = storageSvc.loadAsInputStream(TEMPLATE_FILENAME);
-        XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        templateWb.write(os);
-        AccountData data = svc.readFile(os.toByteArray());
-        System.out.println(data.getCompanyName());
-    }
-
-
-
     @Test
     public void testStringifyContents() throws IOException {
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("formulaToText.xlsx");
@@ -208,6 +201,16 @@ public class ParserTest {
         Workbook outputWb = svc.deleteSheets(workbook, Arrays.asList("Sheet1", "Sheet2","Sheet4"));
         assertThat(outputWb.getNumberOfSheets()).isEqualTo(1);
         assertThat(outputWb.getSheet("Sheet3")).isNotNull();
+    }
+
+    @Test
+    public void testParse() throws IOException {
+        InputStream templateStream = storageSvc.loadAsInputStream(TEMPLATE_FILENAME);
+        XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        templateWb.write(os);
+        AccountData data = svc.readFile(os.toByteArray());
+        System.out.println(data.getCompanyName());
     }
 
 

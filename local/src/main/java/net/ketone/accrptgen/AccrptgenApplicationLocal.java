@@ -13,12 +13,4 @@ public class AccrptgenApplicationLocal {
 //		System.setProperty("poi.log.level", POILogger.DEBUG + "");
 		SpringApplication.run(AccrptgenApplicationLocal.class, args);
 	}
-
-	/**
-	 * to speed up boot time
-	 */
-	@Configuration
-	@ComponentScan(lazyInit = true)
-	static class LocalConfig {
-	}
 }
