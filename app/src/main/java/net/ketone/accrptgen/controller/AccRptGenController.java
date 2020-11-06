@@ -64,7 +64,7 @@ public class AccRptGenController {
     @Value("${build.timestamp}")
     private String buildTimestamp;
 
-    @RequestMapping("/version")
+    @GetMapping("/version")
     public Map<String, String> getVersion() {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime localDateTime = LocalDateTime.parse(buildTimestamp, df);

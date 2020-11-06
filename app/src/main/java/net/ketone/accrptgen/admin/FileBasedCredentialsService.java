@@ -46,7 +46,7 @@ public class FileBasedCredentialsService implements CredentialsService {
         });
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
-            prop.store(os, "File for sotring passwords and configurations");
+            prop.store(os, "File for storing passwords and configurations");
             storageService.store(os.toByteArray(), CREDENTIALS_FILE);
         } catch (IOException e) {
             e.printStackTrace();

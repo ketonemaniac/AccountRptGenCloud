@@ -30,7 +30,7 @@ public class AdminController {
     @Autowired
     private CredentialsService credentialsService;
 
-    @RequestMapping("/hello")
+    @GetMapping("/hello")
     public String greeting() {
         logger.info("hello from Admin!");
         return "Hello World from Admin!";
