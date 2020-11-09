@@ -1,15 +1,15 @@
 package net.ketone.accrptgen.it;
 
 import net.ketone.accrptgen.AccrptgenApplication;
-import net.ketone.accrptgen.entity.AccountData;
-import net.ketone.accrptgen.entity.Section;
-import net.ketone.accrptgen.entity.SectionElement;
-import net.ketone.accrptgen.entity.Table;
-import net.ketone.accrptgen.gen.GenerationService;
-import net.ketone.accrptgen.gen.ParsingService;
-import net.ketone.accrptgen.mail.EmailService;
-import net.ketone.accrptgen.stats.StatisticsService;
-import net.ketone.accrptgen.store.StorageService;
+import net.ketone.accrptgen.domain.gen.AccountData;
+import net.ketone.accrptgen.domain.gen.Section;
+import net.ketone.accrptgen.domain.gen.SectionElement;
+import net.ketone.accrptgen.domain.gen.Table;
+import net.ketone.accrptgen.service.gen.GenerationService;
+import net.ketone.accrptgen.service.gen.ParsingService;
+import net.ketone.accrptgen.service.mail.EmailService;
+import net.ketone.accrptgen.service.stats.StatisticsService;
+import net.ketone.accrptgen.service.store.StorageService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.IndexedColors;

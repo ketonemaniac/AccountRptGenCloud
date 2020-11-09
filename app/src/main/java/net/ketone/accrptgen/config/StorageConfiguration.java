@@ -1,8 +1,8 @@
 package net.ketone.accrptgen.config;
 
-import net.ketone.accrptgen.store.FileStorageService;
-import net.ketone.accrptgen.store.GCloudStorageService;
-import net.ketone.accrptgen.store.StorageService;
+import net.ketone.accrptgen.service.store.FileStorageService;
+import net.ketone.accrptgen.service.store.GCloudStorageService;
+import net.ketone.accrptgen.service.store.StorageService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
