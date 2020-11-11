@@ -1,7 +1,7 @@
 package net.ketone.accrptgen.api;
 
 import net.ketone.accrptgen.service.credentials.CredentialsService;
-import net.ketone.accrptgen.dto.AccountFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,13 +38,13 @@ public class AdminController {
      * @throws IOException
      */
     @PostMapping("/uploadFile")
-    public AccountFileDto handleTemplateFileUpload(@RequestParam("file") MultipartFile file,
-                                           RedirectAttributes redirectAttributes) throws IOException {
+    public AccountJob handleTemplateFileUpload(@RequestParam("file") MultipartFile file,
+                                               RedirectAttributes redirectAttributes) throws IOException {
 
         logger.info("uploading template file=" + file.getOriginalFilename());
         storageService.store(file.getBytes(), file.getOriginalFilename());
         credentialsService.saveCredential(CredentialsService.PREPARSE_TEMPLATE_PROP, file.getOriginalFilename());
-        AccountFileDto dto = new AccountFileDto();
+        AccountJob dto = new AccountJob();
         dto.setFilename(file.getOriginalFilename());
         return dto;
     }

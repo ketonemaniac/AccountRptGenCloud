@@ -19,7 +19,7 @@ package net.ketone.accrptgen.service.mail;
 import com.sendgrid.SendGrid;
 import net.ketone.accrptgen.service.credentials.CredentialsService;
 import net.ketone.accrptgen.domain.auth.User;
-import net.ketone.accrptgen.dto.AccountFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -58,7 +58,7 @@ public class SendgridEmailService extends AbstractEmailService {
     }
 
     @Override
-    public void sendEmail(AccountFileDto dto, List<Attachment> attachments) throws Exception {
+    public void sendEmail(AccountJob dto, List<Attachment> attachments) throws Exception {
         if(!SENDGRID_ENABLE) return;
         SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
         SendGrid.Email email = new SendGrid.Email();

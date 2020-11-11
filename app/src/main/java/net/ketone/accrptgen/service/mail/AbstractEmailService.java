@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import net.ketone.accrptgen.service.credentials.CredentialsService;
 import net.ketone.accrptgen.domain.auth.User;
 import net.ketone.accrptgen.service.auth.UserService;
-import net.ketone.accrptgen.dto.AccountFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -22,7 +22,7 @@ public abstract class AbstractEmailService implements EmailService {
     protected String EMAIL_BCC;
 
 
-    protected Map<String, String[]> getEmailAddresses(AccountFileDto dto) {
+    protected Map<String, String[]> getEmailAddresses(AccountJob dto) {
         return ImmutableMap.of(
                 "to", Optional.ofNullable(
                         userService.findByUsername(dto.getSubmittedBy()).block())  // code smell

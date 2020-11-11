@@ -1,6 +1,6 @@
 package net.ketone.accrptgen.it;
 
-import net.ketone.accrptgen.dto.AccountFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.service.gen.Pipeline;
 import net.ketone.accrptgen.service.mail.Attachment;
 import net.ketone.accrptgen.service.mail.EmailService;
@@ -87,10 +87,10 @@ public class AccrptgenApplicationITCase {
 
 		ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
-		AccountFileDto accountFileDto = new AccountFileDto();
-		accountFileDto.setGenerationTime(genTime);
-		accountFileDto.setFilename(PLAIN_FILENAME);
-		Pipeline pipeline = ctx.getBean(Pipeline.class, accountFileDto);
+		AccountJob accountJob = new AccountJob();
+		accountJob.setGenerationTime(genTime);
+		accountJob.setFilename(PLAIN_FILENAME);
+		Pipeline pipeline = ctx.getBean(Pipeline.class, accountJob);
 		pipeline.run();
 		Mockito.verify(emailService).sendEmail(any(), argumentCaptor.capture());
 		List<Attachment> attachments = argumentCaptor.getValue();

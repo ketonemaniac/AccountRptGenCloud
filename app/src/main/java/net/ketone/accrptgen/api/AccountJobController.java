@@ -1,7 +1,7 @@
 package net.ketone.accrptgen.api;
 
-import net.ketone.accrptgen.dto.AccountFileDto;
-import net.ketone.accrptgen.repo.AccountFileDtoRepository;
+import net.ketone.accrptgen.domain.dto.AccountJob;
+import net.ketone.accrptgen.repo.AccountJobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,15 +12,15 @@ import java.util.List;
 public class AccountJobController {
 
     @Autowired
-    private AccountFileDtoRepository repo;
+    private AccountJobRepository repo;
 
     @GetMapping
-    public List<AccountFileDto> getAll() {
+    public List<AccountJob> getAll() {
         return repo.findAll();
     }
 
     @PostMapping
-    public AccountFileDto save(@RequestBody final AccountFileDto job) {
+    public AccountJob save(@RequestBody final AccountJob job) {
         return repo.save(job);
     }
 

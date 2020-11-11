@@ -1,7 +1,7 @@
 package net.ketone.accrptgen.service.store;
 
 import net.ketone.accrptgen.config.Constants;
-import net.ketone.accrptgen.dto.AccountFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +38,8 @@ public class StorageServiceTest {
         doSave();
     }
 
-    private AccountFileDto doSave() throws IOException {
-        AccountFileDto dto = new AccountFileDto();
+    private AccountJob doSave() throws IOException {
+        AccountJob dto = new AccountJob();
         dto.setGenerationTime(new Date());
         dto.setCompany("ABC Company Limited");
         dto.setStatus(Constants.Status.EMAIL_SENT.name());

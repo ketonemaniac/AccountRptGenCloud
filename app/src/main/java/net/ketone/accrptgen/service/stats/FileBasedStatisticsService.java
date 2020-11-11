@@ -2,7 +2,7 @@ package net.ketone.accrptgen.service.stats;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.ketone.accrptgen.config.Constants;
-import net.ketone.accrptgen.dto.AccountFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,9 +34,9 @@ public class FileBasedStatisticsService implements StatisticsService {
 
 
     @Override
-    public List<AccountFileDto> getRecentTasks(String authenticatedUser) {
+    public List<AccountJob> getRecentTasks(String authenticatedUser) {
         try {
-            Deque<AccountFileDto> lines = loadHistoryFileToDeque();
+            Deque<AccountJob> lines = loadHistoryFileToDeque();
             return lines.stream()
                     .filter(dto -> Optional.ofNullable(dto.getSubmittedBy()).isPresent())
                     .filter(dto -> dto.getSubmittedBy().equals(authenticatedUser))
@@ -57,10 +57,10 @@ public class FileBasedStatisticsService implements StatisticsService {
     @Override
     public Map<String, Integer> housekeepTasks() throws IOException {
         Map<String, Integer> fileLineMap = new HashMap<>();
-        Deque<AccountFileDto> lines = loadHistoryFileToDeque();
+        Deque<AccountJob> lines = loadHistoryFileToDeque();
         String curFile = HISTORY_FILE;
-        Deque<AccountFileDto> curLines = new ArrayDeque<>();
-        for(AccountFileDto lineDto : lines) {
+        Deque<AccountJob> curLines = new ArrayDeque<>();
+        for(AccountJob lineDto : lines) {
             LocalDate monthStart = LocalDate.now().withDayOfMonth(1);
             LocalDate lineDate = new java.sql.Date(lineDto.getGenerationTime().getTime()).toLocalDate();
             if(monthStart.compareTo(lineDate) > 0) {
@@ -85,14 +85,14 @@ public class FileBasedStatisticsService implements StatisticsService {
     }
 
     @Override
-    public void updateTask(AccountFileDto dto) throws IOException {
+    public void updateTask(AccountJob dto) throws IOException {
         logger.info("dto: " + objectMapper.writeValueAsString(dto) );
         // do not store null filename entries
         if(dto.getFilename() == null) return;
-        Deque<AccountFileDto> lines = loadHistoryFileToDeque();
+        Deque<AccountJob> lines = loadHistoryFileToDeque();
 
         // check whether this is the update of an existing line
-        Optional<AccountFileDto> existingDto = lines.stream()
+        Optional<AccountJob> existingDto = lines.stream()
                 .filter(lineDto -> Optional.ofNullable(lineDto.getGenerationTime())
                 .orElse(Date.from(Instant.EPOCH)).equals(
                         Optional.ofNullable(dto.getGenerationTime()).orElse(new Date())))
@@ -108,7 +108,7 @@ public class FileBasedStatisticsService implements StatisticsService {
     }
 
     @Override
-    public AccountFileDto getTask(String handleName) {
+    public AccountJob getTask(String handleName) {
         return null;
     }
 
@@ -117,17 +117,17 @@ public class FileBasedStatisticsService implements StatisticsService {
      * @return
      * @throws IOException
      */
-    private Deque<AccountFileDto> loadHistoryFileToDeque() throws IOException {
+    private Deque<AccountJob> loadHistoryFileToDeque() throws IOException {
         InputStream is = storageService.loadAsInputStream(HISTORY_FILE);
         BufferedReader buf = new BufferedReader(new InputStreamReader(is));
-        Deque<AccountFileDto> lines = buf.lines()
+        Deque<AccountJob> lines = buf.lines()
                 .map(line -> {
                     try {
-                        return objectMapper.readValue(line, AccountFileDto.class);
+                        return objectMapper.readValue(line, AccountJob.class);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    return new AccountFileDto();
+                    return new AccountJob();
                 })
                 .collect(Collectors.toCollection(ArrayDeque::new));
         is.close();
@@ -139,9 +139,9 @@ public class FileBasedStatisticsService implements StatisticsService {
      * @param dtos
      * @throws IOException
      */
-    private void writeHistoryFileFromQueue(Queue<AccountFileDto> dtos) throws IOException {
+    private void writeHistoryFileFromQueue(Queue<AccountJob> dtos) throws IOException {
         StringBuilder sb = new StringBuilder();
-        for(AccountFileDto lineDto : dtos) {
+        for(AccountJob lineDto : dtos) {
             sb.append(objectMapper.writeValueAsString(lineDto)).append(System.lineSeparator());
         }
         storageService.store(sb.toString().getBytes(), HISTORY_FILE);

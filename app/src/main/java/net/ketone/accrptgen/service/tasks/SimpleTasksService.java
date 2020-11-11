@@ -1,7 +1,7 @@
 package net.ketone.accrptgen.service.tasks;
 
 import net.ketone.accrptgen.config.Constants;
-import net.ketone.accrptgen.dto.AccountFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.service.gen.Pipeline;
 import net.ketone.accrptgen.service.stats.StatisticsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class SimpleTasksService implements TasksService {
 
 
     @Override
-    public AccountFileDto submitTask(AccountFileDto dto) throws IOException {
+    public AccountJob submitTask(AccountJob dto) throws IOException {
         dto.setStatus(Constants.Status.GENERATING.name());
         statisticsService.updateTask(dto);
         Pipeline pipeline = ctx.getBean(Pipeline.class, dto);

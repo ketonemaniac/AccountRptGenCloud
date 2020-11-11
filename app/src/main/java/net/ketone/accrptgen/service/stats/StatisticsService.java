@@ -1,6 +1,6 @@
 package net.ketone.accrptgen.service.stats;
 
-import net.ketone.accrptgen.dto.AccountFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
 
 import java.io.IOException;
 import java.util.List;
@@ -10,7 +10,7 @@ public interface StatisticsService {
 
     int MAX_RECENTS = 10;
 
-    List<AccountFileDto> getRecentTasks(String authenticatedUser);
+    List<AccountJob> getRecentTasks(String authenticatedUser);
 
     /**
      *
@@ -18,7 +18,7 @@ public interface StatisticsService {
      */
     Map<String, Integer> housekeepTasks() throws IOException;
 
-    void updateTask(AccountFileDto dto) throws IOException;
+    void updateTask(AccountJob dto) throws IOException;
 
-    AccountFileDto getTask(String task);
+    AccountJob getTask(String task);
 }

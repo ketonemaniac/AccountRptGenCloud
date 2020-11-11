@@ -5,8 +5,8 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.exception.ValidationException;
 import net.ketone.accrptgen.service.stats.StatisticsService;
-import net.ketone.accrptgen.dto.AccountFileDto;
-import net.ketone.accrptgen.dto.DownloadFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
+import net.ketone.accrptgen.domain.dto.DownloadFileDto;
 import net.ketone.accrptgen.service.gen.GenerationService;
 import net.ketone.accrptgen.service.gen.ParsingService;
 import net.ketone.accrptgen.service.mail.EmailService;
@@ -70,7 +70,7 @@ public class AccRptGenController {
     }
 
     @PostMapping("/uploadFile")
-    public AccountFileDto handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
+    public AccountJob handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
         if(file.getOriginalFilename().lastIndexOf(".") == -1) {
             throw new ValidationException("sadfa");
         }
@@ -79,7 +79,7 @@ public class AccRptGenController {
         final Date generationTime = new Date();
         storageService.store(fileBytes, generationTime.getTime()+".xlsm");
 
-        AccountFileDto dto = new AccountFileDto();
+        AccountJob dto = new AccountJob();
         XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
         dto.setId(UUID.randomUUID());
         dto.setCompany(parsingService.extractCompanyName(workbook));
@@ -91,9 +91,9 @@ public class AccRptGenController {
     }
 
     @PostMapping("/startGeneration")
-    public AccountFileDto startGeneration(AccountFileDto requestDto) throws IOException {
+    public AccountJob startGeneration(AccountJob requestDto) throws IOException {
         logger.info("cacheFilename=" + requestDto.getFilename() + "; referredBy=" + requestDto.getReferredBy());
-        AccountFileDto dto = new AccountFileDto();
+        AccountJob dto = new AccountJob();
         try {
             dto.setId(requestDto.getId());
             dto.setCompany(requestDto.getCompany());
@@ -135,7 +135,7 @@ public class AccRptGenController {
     }
 
     @GetMapping("/listFiles")
-    public List<AccountFileDto> listFiles() {
+    public List<AccountJob> listFiles() {
         return statisticsService.getRecentTasks(UserUtils.getAuthenticatedUser());
     }
 

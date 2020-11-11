@@ -1,7 +1,7 @@
 package net.ketone.accrptgen.service.mail;
 
 import net.ketone.accrptgen.domain.auth.User;
-import net.ketone.accrptgen.dto.AccountFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -24,7 +24,7 @@ public class MockEmailService extends AbstractEmailService {
     private static final Logger logger = Logger.getLogger(MockEmailService.class.getName());
 
     @Override
-    public void sendEmail(AccountFileDto dto, List<Attachment> attachments) throws Exception {
+    public void sendEmail(AccountJob dto, List<Attachment> attachments) throws Exception {
         Map<String, String[]> recipients = getEmailAddresses(dto);
         recipients.forEach((k,v) -> {
             logger.info(k + ":" + Arrays.asList(v).stream().collect(Collectors.joining(";")));

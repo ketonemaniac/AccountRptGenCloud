@@ -2,7 +2,7 @@ package net.ketone.accrptgen.service.gen;
 
 import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.service.stats.StatisticsService;
-import net.ketone.accrptgen.dto.AccountFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.domain.gen.AccountData;
 import net.ketone.accrptgen.service.mail.Attachment;
 import net.ketone.accrptgen.service.mail.EmailService;
@@ -50,9 +50,9 @@ public class Pipeline implements Runnable {
 
     private String filename;
     private String cacheFilename;
-    private AccountFileDto dto;
+    private AccountJob dto;
 
-    public Pipeline(AccountFileDto dto) {
+    public Pipeline(AccountJob dto) {
         this.cacheFilename = String.valueOf(dto.getFilename());
         this.dto = dto;
     }

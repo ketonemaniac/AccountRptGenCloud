@@ -1,4 +1,4 @@
-package net.ketone.accrptgen.dto;
+package net.ketone.accrptgen.domain.dto;
 
 import lombok.Data;
 

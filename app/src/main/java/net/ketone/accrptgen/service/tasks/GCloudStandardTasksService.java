@@ -7,7 +7,7 @@ import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.service.stats.StatisticsService;
-import net.ketone.accrptgen.dto.AccountFileDto;
+import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.service.gen.Pipeline;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,7 +43,7 @@ public class GCloudStandardTasksService implements TasksService {
     private ApplicationContext ctx;
 
     @Override
-    public AccountFileDto submitTask(AccountFileDto dto) throws IOException {
+    public AccountJob submitTask(AccountJob dto) throws IOException {
         Queue queue = QueueFactory.getQueue(GEN_QUEUE_NAME);
         logger.info("before submit:" + mapper.writeValueAsString(dto));
         TaskHandle handle = queue.add(TaskOptions.Builder.withUrl(GEN_QUEUE_ENDPOINT)
@@ -62,7 +62,7 @@ public class GCloudStandardTasksService implements TasksService {
 
     @PostMapping(GEN_QUEUE_ENDPOINT)
     // public String doWork(@RequestParam("accountFileDto") AccountFileDto dto) {
-    public String doWork(@RequestBody AccountFileDto dto) {
+    public String doWork(@RequestBody AccountJob dto) {
         logger.info("inside doWork() " + dto.toString());
         dto.setStatus(Constants.Status.GENERATING.name());
         try {
