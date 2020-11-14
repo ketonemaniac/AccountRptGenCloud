@@ -20,7 +20,7 @@ Local run with google services (cloud)
 
 To deploy to google cloud
 * make sure you have the right environment set in appengine-web.xml.
-* Run `mvn validate appengine:deploy` in cloud folder
+* Run `mvn validate appengine:deploy -Dapp.stage.appEngineDirectory=src/main/appengine/staging` in app folder
 
 ## Setup google services ## 
 

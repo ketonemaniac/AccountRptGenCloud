@@ -11,6 +11,7 @@ import net.ketone.accrptgen.service.gen.GenerationService;
 import net.ketone.accrptgen.service.gen.ParsingService;
 import net.ketone.accrptgen.service.mail.EmailService;
 import net.ketone.accrptgen.service.store.StorageService;
+import net.ketone.accrptgen.service.tasks.TaskQueueService;
 import net.ketone.accrptgen.service.tasks.TasksService;
 import net.ketone.accrptgen.util.UserUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -51,6 +52,8 @@ public class AccRptGenController {
     private StatisticsService statisticsService;
     @Autowired
     private TasksService tasksService;
+    @Autowired
+    private TaskQueueService taskQueueService;
 
     @Value("${build.version}")
     private String buildVersion;
@@ -110,7 +113,8 @@ public class AccRptGenController {
                 return dto;
             }
 
-            tasksService.submitTask(dto);
+//            tasksService.submitTask(dto);
+            taskQueueService.createTask(dto);
             statisticsService.updateTask(dto);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in startGeneration", e);
