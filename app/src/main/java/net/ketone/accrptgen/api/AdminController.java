@@ -24,8 +24,7 @@ public class AdminController {
     private static final Logger logger = Logger.getLogger(AdminController.class.getName());
 
     @Autowired
-    @Qualifier("persistentStorage")
-    private StorageService storageService;
+    private StorageService persistentStorage;
     @Autowired
     private CredentialsService credentialsService;
 
@@ -42,7 +41,7 @@ public class AdminController {
                                                RedirectAttributes redirectAttributes) throws IOException {
 
         logger.info("uploading template file=" + file.getOriginalFilename());
-        storageService.store(file.getBytes(), file.getOriginalFilename());
+        persistentStorage.store(file.getBytes(), file.getOriginalFilename());
         credentialsService.saveCredential(CredentialsService.PREPARSE_TEMPLATE_PROP, file.getOriginalFilename());
         AccountJob dto = new AccountJob();
         dto.setFilename(file.getOriginalFilename());

@@ -5,7 +5,6 @@ import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -20,6 +19,7 @@ import java.util.stream.Collectors;
 import static net.ketone.accrptgen.config.Constants.HISTORY_FILE;
 
 @Service
+@Deprecated
 public class FileBasedStatisticsService implements StatisticsService {
 
     private static final Logger logger = Logger.getLogger(FileBasedStatisticsService.class.getName());
@@ -27,10 +27,9 @@ public class FileBasedStatisticsService implements StatisticsService {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    @Qualifier("persistentStorage")
-    private StorageService storageService;
+    private StorageService persistentStorage;
     @Autowired
-    private StorageService cache;
+    private StorageService tempStorage;
 
 
     @Override
@@ -45,8 +44,8 @@ public class FileBasedStatisticsService implements StatisticsService {
                             || dto.getStatus().equals(Constants.Status.GENERATING.name())
                             || dto.getStatus().equals(Constants.Status.FAILED.name())
                     ))
-                            || cache.hasFile(dto.getFilename()+".zip")
-                            || cache.hasFile(dto.getFilename()+".xlsm"))
+                            || tempStorage.hasFile(dto.getFilename()+".zip")
+                            || tempStorage.hasFile(dto.getFilename()+".xlsm"))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             logger.log(Level.WARNING, "Cannot read from " + HISTORY_FILE, e);
@@ -118,7 +117,7 @@ public class FileBasedStatisticsService implements StatisticsService {
      * @throws IOException
      */
     private Deque<AccountJob> loadHistoryFileToDeque() throws IOException {
-        InputStream is = storageService.loadAsInputStream(HISTORY_FILE);
+        InputStream is = persistentStorage.loadAsInputStream(HISTORY_FILE);
         BufferedReader buf = new BufferedReader(new InputStreamReader(is));
         Deque<AccountJob> lines = buf.lines()
                 .map(line -> {
@@ -144,7 +143,7 @@ public class FileBasedStatisticsService implements StatisticsService {
         for(AccountJob lineDto : dtos) {
             sb.append(objectMapper.writeValueAsString(lineDto)).append(System.lineSeparator());
         }
-        storageService.store(sb.toString().getBytes(), HISTORY_FILE);
+        persistentStorage.store(sb.toString().getBytes(), HISTORY_FILE);
     }
 
 }

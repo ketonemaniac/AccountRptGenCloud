@@ -7,40 +7,30 @@ import net.ketone.accrptgen.domain.dto.AccountJob;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 
 @Service
 @Profile("gCloudStandard")
-public class TaskQueueService {
+public class TaskQueueService implements TasksService {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public void createTask(final AccountJob dto) throws Exception {
+    @Override
+    public AccountJob submitTask(AccountJob dto) throws IOException {
         try (CloudTasksClient client = CloudTasksClient.create()) {
             // TODO(developer): Uncomment these lines and replace with your values.
              String projectId = "accountrptgen-hk-test";
              String locationId = "asia-east2";
              String queueId = "accountrptgen-queue";
-            String key = "key";
 
             // Construct the fully qualified queue name.
             String queueName = QueueName.of(projectId, locationId, queueId).toString();
-
-            // Construct the task body.
-//            Task taskParam =
-//                    Task.newBuilder()
-//                            .setAppEngineHttpRequest(
-//                                    AppEngineHttpRequest.newBuilder()
-//                                            .setRelativeUri("/worker?key=" + key)
-//                                            .setHttpMethod(HttpMethod.GET)
-//                                            .build())
-//                            .build();
 
             Task taskPayload =
                     Task.newBuilder()
                             .setAppEngineHttpRequest(
                                     AppEngineHttpRequest.newBuilder()
-//                                            .setBody(ByteString.copyFrom(key, Charset.defaultCharset()))
                                             .setBody(ByteString.copyFrom(mapper.writeValueAsString(dto).getBytes()))
                                             .putHeaders("content-type", "application/json")
                                             .setRelativeUri("/worker")
@@ -55,5 +45,11 @@ public class TaskQueueService {
                 System.out.println(response);
             }
         }
+        return dto;
+    }
+
+    @Override
+    public boolean terminateTask(String task) {
+        return false;
     }
 }

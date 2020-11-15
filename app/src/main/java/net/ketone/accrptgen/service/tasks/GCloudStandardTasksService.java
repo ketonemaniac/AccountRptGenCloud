@@ -27,7 +27,7 @@ import static net.ketone.accrptgen.config.Constants.GEN_QUEUE_ENDPOINT;
  */
 @Profile("gCloudStandard")
 @RestController
-public class GCloudStandardTasksService implements TasksService {
+public class GCloudStandardTasksService {
 
     private static final Logger logger = Logger.getLogger(GCloudStandardTasksService.class.getName());
 
@@ -41,24 +41,6 @@ public class GCloudStandardTasksService implements TasksService {
 
     @Autowired
     private ApplicationContext ctx;
-
-    @Override
-    public AccountJob submitTask(AccountJob dto) throws IOException {
-        Queue queue = QueueFactory.getQueue(GEN_QUEUE_NAME);
-        logger.info("before submit:" + mapper.writeValueAsString(dto));
-        TaskHandle handle = queue.add(TaskOptions.Builder.withUrl(GEN_QUEUE_ENDPOINT)
-                .payload(mapper.writeValueAsString(dto).getBytes(), "application/json")
-                // .param("accountFileDto", mapper.writeValueAsString(dto))
-        );
-        logger.info("Handle Created: " + handle.getName());
-        return dto;
-    }
-
-    @Override
-    public boolean terminateTask(String task) {
-        Queue q = QueueFactory.getQueue(GEN_QUEUE_NAME);
-        return q.deleteTask(task);
-    }
 
     @PostMapping(GEN_QUEUE_ENDPOINT)
     // public String doWork(@RequestParam("accountFileDto") AccountFileDto dto) {

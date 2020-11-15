@@ -36,7 +36,7 @@ public class ParsingService {
     private static final List<String> preParseSheets = Arrays.asList("Control", "Dir info", "Section3", "Section4", "Section6");
 
     @Autowired
-    private StorageService storageService;
+    private StorageService persistentStorage;
     @Autowired
     private CredentialsService credentialsService;
 
@@ -66,7 +66,7 @@ public class ParsingService {
 
         String templateName = credentialsService.getCredentials().getProperty(CredentialsService.PREPARSE_TEMPLATE_PROP);
         logger.info("starting pre-parse to template " + templateName);
-        InputStream templateStream = storageService.loadAsInputStream(templateName);
+        InputStream templateStream = persistentStorage.loadAsInputStream(templateName);
         XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
         templateStream.close();
         if(templateWb == null) {

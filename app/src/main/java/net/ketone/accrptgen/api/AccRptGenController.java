@@ -45,15 +45,13 @@ public class AccRptGenController {
     @Autowired
     private ParsingService parsingService;
     @Autowired
-    private StorageService storageService;
+    private StorageService tempStorage;
     @Autowired
     private EmailService emailService;
     @Autowired
     private StatisticsService statisticsService;
     @Autowired
     private TasksService tasksService;
-    @Autowired
-    private TaskQueueService taskQueueService;
 
     @Value("${build.version}")
     private String buildVersion;
@@ -80,7 +78,7 @@ public class AccRptGenController {
         file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")+1, file.getOriginalFilename().length());
         final byte[] fileBytes = file.getBytes();
         final Date generationTime = new Date();
-        storageService.store(fileBytes, generationTime.getTime()+".xlsm");
+        tempStorage.store(fileBytes, generationTime.getTime()+".xlsm");
 
         AccountJob dto = new AccountJob();
         XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
@@ -107,14 +105,13 @@ public class AccRptGenController {
             dto.setGenerationTime(new Date());
 
             String inputFileName = dto.getFilename() + ".xlsm";
-            if(!storageService.hasFile(inputFileName)) {
+            if(!tempStorage.hasFile(inputFileName)) {
                 logger.log(Level.WARNING, "File not present: " + inputFileName);
                 dto.setStatus(Constants.Status.FAILED.name());
                 return dto;
             }
 
-//            tasksService.submitTask(dto);
-            taskQueueService.createTask(dto);
+            tasksService.submitTask(dto);
             statisticsService.updateTask(dto);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error in startGeneration", e);
@@ -130,7 +127,7 @@ public class AccRptGenController {
     public ResponseEntity<Resource> downloadFile(@RequestBody DownloadFileDto dto) throws IOException {
         String fileName = dto.getFilename() + ".zip";
         logger.info("filename is " + fileName);
-        InputStream is = storageService.loadAsInputStream(fileName);
+        InputStream is = tempStorage.loadAsInputStream(fileName);
         Resource resource = new InputStreamResource(is);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)

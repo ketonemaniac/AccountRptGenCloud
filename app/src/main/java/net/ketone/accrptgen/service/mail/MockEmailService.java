@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class MockEmailService extends AbstractEmailService {
 
     @Autowired
-    private StorageService storageSvc;
+    private StorageService tempStorage;
 
 
     private static final Logger logger = Logger.getLogger(MockEmailService.class.getName());
@@ -31,7 +31,7 @@ public class MockEmailService extends AbstractEmailService {
         });
         for(Attachment attachment : attachments) {
             logger.info("storing file " + attachment.getAttachmentName());
-            storageSvc.store(attachment.getData(), attachment.getAttachmentName());
+            tempStorage.store(attachment.getData(), attachment.getAttachmentName());
         }
     }
 

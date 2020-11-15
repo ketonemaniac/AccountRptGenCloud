@@ -40,7 +40,7 @@ public class Pipeline implements Runnable {
     private ParsingService parsingService;
     // in cloud this is just the cache
     @Autowired
-    private StorageService storageService;
+    private StorageService tempStorage;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -64,13 +64,13 @@ public class Pipeline implements Runnable {
         try {
             filename = GenerationService.getFileName(dto.getCompany(), dto.getGenerationTime());
 
-            byte[] workbookArr = storageService.load(inputFileName);
+            byte[] workbookArr = tempStorage.load(inputFileName);
             XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(workbookArr));
             byte[] preParseOutput = parsingService.preParse(workbook);
 
             Attachment inputXlsx = new Attachment(filename + "-plain.xlsm", workbookArr);
             // no need to use the template anymore, delete it.
-            storageService.delete(inputFileName);
+            tempStorage.delete(inputFileName);
 
             logger.info("template Closing input file stream, " + preParseOutput.length + "_bytes");
             logger.info("Start parse operation for " + filename);
@@ -98,7 +98,7 @@ public class Pipeline implements Runnable {
             // zip files and store them just in case needed
             Map<String, byte[]> zipInput = attachments.stream()
                     .collect(Collectors.toMap(Attachment::getAttachmentName, Attachment::getData));
-            storageService.store(ZipUtils.zipFiles(zipInput), filename + ".zip");
+            tempStorage.store(ZipUtils.zipFiles(zipInput), filename + ".zip");
 
             dto.setFilename(filename);
             dto.setStatus(Constants.Status.EMAIL_SENT.name());

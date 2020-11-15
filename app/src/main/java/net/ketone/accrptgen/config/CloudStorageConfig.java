@@ -3,29 +3,34 @@ package net.ketone.accrptgen.config;
 import net.ketone.accrptgen.service.store.FileStorageService;
 import net.ketone.accrptgen.service.store.GCloudStorageService;
 import net.ketone.accrptgen.service.store.StorageService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-public class StorageConfiguration {
+@Profile({"gCloudStandard"})
+public class CloudStorageConfig {
+
+    @Value("${storage.persistent.bucket}")
+    private String persistentBucket;
+
+    @Value("${storage.temp.bucket}")
+    private String tempBucket;
 
     /**
      * For cloud profiles
      * Could be accessed directly (for non-cached objects) or via the 1st level cache
      * @return
      */
-    @Profile({"gCloudStandard","gCloudFlexible"})
-    @Bean(name="persistentStorage")
-    public StorageService cloudPersistentStorage() {
-        return new GCloudStorageService();
+    @Bean
+    public StorageService persistentStorage() {
+        return new GCloudStorageService(persistentBucket);
     }
 
-
-    @Profile("local")
-    @Bean(name="persistentStorage")
-    public StorageService localPersistentStorage() {
-        return new FileStorageService();
+    @Bean
+    public StorageService tempStorage() {
+        return new GCloudStorageService(tempBucket);
     }
 
 }

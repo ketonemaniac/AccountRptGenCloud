@@ -4,7 +4,6 @@ import net.ketone.accrptgen.domain.auth.Role;
 import net.ketone.accrptgen.domain.auth.User;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,13 +25,12 @@ public class InitialDataLoader {
     @Autowired
     private UserService userService;
     @Autowired
-    @Qualifier("persistentStorage")
-    private StorageService storageService;
+    private StorageService persistentStorage;
 
     @Bean
     public CommandLineRunner init() {
         return args -> {
-            InputStream resource = storageService.loadAsInputStream(USERS_FILE);
+            InputStream resource = persistentStorage.loadAsInputStream(USERS_FILE);
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(resource))) {
                 reader.lines().forEach(line -> {

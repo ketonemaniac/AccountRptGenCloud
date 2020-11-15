@@ -3,7 +3,6 @@ package net.ketone.accrptgen.service.store;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
 import com.google.common.base.Stopwatch;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
@@ -19,16 +18,16 @@ public class GCloudStorageService implements StorageService {
     // private static final Logger logger = LoggerFactory.getLogger(GCloudStorageService.class);
     private static final Logger logger = Logger.getLogger(GCloudStorageService.class.getName());
 
-    Storage storage;
+    private Storage storage;
 
-    @Value("${gcloud.storage.bucket}")
-    private String BUCKET_NAME;
+    private String bucketName;
+
+    public GCloudStorageService(final String bucketName) {
+        this.bucketName = bucketName;
+    }
 
     @PostConstruct
     public void init() throws IOException {
-//        GoogleCredentials credentials = GoogleCredentials.fromStream(new ClassPathResource("gcloud-tests-4337e92868b4.json").getInputStream())
-//                .createScoped(Arrays.asList("https://www.googleapis.com/auth/cloud-platform"));
-//        StorageOptions.Builder optionsBuilder = StorageOptions.newBuilder().setCredentials(credentials);
         StorageOptions.Builder optionsBuilder = StorageOptions.newBuilder();
         storage = optionsBuilder.build().getService();
     }
@@ -40,7 +39,7 @@ public class GCloudStorageService implements StorageService {
         Stopwatch stopwatch = Stopwatch.createStarted();
         String contentType = null;
         BlobInfo.Builder blobInfoBuilder =
-                BlobInfo.newBuilder(BUCKET_NAME, filename);
+                BlobInfo.newBuilder(bucketName, filename);
         if(filename.endsWith(".docx")) {
             blobInfoBuilder.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
         } else if(filename.endsWith(".txt")) {
@@ -62,7 +61,7 @@ public class GCloudStorageService implements StorageService {
     public byte[] load(String filename) {
         logger.info("loading " + filename);
         Stopwatch stopwatch = Stopwatch.createStarted();
-        BlobId blobId = BlobId.of(BUCKET_NAME, filename);
+        BlobId blobId = BlobId.of(bucketName, filename);
         Blob blob = storage.get(blobId);
         if (blob == null) {
             logger.warning("No such object");
@@ -78,7 +77,7 @@ public class GCloudStorageService implements StorageService {
 
         List<String> filenames = new ArrayList<>();
 
-        Bucket bucket = storage.get(BUCKET_NAME);
+        Bucket bucket = storage.get(bucketName);
         if (bucket == null) {
             System.out.println("No such bucket");
             return new ArrayList<>();
@@ -90,7 +89,7 @@ public class GCloudStorageService implements StorageService {
 
     @Override
     public void delete(String filename) {
-        BlobId blobId = BlobId.of(BUCKET_NAME, filename);
+        BlobId blobId = BlobId.of(bucketName, filename);
         if(blobId != null) {
             logger.info("Deleting file " + filename);
             storage.delete(blobId);
@@ -99,7 +98,7 @@ public class GCloudStorageService implements StorageService {
 
     @Override
     public boolean hasFile(String filename) {
-        BlobId blobId = BlobId.of(BUCKET_NAME, filename);
+        BlobId blobId = BlobId.of(bucketName, filename);
         Blob blob = storage.get(blobId);
         return (blob != null);
     }

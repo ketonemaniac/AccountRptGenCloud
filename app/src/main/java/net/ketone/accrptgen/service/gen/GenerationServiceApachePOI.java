@@ -45,7 +45,7 @@ public class GenerationServiceApachePOI implements GenerationService {
     private static final int twipsPerIndent = 360;
 
     @Autowired
-    private StorageService storageService;
+    private StorageService persistentStorage;
 
     Map<String, XWPFParagraph> currPghs = new HashMap<>();
     Map<String, XWPFParagraph> pghHeaders = new HashMap<>();
@@ -79,7 +79,7 @@ public class GenerationServiceApachePOI implements GenerationService {
         XWPFDocument document = null;
         try {
 //            document = new XWPFDocument(new FileInputStream(file));
-            document = new XWPFDocument(storageService.loadAsInputStream(TEMPLATE_FILE));
+            document = new XWPFDocument(persistentStorage.loadAsInputStream(TEMPLATE_FILE));
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error in opening " + TEMPLATE_FILE, e);
             throw new RuntimeException(e);

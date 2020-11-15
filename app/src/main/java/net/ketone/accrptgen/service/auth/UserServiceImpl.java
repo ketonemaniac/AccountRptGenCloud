@@ -9,7 +9,6 @@ import net.ketone.accrptgen.repo.auth.UserRepository;
 import net.ketone.accrptgen.service.mail.EmailService;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,8 +38,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired
-    @Qualifier("persistentStorage")
-    private StorageService storageService;
+    private StorageService persistentStorage;
     @Autowired
     private EmailService emailService;
 
@@ -171,7 +169,7 @@ public class UserServiceImpl implements UserService {
                         .map(Role::getName).collect(Collectors.joining(USERS_FILE_SEPARATOR)))
                         .append(System.lineSeparator());
             });
-            storageService.store(sb.toString().getBytes(), USERS_FILE);
+            persistentStorage.store(sb.toString().getBytes(), USERS_FILE);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error persisting users", e);
         }
