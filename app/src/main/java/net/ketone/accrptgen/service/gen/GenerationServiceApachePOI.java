@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.service.gen;
 
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.gen.*;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.apache.poi.ss.formula.eval.FunctionEval;
@@ -30,12 +31,10 @@ import static net.ketone.accrptgen.config.Constants.TEMPLATE_FILE;
  * https://stackoverflow.com/questions/23601516/create-docx-using-docx4j-with-multiple-headers
  * since Apache POI does not support multiple sections
  */
+@Slf4j
 @Component
 @Scope(value = "prototype")
 public class GenerationServiceApachePOI implements GenerationService {
-
-//    private static final Logger logger = LoggerFactory.getLogger(GenerationServiceApachePOI.class);
-    private static final Logger logger = Logger.getLogger(GenerationServiceApachePOI.class.getName());
 
     // this converts cm to "twips" used internally for specifying height
     private static final int twipsPerCm =  566;
@@ -81,7 +80,7 @@ public class GenerationServiceApachePOI implements GenerationService {
 //            document = new XWPFDocument(new FileInputStream(file));
             document = new XWPFDocument(persistentStorage.loadAsInputStream(TEMPLATE_FILE));
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error in opening " + TEMPLATE_FILE, e);
+            log.error("Error in opening " + TEMPLATE_FILE, e);
             throw new RuntimeException(e);
         }
         List<XWPFParagraph> contentParagraphs = document.getParagraphs();
@@ -141,7 +140,7 @@ public class GenerationServiceApachePOI implements GenerationService {
                 }
             }
             if(!pghsMap.containsKey(sectionName)) {
-                logger.warning("Cannot find paragraph " + sectionName);
+                log.warn("Cannot find paragraph " + sectionName);
             }
         }
         return pghsMap;
@@ -304,7 +303,7 @@ public class GenerationServiceApachePOI implements GenerationService {
                             }
                         }
                     }catch (Exception e) {
-                        logger.log(Level.WARNING, "write table error: " + sectionName + " i:" + i + " j:" + j, e);
+                        log.error("write table error: " + sectionName + " i:" + i + " j:" + j, e);
                     }
                 }
             }

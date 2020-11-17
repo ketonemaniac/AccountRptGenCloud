@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.service.gen;
 
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.service.credentials.CredentialsService;
 import net.ketone.accrptgen.domain.gen.*;
 import net.ketone.accrptgen.domain.gen.Header;
@@ -26,11 +27,9 @@ import java.util.logging.Logger;
 
 // import org.springframework.util.StringUtils;
 
+@Slf4j
 @Component
 public class ParsingService {
-
-//    private static final Logger logger = LoggerFactory.getLogger(ParsingService.class);
-    private static final Logger logger = Logger.getLogger(ParsingService.class.getName());
 
     private static final List<String> COPY_COLORS = Arrays.asList("4F81BD", "8064A2");
     private static final List<String> preParseSheets = Arrays.asList("Control", "Dir info", "Section3", "Section4", "Section6");
@@ -65,7 +64,7 @@ public class ParsingService {
     public byte[] preParse(Workbook workbook) throws IOException {
 
         String templateName = credentialsService.getCredentials().getProperty(CredentialsService.PREPARSE_TEMPLATE_PROP);
-        logger.info("starting pre-parse to template " + templateName);
+        log.info("starting pre-parse to template " + templateName);
         InputStream templateStream = persistentStorage.loadAsInputStream(templateName);
         XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
         templateStream.close();
@@ -82,7 +81,7 @@ public class ParsingService {
             if(!preParseSheets.contains(sheet.getSheetName())) continue;
             Sheet templateSheet = templateSheetMap.get(sheet.getSheetName());
             if(templateSheet == null) continue;
-            logger.info("parsing sheet: " + sheet.getSheetName());
+            log.info("parsing sheet: " + sheet.getSheetName());
             int count = 0;
             for (int r = 0; r < sheet.getLastRowNum(); r++) {
                 Row row = sheet.getRow(r);
@@ -115,7 +114,7 @@ public class ParsingService {
                                 count++;
                                 break;
                             case FORMULA:
-                                logger.info("Formula Sheet=" + sheet.getSheetName() + " Cell=" + cell.getAddress().formatAsString());
+                                log.info("Formula Sheet=" + sheet.getSheetName() + " Cell=" + cell.getAddress().formatAsString());
                                 // templateCell.setCellFormula(cell.getCellFormula());
                                 CellValue cellValue = inputWbEvaluator.evaluate(cell);
                                     switch(cellValue.getCellTypeEnum()) {
@@ -123,7 +122,7 @@ public class ParsingService {
                                             templateCell.setCellType(CellType.NUMERIC);
                                             templateCell.setCellValue(cellValue.getNumberValue());
                                             setNumericCellStyle(templateWb, templateCell, cell.getCellStyle());
-                                            logger.info("input cell with formula: " + cell.getCellFormula() + " is now: " + templateCell.getNumericCellValue() + " of type " + cellValue.getCellTypeEnum().name());
+                                            log.info("input cell with formula: " + cell.getCellFormula() + " is now: " + templateCell.getNumericCellValue() + " of type " + cellValue.getCellTypeEnum().name());
                                             templateCell.setCellFormula(null);
                                             break;
                                         default:
@@ -131,10 +130,10 @@ public class ParsingService {
                                                 // try String for anything else
                                                 templateCell.setCellType(CellType.STRING);
                                                 templateCell.setCellValue(cellValue.getStringValue());
-                                                logger.info("input cell with formula: " + cell.getCellFormula() + " is now: " + templateCell.getStringCellValue() + " of type STRING.");
+                                                log.info("input cell with formula: " + cell.getCellFormula() + " is now: " + templateCell.getStringCellValue() + " of type STRING.");
                                                 templateCell.setCellFormula(null);
                                             } catch (Exception e2) {
-                                                logger.log(Level.WARNING, "cannot evaluate cell with formula: " + cell.getCellFormula() + ". CellType=" + cellValue.getCellTypeEnum().name());
+                                                log.warn("cannot evaluate cell with formula: " + cell.getCellFormula() + ". CellType=" + cellValue.getCellTypeEnum().name());
                                                 templateCell.setCellValue(cell.getCellFormula());
                                             }
                                             break;
@@ -149,27 +148,27 @@ public class ParsingService {
                             case ERROR:
                                 break;
                             default:
-                                logger.info("TYPE:" + cell.getCellTypeEnum().name());
+                                log.info("TYPE:" + cell.getCellTypeEnum().name());
                                 break;
                         }
                     }
                 }
             }
-            logger.info("sheet: " + sheet.getSheetName() + " updated cells:" + count);
+            log.info("sheet: " + sheet.getSheetName() + " updated cells:" + count);
 
         }
 
         // refresh everything
-        logger.info("start refreshing template");
+        log.debug("start refreshing template");
         evaluateAll(templateWb, templateSheetMap);
-        logger.info("template refreshed. Writing to stream");
+        log.info("template refreshed. Writing to stream");
 
         ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
-        logger.info("writing template. os.size()=" + os.size());
+        log.debug("writing template. os.size()=" + os.size());
         templateWb.write(os);
-        logger.info("creating byte[] from template. os.size()=" + os.size());
+        log.info("creating byte[] from template. os.size()=" + os.size());
         byte [] result = os.toByteArray();
-        logger.info("closing template");
+        log.debug("closing template");
         os.close();
         workbook.close();
         templateWb.close();
@@ -203,7 +202,7 @@ public class ParsingService {
         evaluator.clearAllCachedResultValues();
 //        evaluator.evaluateAll();
         for(Sheet sheet : templateSheetMap.values()) {
-            logger.info("refreshing sheet: " + sheet.getSheetName());
+            log.info("refreshing sheet: " + sheet.getSheetName());
             int count = 0;
             for (int r = 0; r < sheet.getLastRowNum(); r++) {
                 Row row = sheet.getRow(r);
@@ -215,7 +214,7 @@ public class ParsingService {
                     try {
                         cellType = evaluator.evaluateFormulaCellEnum(cell);
                     } catch(Exception e) {
-                        logger.log(Level.WARNING, "cannot evaluate cell " + cell.getAddress().formatAsString() + " with formula: " + cell.getCellFormula() + " cellType=" + cell.getCellTypeEnum().name(), e);
+                        log.warn("cannot evaluate cell " + cell.getAddress().formatAsString() + " with formula: " + cell.getCellFormula() + " cellType=" + cell.getCellTypeEnum().name(), e);
                         throw e;
                     }
                 }
@@ -266,7 +265,7 @@ public class ParsingService {
         Table curTable = null;
         StringBuilder startEndBuilder = new StringBuilder("Start line=");
 
-        logger.info("section: " + section.getName() + " Control:" + section.getControlColumn());
+        log.info("section: " + section.getName() + " Control:" + section.getControlColumn());
         doParse:
         for(int i = 0; ; i++) {
             try {
@@ -307,7 +306,7 @@ public class ParsingService {
                             break;
                         case Paragraph.END:
                             startEndBuilder.append("End line=").append(i);
-                            logger.info(startEndBuilder.toString());
+                            log.info(startEndBuilder.toString());
                             break doParse;
                         case Paragraph.TABLE_START:
                             isInTable = true;
@@ -321,14 +320,14 @@ public class ParsingService {
                                     try {
                                         int columnWidth = (int) dataCell.getNumericCellValue();
                                         columnWidths.add(columnWidth);
-                                        logger.fine("Column width " + section.getName() + " line " + (i + 1) + ", column=" + columnWidth);
+                                        log.debug("Column width " + section.getName() + " line " + (i + 1) + ", column=" + columnWidth);
                                     } catch (Exception e) {
-                                        logger.warning("Unparsable Column Width cell at " + section.getName() + " line " + (i + 1) + ", " + e.toString());
+                                        log.warn("Unparsable Column Width cell at " + section.getName() + " line " + (i + 1) + ", " + e.toString());
                                     }
                                 }
                             }
                             curTable.setColumnWidths(columnWidths);
-                            logger.info("Column widths " + section.getName() + " line " + (i + 1) + ", columns=" + columnWidths.size());
+                            log.info("Column widths " + section.getName() + " line " + (i + 1) + ", columns=" + columnWidths.size());
                             // row height
                             int rowHeight = (int) sectionSheet.getRow(i).getCell(section.getYesNoColumn()).getNumericCellValue();
                             curTable.setRowHeight(rowHeight);
@@ -345,7 +344,7 @@ public class ParsingService {
                             isInItem = true;
                             break;
                         default:
-                            logger.warning("unknown command:" + control.trim());
+                            log.warn("unknown command:" + control.trim());
                             break;
                     }
                 }
@@ -383,7 +382,7 @@ public class ParsingService {
                                     case ERROR:
                                     default:
                                         parsedCell = curTable.addCell("");
-                                        logger.warning("TYPE:" + dataCell.getCellTypeEnum().name());
+                                        log.warn("TYPE:" + dataCell.getCellTypeEnum().name());
                                         break;
                                 }
                                 if(dataCell.getCellStyle() == null) continue;
@@ -404,7 +403,7 @@ public class ParsingService {
                                         parsedCell.setAlignment(Table.Alignment.RIGHT); break;
                                 }
                             } catch (Exception e) {
-                                logger.warning("Unparsable table content at " + section.getName() + " line " + (sectionSheet.getRow(i).getRowNum() + 1) + ", " + e.toString());
+                                log.warn("Unparsable table content at " + section.getName() + " line " + (sectionSheet.getRow(i).getRowNum() + 1) + ", " + e.toString());
                             }
                         } else {
                             Table.Cell blankCell = curTable.addCell("");
@@ -422,7 +421,7 @@ public class ParsingService {
                     }
                 }
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Error at section " + section.getName() + " line " + (i + 1), e);
+                log.error("Error at section " + section.getName() + " line " + (i + 1), e);
                 throw e;
             }
         }
@@ -453,7 +452,7 @@ public class ParsingService {
         try {
             yesNo = yesNoCell.getStringCellValue();
         } catch (Exception e) {
-            logger.warning("Unparsable Yes/No cell at " + section.getName() + " line " + (row + 1) + ", " + e.toString());
+            log.warn("Unparsable Yes/No cell at " + section.getName() + " line " + (row + 1) + ", " + e.toString());
             return false;
         }
         // ignored row
@@ -491,7 +490,7 @@ public class ParsingService {
                         p.setIndent(p.getIndent()+1);
                     }
                 } catch (Exception e) {
-                    logger.warning("Unparsable content at " + section.getName() + " line " + (row.getRowNum()+1) + ", " + e.toString());
+                    log.warn("Unparsable content at " + section.getName() + " line " + (row.getRowNum()+1) + ", " + e.toString());
                 }
             } else if(!hasContent) {
                 // no content, empty cell = indent

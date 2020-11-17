@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.service.store;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.input.NullInputStream;
 
 import java.io.*;
@@ -9,10 +10,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+@Slf4j
 public class FileStorageService implements StorageService {
-
-//    private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
-    private static final Logger logger = Logger.getLogger(FileStorageService.class.getName());
 
     private String storageFolder;
 
@@ -22,7 +21,7 @@ public class FileStorageService implements StorageService {
 
     @Override
     public String store(byte[] input, String filename) throws IOException {
-        logger.info("Writing to local file " + storageFolder + filename);
+        log.info("Writing to local file " + storageFolder + filename);
         File output= new File(storageFolder + filename);
         FileOutputStream out = new FileOutputStream(output);
         out.write(input);
@@ -58,9 +57,9 @@ public class FileStorageService implements StorageService {
     public void delete(String filename) {
         File f = new File(storageFolder + filename);
         if(f.exists()) {
-            logger.info("Deleting local file " + storageFolder + filename);
+            log.info("Deleting local file " + storageFolder + filename);
             boolean success = f.delete();
-            logger.info("Deleted=" + success);
+            log.info("Deleted=" + success);
         }
     }
 

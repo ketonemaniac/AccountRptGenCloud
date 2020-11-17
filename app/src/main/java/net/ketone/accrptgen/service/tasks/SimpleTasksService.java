@@ -21,8 +21,6 @@ import java.util.logging.Logger;
 @Profile({"local","gCloudFlexible"})
 public class SimpleTasksService implements TasksService {
 
-    private static final Logger logger = Logger.getLogger(SimpleTasksService.class.getName());
-
     ExecutorService executor = Executors.newFixedThreadPool(1);
     List<Future> tasks = new ArrayList<>();
 

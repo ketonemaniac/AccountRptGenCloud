@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.service.auth;
 
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.auth.Role;
 import net.ketone.accrptgen.domain.auth.User;
 import net.ketone.accrptgen.service.store.StorageService;
@@ -17,10 +18,9 @@ import java.util.stream.Collectors;
 import static net.ketone.accrptgen.config.Constants.USERS_FILE;
 import static net.ketone.accrptgen.config.Constants.USERS_FILE_SEPARATOR;
 
+@Slf4j
 @Configuration
 public class InitialDataLoader {
-
-    private static final Logger logger = Logger.getLogger(InitialDataLoader.class.getName());
 
     @Autowired
     private UserService userService;
@@ -43,11 +43,11 @@ public class InitialDataLoader {
                             .email(userPass[2])
                             .roles(userRoles)
                             .build();
-                    logger.info("saving user " + user.getUsername());
+                    log.info("saving user " + user.getUsername());
                     userService.createUser(user, true).subscribe();
                 });
             } catch (Exception e) {
-                logger.severe("Error loading " + USERS_FILE + " " + e.getMessage());
+                log.error("Error loading " + USERS_FILE + " ", e);
                 e.printStackTrace();
             }
         };

@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.service.gen;
 
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.service.stats.StatisticsService;
 import net.ketone.accrptgen.domain.dto.AccountJob;
@@ -27,12 +28,10 @@ import java.util.stream.Collectors;
  * File generation batch processes pipeline
  * Done on a background thread
  */
+@Slf4j
 @Service
 @Scope("prototype")
 public class Pipeline implements Runnable {
-
-//    private static final Logger logger = LoggerFactory.getLogger(Pipeline.class);
-    private static final Logger logger = Logger.getLogger(Pipeline.class.getName());
 
     @Autowired
     private GenerationService generationService;
@@ -60,7 +59,7 @@ public class Pipeline implements Runnable {
     @Override
     public void run() {
         String inputFileName = cacheFilename + ".xlsm";
-        logger.info("Opening file: " + inputFileName);
+        log.info("Opening file: " + inputFileName);
         try {
             filename = GenerationService.getFileName(dto.getCompany(), dto.getGenerationTime());
 
@@ -72,11 +71,11 @@ public class Pipeline implements Runnable {
             // no need to use the template anymore, delete it.
             tempStorage.delete(inputFileName);
 
-            logger.info("template Closing input file stream, " + preParseOutput.length + "_bytes");
-            logger.info("Start parse operation for " + filename);
+            log.info("template Closing input file stream, " + preParseOutput.length + "_bytes");
+            log.info("Start parse operation for " + filename);
             AccountData data = parsingService.readFile(preParseOutput);
             data.setGenerationTime(dto.getGenerationTime());
-            logger.info("template finished parsing, sections=" + data.getSections().size());
+            log.info("template finished parsing, sections=" + data.getSections().size());
 
             // remove sheets and stringify contents
             XSSFWorkbook allDocs = new XSSFWorkbook(new ByteArrayInputStream(preParseOutput));
@@ -89,7 +88,7 @@ public class Pipeline implements Runnable {
             allDocsFinal.write(os);
 
             byte[] generatedDoc = generationService.generate(data);
-            logger.info("Generated doc. " + generatedDoc.length + "_bytes");
+            log.info("Generated doc. " + generatedDoc.length + "_bytes");
             Attachment doc = new Attachment(filename + ".docx", generatedDoc);
             Attachment template = new Attachment(filename + "-allDocs.xlsm", os.toByteArray());
             List<Attachment> attachments = Arrays.asList(doc, template, inputXlsx);
@@ -102,18 +101,18 @@ public class Pipeline implements Runnable {
 
             dto.setFilename(filename);
             dto.setStatus(Constants.Status.EMAIL_SENT.name());
-            logger.info("Updating statistics for " + filename);
+            log.info("Updating statistics for " + filename);
             statisticsService.updateTask(dto);
-            logger.info("Operation complete for " + filename);
+            log.info("Operation complete for " + filename);
 
         } catch (Throwable e) {
-            logger.log(Level.WARNING, "Generation failed", e);
+            log.warn("Generation failed", e);
             dto.setFilename(filename);
             dto.setStatus(Constants.Status.FAILED.name());
             try {
                 statisticsService.updateTask(dto);
             } catch (IOException e1) {
-                logger.log(Level.WARNING, "History file write failed", e1);
+                log.warn("History file write failed", e1);
             }
         }
 

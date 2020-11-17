@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.api;
 
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.service.credentials.CredentialsService;
 import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.service.store.StorageService;
@@ -18,10 +19,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin")
+@Slf4j
 public class AdminController {
-
-//    private static final Logger logger = LoggerFactory.getLogger(AccRptGenController.class);
-    private static final Logger logger = Logger.getLogger(AdminController.class.getName());
 
     @Autowired
     private StorageService persistentStorage;
@@ -40,7 +39,7 @@ public class AdminController {
     public AccountJob handleTemplateFileUpload(@RequestParam("file") MultipartFile file,
                                                RedirectAttributes redirectAttributes) throws IOException {
 
-        logger.info("uploading template file=" + file.getOriginalFilename());
+        log.info("uploading template file=" + file.getOriginalFilename());
         persistentStorage.store(file.getBytes(), file.getOriginalFilename());
         credentialsService.saveCredential(CredentialsService.PREPARSE_TEMPLATE_PROP, file.getOriginalFilename());
         AccountJob dto = new AccountJob();

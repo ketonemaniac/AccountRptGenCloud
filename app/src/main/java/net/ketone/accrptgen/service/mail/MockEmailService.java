@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.service.mail;
 
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.auth.User;
 import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.service.store.StorageService;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Profile("local")
 public class MockEmailService extends AbstractEmailService {
@@ -20,24 +22,21 @@ public class MockEmailService extends AbstractEmailService {
     @Autowired
     private StorageService tempStorage;
 
-
-    private static final Logger logger = Logger.getLogger(MockEmailService.class.getName());
-
     @Override
     public void sendEmail(AccountJob dto, List<Attachment> attachments) throws Exception {
         Map<String, String[]> recipients = getEmailAddresses(dto);
         recipients.forEach((k,v) -> {
-            logger.info(k + ":" + Arrays.asList(v).stream().collect(Collectors.joining(";")));
+            log.info(k + ":" + Arrays.asList(v).stream().collect(Collectors.joining(";")));
         });
         for(Attachment attachment : attachments) {
-            logger.info("storing file " + attachment.getAttachmentName());
+            log.info("storing file " + attachment.getAttachmentName());
             tempStorage.store(attachment.getData(), attachment.getAttachmentName());
         }
     }
 
     @Override
     public void sendResetPasswordEmail(User user) throws Exception {
-        logger.info(String.format("User %s password reset: %s . Please change your password once logged in.",
+        log.info(String.format("User %s password reset: %s . Please change your password once logged in.",
                 user.getUsername(), user.getPassword()));
     }
 }

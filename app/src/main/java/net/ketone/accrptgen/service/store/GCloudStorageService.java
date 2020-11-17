@@ -3,6 +3,7 @@ package net.ketone.accrptgen.service.store;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
 import com.google.common.base.Stopwatch;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
@@ -12,11 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+@Slf4j
 public class GCloudStorageService implements StorageService {
-
-
-    // private static final Logger logger = LoggerFactory.getLogger(GCloudStorageService.class);
-    private static final Logger logger = Logger.getLogger(GCloudStorageService.class.getName());
 
     private Storage storage;
 
@@ -35,7 +33,7 @@ public class GCloudStorageService implements StorageService {
 
     @Override
     public String store(byte[] input, String filename) throws IOException {
-        logger.info("storing " + filename);
+        log.info("storing " + filename);
         Stopwatch stopwatch = Stopwatch.createStarted();
         String contentType = null;
         BlobInfo.Builder blobInfoBuilder =
@@ -48,7 +46,7 @@ public class GCloudStorageService implements StorageService {
             blobInfoBuilder.setContentType("application/vnd.ms-excel");
         }
         storage.create(blobInfoBuilder.build(), input);
-        logger.info("stored " + filename + " in " + stopwatch.toString());
+        log.info("stored " + filename + " in " + stopwatch.toString());
         return filename;
     }
 
@@ -59,16 +57,16 @@ public class GCloudStorageService implements StorageService {
 
     @Override
     public byte[] load(String filename) {
-        logger.info("loading " + filename);
+        log.info("loading " + filename);
         Stopwatch stopwatch = Stopwatch.createStarted();
         BlobId blobId = BlobId.of(bucketName, filename);
         Blob blob = storage.get(blobId);
         if (blob == null) {
-            logger.warning("No such object");
+            log.warn("No such object");
             return new byte[0];
         }
         byte[] content = blob.getContent();
-        logger.info("loaded " + filename + " in " + stopwatch.toString());
+        log.info("loaded " + filename + " in " + stopwatch.toString());
         return content;
     }
 
@@ -91,7 +89,7 @@ public class GCloudStorageService implements StorageService {
     public void delete(String filename) {
         BlobId blobId = BlobId.of(bucketName, filename);
         if(blobId != null) {
-            logger.info("Deleting file " + filename);
+            log.info("Deleting file " + filename);
             storage.delete(blobId);
         }
     }

@@ -17,6 +17,7 @@
 package net.ketone.accrptgen.service.mail;
 
 import com.sendgrid.SendGrid;
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.service.credentials.CredentialsService;
 import net.ketone.accrptgen.domain.auth.User;
 import net.ketone.accrptgen.domain.dto.AccountJob;
@@ -35,12 +36,10 @@ import java.util.stream.Collectors;
  * Sendgrid service
  * @see https://cloud.google.com/compute/docs/tutorials/sending-mail/using-sendgrid
  */
+@Slf4j
 @Service
 @Profile("!local")
 public class SendgridEmailService extends AbstractEmailService {
-
-//    private static final Logger logger = LoggerFactory.getLogger(SendgridEmailService.class);
-    private static final Logger logger = Logger.getLogger(SendgridEmailService.class.getName());
 
     private String SENDGRID_API_KEY;
 
@@ -75,16 +74,16 @@ public class SendgridEmailService extends AbstractEmailService {
             InputStream data = new ByteArrayInputStream(attachment.getData());
             email.addAttachment(attachment.getAttachmentName(), data);
             data.close();
-            logger.info("Added attachment " + attachment.getAttachmentName());
+            log.info("Added attachment " + attachment.getAttachmentName());
         }
 
         SendGrid.Response response = sendgrid.send(email);
         if (response.getCode() != 200) {
-            logger.warning(String.format("An error occured: %s Code=%d", response.getMessage(), response.getCode()));
+            log.warn(String.format("An error occured: %s Code=%d", response.getMessage(), response.getCode()));
             return;
         }
         recipients.forEach((k,v) -> {
-            logger.info("email " + k + ":" + Arrays.asList(v).stream().collect(Collectors.joining(";")));
+            log.info("email " + k + ":" + Arrays.asList(v).stream().collect(Collectors.joining(";")));
         });
 
     }
@@ -106,7 +105,7 @@ public class SendgridEmailService extends AbstractEmailService {
 
         SendGrid.Response response = sendgrid.send(email);
         if (response.getCode() != 200) {
-            logger.warning(String.format("An error occured: %s Code=%d", response.getMessage(), response.getCode()));
+            log.warn(String.format("An error occured: %s Code=%d", response.getMessage(), response.getCode()));
             return;
         }
     }

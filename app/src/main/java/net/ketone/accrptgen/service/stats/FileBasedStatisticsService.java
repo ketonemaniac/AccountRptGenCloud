@@ -1,6 +1,7 @@
 package net.ketone.accrptgen.service.stats;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.service.store.StorageService;
@@ -18,11 +19,10 @@ import java.util.stream.Collectors;
 
 import static net.ketone.accrptgen.config.Constants.HISTORY_FILE;
 
+@Slf4j
 @Service
 @Deprecated
 public class FileBasedStatisticsService implements StatisticsService {
-
-    private static final Logger logger = Logger.getLogger(FileBasedStatisticsService.class.getName());
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -48,7 +48,7 @@ public class FileBasedStatisticsService implements StatisticsService {
                             || tempStorage.hasFile(dto.getFilename()+".xlsm"))
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            logger.log(Level.WARNING, "Cannot read from " + HISTORY_FILE, e);
+            log.warn("Cannot read from " + HISTORY_FILE, e);
         }
         return null;
     }
@@ -85,7 +85,7 @@ public class FileBasedStatisticsService implements StatisticsService {
 
     @Override
     public void updateTask(AccountJob dto) throws IOException {
-        logger.info("dto: " + objectMapper.writeValueAsString(dto) );
+        log.info("dto: " + objectMapper.writeValueAsString(dto) );
         // do not store null filename entries
         if(dto.getFilename() == null) return;
         Deque<AccountJob> lines = loadHistoryFileToDeque();

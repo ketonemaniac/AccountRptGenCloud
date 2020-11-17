@@ -13,8 +13,6 @@ import java.util.logging.Logger;
 @RequestMapping("/api/admin/user")
 public class UserAdminController {
 
-    private static final Logger logger = Logger.getLogger(UserAdminController.class.getName());
-
     @Autowired
     private UserService userService;
     @Autowired

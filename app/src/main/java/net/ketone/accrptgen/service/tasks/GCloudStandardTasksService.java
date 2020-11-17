@@ -5,6 +5,7 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.service.stats.StatisticsService;
 import net.ketone.accrptgen.domain.dto.AccountJob;
@@ -25,11 +26,10 @@ import static net.ketone.accrptgen.config.Constants.GEN_QUEUE_ENDPOINT;
 /**
  * Works for Google cloud Standard environment
  */
+@Slf4j
 @Profile("gCloudStandard")
 @RestController
 public class GCloudStandardTasksService {
-
-    private static final Logger logger = Logger.getLogger(GCloudStandardTasksService.class.getName());
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -45,12 +45,12 @@ public class GCloudStandardTasksService {
     @PostMapping(GEN_QUEUE_ENDPOINT)
     // public String doWork(@RequestParam("accountFileDto") AccountFileDto dto) {
     public String doWork(@RequestBody AccountJob dto) {
-        logger.info("inside doWork() " + dto.toString());
+        log.info("inside doWork() " + dto.toString());
         dto.setStatus(Constants.Status.GENERATING.name());
         try {
             statisticsService.updateTask(dto);
         } catch (IOException e) {
-            logger.log(Level.WARNING, "History file write failed (GENERATING)", e);
+            log.warn("History file write failed (GENERATING)", e);
             return "NOT OK";
         }
         Pipeline pipeline = ctx.getBean(Pipeline.class, dto);

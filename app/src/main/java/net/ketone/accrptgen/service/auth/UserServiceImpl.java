@@ -2,6 +2,7 @@ package net.ketone.accrptgen.service.auth;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.auth.Role;
 import net.ketone.accrptgen.domain.auth.User;
 import net.ketone.accrptgen.repo.auth.RoleRepository;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 import static net.ketone.accrptgen.config.Constants.USERS_FILE;
 import static net.ketone.accrptgen.config.Constants.USERS_FILE_SEPARATOR;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -42,8 +44,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private EmailService emailService;
 
-
-    private static final Logger logger = Logger.getLogger(UserServiceImpl.class.getName());
 
     private Map<String, Role> roles;
 
@@ -171,7 +171,7 @@ public class UserServiceImpl implements UserService {
             });
             persistentStorage.store(sb.toString().getBytes(), USERS_FILE);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error persisting users", e);
+            log.error("Error persisting users", e);
         }
     }
 

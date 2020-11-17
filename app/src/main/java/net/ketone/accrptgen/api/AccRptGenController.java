@@ -2,6 +2,7 @@ package net.ketone.accrptgen.api;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.exception.ValidationException;
 import net.ketone.accrptgen.service.stats.StatisticsService;
@@ -36,9 +37,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RestController
+@Slf4j
 public class AccRptGenController {
-
-    private static final Logger logger = Logger.getLogger(AccRptGenController.class.getName());
 
     @Autowired
     private GenerationService generationService;
@@ -93,7 +93,7 @@ public class AccRptGenController {
 
     @PostMapping("/startGeneration")
     public AccountJob startGeneration(AccountJob requestDto) throws IOException {
-        logger.info("cacheFilename=" + requestDto.getFilename() + "; referredBy=" + requestDto.getReferredBy());
+        log.info("cacheFilename=" + requestDto.getFilename() + "; referredBy=" + requestDto.getReferredBy());
         AccountJob dto = new AccountJob();
         try {
             dto.setId(requestDto.getId());
@@ -106,7 +106,7 @@ public class AccRptGenController {
 
             String inputFileName = dto.getFilename() + ".xlsm";
             if(!tempStorage.hasFile(inputFileName)) {
-                logger.log(Level.WARNING, "File not present: " + inputFileName);
+                log.warn("File not present: " + inputFileName);
                 dto.setStatus(Constants.Status.FAILED.name());
                 return dto;
             }
@@ -114,7 +114,7 @@ public class AccRptGenController {
             tasksService.submitTask(dto);
             statisticsService.updateTask(dto);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error in startGeneration", e);
+            log.error("Error in startGeneration", e);
             dto.setStatus(Constants.Status.FAILED.name());
             statisticsService.updateTask(dto);
         }
@@ -126,7 +126,7 @@ public class AccRptGenController {
     @PostMapping("/downloadFile")
     public ResponseEntity<Resource> downloadFile(@RequestBody DownloadFileDto dto) throws IOException {
         String fileName = dto.getFilename() + ".zip";
-        logger.info("filename is " + fileName);
+        log.info("filename is " + fileName);
         InputStream is = tempStorage.loadAsInputStream(fileName);
         Resource resource = new InputStreamResource(is);
         return ResponseEntity.ok()
