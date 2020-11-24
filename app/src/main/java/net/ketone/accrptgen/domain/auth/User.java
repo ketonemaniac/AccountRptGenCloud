@@ -9,20 +9,18 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @Builder(toBuilder=true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "user")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
-    private Long id;
+    private UUID id;
 
     private String username;
 

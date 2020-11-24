@@ -23,4 +23,5 @@ public interface UserService {
 
     Mono<User> resetPassword(User user) throws Exception;
 
+    void deleteAll();
 }

@@ -2,7 +2,7 @@ package net.ketone.accrptgen.service.auth;
 
 import net.ketone.accrptgen.domain.auth.Role;
 import net.ketone.accrptgen.domain.auth.User;
-import net.ketone.accrptgen.repo.auth.UserRepository;
+import net.ketone.accrptgen.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,8 +1,8 @@
 package net.ketone.accrptgen.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Id;
 import javax.persistence.Temporal;

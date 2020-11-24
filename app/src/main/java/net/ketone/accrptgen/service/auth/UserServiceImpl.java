@@ -5,8 +5,8 @@ import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.auth.Role;
 import net.ketone.accrptgen.domain.auth.User;
-import net.ketone.accrptgen.repo.auth.RoleRepository;
-import net.ketone.accrptgen.repo.auth.UserRepository;
+import net.ketone.accrptgen.repo.RoleRepository;
+import net.ketone.accrptgen.repo.UserRepository;
 import net.ketone.accrptgen.service.mail.EmailService;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +18,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static net.ketone.accrptgen.config.Constants.USERS_FILE;
-import static net.ketone.accrptgen.config.Constants.USERS_FILE_SEPARATOR;
 
 @Slf4j
 @Service
@@ -50,8 +44,8 @@ public class UserServiceImpl implements UserService {
     @PostConstruct
     public void init() {
         roles = ImmutableMap.of(
-                "User", save(Role.builder().name("User").build()),
-                "Admin", save(Role.builder().name("Admin").build())
+                "User", save(Role.builder().id(UUID.randomUUID()).name("User").build()),
+                "Admin", save(Role.builder().id(UUID.randomUUID()).name("Admin").build())
         );
     }
 
@@ -109,7 +103,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public Mono<User> deleteUser(String username) {
         return Mono.fromCallable(() -> userRepository.deleteByUsername(username))
-                .doOnSuccess(r -> persistUsers())
                 .map(list -> list.get(0));
     }
 
@@ -143,6 +136,11 @@ public class UserServiceImpl implements UserService {
                 .map(this::ripPassword);
     }
 
+    @Override
+    public void deleteAll() {
+        userRepository.deleteAll();
+    }
+
 
     private Role save(Role role) {
         return roleRepository.save(role);
@@ -153,26 +151,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private Mono<User> saveWithEncryptedPassword(User user, boolean isInit) {
-        return Mono.fromCallable(() ->  userRepository.save(user))
-                .doOnSuccess(r -> {if(!isInit) persistUsers();});
-    }
-
-    private void persistUsers() {
-        List<User> users = userRepository.findAll();
-        StringBuffer sb = new StringBuffer();
-        try {
-            users.forEach(user -> {
-                sb.append(user.getUsername()).append(USERS_FILE_SEPARATOR)
-                        .append(user.getPassword()).append(USERS_FILE_SEPARATOR)
-                        .append(user.getEmail()).append(USERS_FILE_SEPARATOR)
-                        .append(user.getRoles().stream()
-                        .map(Role::getName).collect(Collectors.joining(USERS_FILE_SEPARATOR)))
-                        .append(System.lineSeparator());
-            });
-            persistentStorage.store(sb.toString().getBytes(), USERS_FILE);
-        } catch (IOException e) {
-            log.error("Error persisting users", e);
-        }
+        return Mono.fromCallable(() ->  userRepository.save(user));
     }
 
     private User ripPassword(User user) {

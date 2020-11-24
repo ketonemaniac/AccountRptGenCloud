@@ -45,16 +45,16 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
                 .antMatchers("/login").permitAll()
                 .antMatchers("/api/user/encode/**").permitAll()
 
-                .anyRequest().permitAll()
+//                .anyRequest().permitAll()
 
-//                .antMatchers("/api/admin/user/**").hasAuthority("Admin") // .authenticated()
-//                .anyRequest().hasAuthority("User")  //.authenticated()
-//                .and()
-//                .formLogin()
-//                .defaultSuccessUrl("/", true)
-//                .and()
-//                .logout()
-//                .deleteCookies("JSESSIONID")
+                .antMatchers("/api/admin/user/**").hasAuthority("Admin") // .authenticated()
+                .anyRequest().hasAuthority("User")  //.authenticated()
+                .and()
+                .formLogin()
+                .defaultSuccessUrl("/", true)
+                .and()
+                .logout()
+                .deleteCookies("JSESSIONID")
         ;
     }
 

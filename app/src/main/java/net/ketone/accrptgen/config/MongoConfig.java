@@ -6,6 +6,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.connection.SslSettings;
 import net.ketone.accrptgen.service.credentials.CredentialsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 
@@ -19,9 +20,12 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
     private CredentialsService credentialsService;
 
 
+    @Value("${mongo.database.name}")
+    private String mongoDbName;
+
     @Override
     public String getDatabaseName() {
-        return "testing";
+        return mongoDbName;
     }
 
     @Override
