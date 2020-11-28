@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -56,7 +57,7 @@ public class FileBasedStatisticsServiceTest {
 
     private AccountJob doSave() throws IOException {
         AccountJob dto = new AccountJob();
-        dto.setGenerationTime(new Date());
+        dto.setGenerationTime(LocalDateTime.now());
         dto.setCompany("ABC Company Limited");
         dto.setStatus(Constants.Status.EMAIL_SENT.name());
         dto.setSubmittedBy("user");

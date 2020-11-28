@@ -6,14 +6,16 @@ import net.ketone.accrptgen.domain.gen.Table;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
 public interface GenerationService {
 
-    static String getFileName(String companyName, Date generationTime) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA);
-        return companyName + "-" + sdf.format(generationTime);
+    static String getFileName(String companyName, LocalDateTime generationTime) {
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        return companyName + "-" + df.format(generationTime);
     }
 
     byte[] generate(AccountData data) throws IOException;

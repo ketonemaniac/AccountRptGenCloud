@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Document(collection = "accountJob")
@@ -22,9 +22,9 @@ public class AccountJob implements Serializable {
 
     private String filename;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "Asia/Shanghai")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     @Temporal( TemporalType.TIMESTAMP )
-    private Date generationTime;
+    private LocalDateTime generationTime;
     private String status;
     private String referredBy;
     private String submittedBy;

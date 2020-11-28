@@ -2,6 +2,7 @@ package net.ketone.accrptgen.api;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.repackaged.org.joda.time.DateTime;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.config.Constants;
 import net.ketone.accrptgen.exception.ValidationException;
@@ -29,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -102,7 +104,7 @@ public class AccRptGenController {
             dto.setStatus(Constants.Status.PENDING.name());
             dto.setReferredBy(requestDto.getReferredBy());
             dto.setSubmittedBy(UserUtils.getAuthenticatedUser());
-            dto.setGenerationTime(new Date());
+            dto.setGenerationTime(LocalDateTime.now());
 
             String inputFileName = dto.getFilename() + ".xlsm";
             if(!tempStorage.hasFile(inputFileName)) {

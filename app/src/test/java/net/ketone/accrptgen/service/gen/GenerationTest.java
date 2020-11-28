@@ -20,6 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -80,7 +81,7 @@ public class GenerationTest {
     public void testGeneration() throws IOException {
         AccountData data = new AccountData();
         data.setCompanyName("KEITH ENTERPRISES LTD");
-        data.setGenerationTime(new Date());
+        data.setGenerationTime(LocalDateTime.now());
 
         Section s = new Section();
         data.addSection(s);

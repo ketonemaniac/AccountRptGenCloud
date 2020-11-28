@@ -7,19 +7,20 @@ Accounting Report Generator on Google Cloud. Runs with Spring boot with a Bootst
 In the root module run the following to run react build the web content (main.js)
 `mvn clean package`
 
+Main class: /app AccrptgenApplication.java
+
 Running locally in IDE without google services (local)
-* Put files in /local
-* Main class in /local module: net.ketone.accrptgen.AccrptgenApplicationLocal 
+* Put files in /local/files
+* Working directory: /local
 * VM options: `-Dspring.profiles.active=local`
 
-Local run with google services (cloud)
-* make sure you have the right environment set in /cloud module's appengine-web.xml. Possible values are staging,prod
-* Put in Enviroment variable GOOGLE_APPLICATION_CREDENTIALS for access to different buckets
-* Run `mvn clean package` in root, then `mvn appengine:run` in cloud folder
-* go to http://localhost:8080/_ah/admin to see task queues being set up
+Submitting locally but running the task in App Engine
+* Working directory: /app
+* VM options: `-Dspring.profiles.active=staging,gCloudStandard`
+* Put in Environment variable GOOGLE_APPLICATION_CREDENTIALS for access to different buckets
 
-To deploy to google cloud
-* make sure you have the right environment set in appengine-web.xml.
+## Deploy ##
+* set project: `gcloud config set project accountrptgen-hk-test`
 * Run `mvn validate appengine:deploy -Dapp.stage.appEngineDirectory=src/main/appengine/staging` in app folder
 
 ## Setup google services ## 
@@ -38,3 +39,10 @@ https://cloud.google.com/appengine/docs/standard/python/config/queueref
 
 ### Version Upgrade ###
     versions:set -DnewVersion=<new_version> -DprocessAllModules -DgenerateBackupPoms=false
+
+### Version History ###
+2.2.0: appengine/Java 11 upgrade, Mongo DB, use LocalDateTime
+
+2.1.1: new React UI
+
+1.0.0: initial version 

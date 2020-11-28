@@ -3,7 +3,10 @@ package net.ketone.accrptgen.service.tasks;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.tasks.v2.*;
 import com.google.protobuf.ByteString;
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.dto.AccountJob;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -12,17 +15,20 @@ import java.nio.charset.Charset;
 
 @Service
 @Profile("gCloudStandard")
+@Slf4j
 public class TaskQueueService implements TasksService {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper mapper;
+
+    @Value("${tasks.projectId}")
+    private String projectId;
 
     @Override
     public AccountJob submitTask(AccountJob dto) throws IOException {
         try (CloudTasksClient client = CloudTasksClient.create()) {
-            // TODO(developer): Uncomment these lines and replace with your values.
-             String projectId = "accountrptgen-hk-test";
-             String locationId = "asia-east2";
-             String queueId = "accountrptgen-queue";
+            String locationId = "asia-east2";
+            String queueId = "accountrptgen-queue";
 
             // Construct the fully qualified queue name.
             String queueName = QueueName.of(projectId, locationId, queueId).toString();
@@ -42,7 +48,7 @@ public class TaskQueueService implements TasksService {
             Task[] tasks = new Task[] {taskPayload};
             for (Task task : tasks) {
                 Task response = client.createTask(queueName, task);
-                System.out.println(response);
+                log.info("task creadted, resp={}", response);
             }
         }
         return dto;

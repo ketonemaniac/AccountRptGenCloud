@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
@@ -40,7 +41,7 @@ public class StorageServiceTest {
 
     private AccountJob doSave() throws IOException {
         AccountJob dto = new AccountJob();
-        dto.setGenerationTime(new Date());
+        dto.setGenerationTime(LocalDateTime.now());
         dto.setCompany("ABC Company Limited");
         dto.setStatus(Constants.Status.EMAIL_SENT.name());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");

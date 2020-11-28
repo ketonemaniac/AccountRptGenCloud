@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles({"local","staging"})
+@ActiveProfiles({"prod","gCloudStandard"})
 public class InitialDataLoadITCase {
 
     // login users

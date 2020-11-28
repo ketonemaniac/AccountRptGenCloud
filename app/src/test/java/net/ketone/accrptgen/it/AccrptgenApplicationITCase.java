@@ -27,6 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -70,7 +71,7 @@ public class AccrptgenApplicationITCase {
 	}
 
 
-	static private Date genTime = new Date();
+	static private LocalDateTime genTime = LocalDateTime.now();
 
 	@Value("${plain.filename}")
 	private String PLAIN_FILENAME;

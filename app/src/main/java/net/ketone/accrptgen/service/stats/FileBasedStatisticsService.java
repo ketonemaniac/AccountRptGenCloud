@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
@@ -61,7 +63,7 @@ public class FileBasedStatisticsService implements StatisticsService {
         Deque<AccountJob> curLines = new ArrayDeque<>();
         for(AccountJob lineDto : lines) {
             LocalDate monthStart = LocalDate.now().withDayOfMonth(1);
-            LocalDate lineDate = new java.sql.Date(lineDto.getGenerationTime().getTime()).toLocalDate();
+            LocalDate lineDate = lineDto.getGenerationTime().toLocalDate();
             if(monthStart.compareTo(lineDate) > 0) {
                 // in previous month
                 // deal with the cur lines first
@@ -93,8 +95,8 @@ public class FileBasedStatisticsService implements StatisticsService {
         // check whether this is the update of an existing line
         Optional<AccountJob> existingDto = lines.stream()
                 .filter(lineDto -> Optional.ofNullable(lineDto.getGenerationTime())
-                .orElse(Date.from(Instant.EPOCH)).equals(
-                        Optional.ofNullable(dto.getGenerationTime()).orElse(new Date())))
+                .orElse(LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault())).equals(
+                        Optional.ofNullable(dto.getGenerationTime()).orElse(LocalDateTime.now())))
                 .findFirst();
         if(existingDto.isPresent()) {
             lines.remove(existingDto.get());

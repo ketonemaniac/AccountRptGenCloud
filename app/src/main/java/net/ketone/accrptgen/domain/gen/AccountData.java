@@ -2,6 +2,7 @@ package net.ketone.accrptgen.domain.gen;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -14,7 +15,7 @@ public class AccountData {
             "Section2", "Section3", "Section4", "Section5", "Section6");
 
     private String companyName;
-    private Date generationTime;
+    private LocalDateTime generationTime;
     private List<Section> sections;
 
     public void addSection(Section s) {
