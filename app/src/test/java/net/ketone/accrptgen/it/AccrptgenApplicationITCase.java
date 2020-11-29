@@ -1,12 +1,11 @@
 package net.ketone.accrptgen.it;
 
-import net.ketone.accrptgen.dto.AccountFileDto;
-import net.ketone.accrptgen.gen.GenerationTest;
-import net.ketone.accrptgen.gen.Pipeline;
-import net.ketone.accrptgen.mail.Attachment;
-import net.ketone.accrptgen.mail.EmailService;
-import net.ketone.accrptgen.store.FileStorageService;
-import net.ketone.accrptgen.store.StorageService;
+import net.ketone.accrptgen.domain.dto.AccountJob;
+import net.ketone.accrptgen.service.gen.Pipeline;
+import net.ketone.accrptgen.service.mail.Attachment;
+import net.ketone.accrptgen.service.mail.EmailService;
+import net.ketone.accrptgen.service.store.FileStorageService;
+import net.ketone.accrptgen.service.store.StorageService;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.util.IOUtils;
 import org.junit.Test;
@@ -15,15 +14,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -31,6 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -74,7 +71,7 @@ public class AccrptgenApplicationITCase {
 	}
 
 
-	static private Date genTime = new Date();
+	static private LocalDateTime genTime = LocalDateTime.now();
 
 	@Value("${plain.filename}")
 	private String PLAIN_FILENAME;
@@ -91,10 +88,10 @@ public class AccrptgenApplicationITCase {
 
 		ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
-		AccountFileDto accountFileDto = new AccountFileDto();
-		accountFileDto.setGenerationTime(genTime);
-		accountFileDto.setFilename(PLAIN_FILENAME);
-		Pipeline pipeline = ctx.getBean(Pipeline.class, accountFileDto);
+		AccountJob accountJob = new AccountJob();
+		accountJob.setGenerationTime(genTime);
+		accountJob.setFilename(PLAIN_FILENAME);
+		Pipeline pipeline = ctx.getBean(Pipeline.class, accountJob);
 		pipeline.run();
 		Mockito.verify(emailService).sendEmail(any(), argumentCaptor.capture());
 		List<Attachment> attachments = argumentCaptor.getValue();

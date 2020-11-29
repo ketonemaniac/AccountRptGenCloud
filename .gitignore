@@ -29,5 +29,6 @@ nbdist/
 
 /web
 /local/files/**
+/local/temp/**
 **/accountrptgen.log*
 client/out

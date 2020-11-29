@@ -11,17 +11,21 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.1.RELEASE</version>
+		<version>2.3.2.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
 	<name>accrptgen</name>
 	<description>Demo project for Spring Boot</description>
 
+	<properties>
+		<java.version>11</java.version>
+	</properties>
+
 	<modules>
 		<module>client</module>
 		<module>app</module>
-        <module>cloud</module>
+        <!-- module>cloud</module -->
 		<module>local</module>
 	</modules>
 
@@ -58,18 +62,22 @@
 			<dependency>
 				<groupId>com.google.cloud</groupId>
 				<artifactId>google-cloud-storage</artifactId>
-				<version>1.63.0</version>
+				<version>1.113.3</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.appengine</groupId>
 				<artifactId>appengine-api-1.0-sdk</artifactId>
-				<!-- version>1.9.50</version -->
-				<version>1.9.71</version>
+				<version>1.9.83</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.cloud</groupId>
 				<artifactId>google-cloud-logging</artifactId>
-				<version>1.82.0</version>
+				<version>1.102.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>google-cloud-tasks</artifactId>
+				<version>1.30.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -83,7 +91,11 @@
 				<artifactId>sendgrid-java</artifactId>
 				<version>2.2.2</version>
 			</dependency>
-
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>30.0-jre</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
