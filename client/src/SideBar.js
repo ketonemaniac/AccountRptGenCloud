@@ -15,6 +15,7 @@ class SideBar extends Component {
                 <ListGroup className="sidebar-list text-nowrap">
                     <Link onClick={this.linkOnclick.bind(this)} to="/app/main"><ListGroupItem>Report Generation</ListGroupItem></Link>
                     <Link onClick={this.linkOnclick.bind(this)} to="/app/users"><ListGroupItem>Users</ListGroupItem></Link>
+                    <Link onClick={this.linkOnclick.bind(this)} to="/app/settings"><ListGroupItem>Settings</ListGroupItem></Link>
                 </ListGroup>
             </div>
         );

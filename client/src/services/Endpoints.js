@@ -31,5 +31,15 @@ export default {
         return axios.get('/api/user')
         .catch(error => { console.log(error); throw Error(error) })
         .then(res => res.data);
-    }
+    },
+    getAllSettings() {
+        return axios.get('/api/settings/all')
+            .catch(error => { console.log(error); throw Error(error) })
+            .then(res => res.data);
+    },
+    saveSettings(settings) {
+        return axios.post('/api/settings/upsert', settings)
+            .catch(error => { console.log(error); throw Error(error) })
+            .then(res => res.data);
+    },
 }
