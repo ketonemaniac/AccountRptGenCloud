@@ -1,6 +1,7 @@
 package net.ketone.accrptgen.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -20,6 +21,9 @@ import static net.ketone.accrptgen.config.Constants.STATUS_QUEUE_ENDPOINT;
 @Profile("!test")
 public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
+    @Value("${security.enable:true}")
+    private boolean enableSecurity;
+
     @Autowired
     private UserDetailsService userDetailsService;
 
@@ -36,26 +40,27 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
+        var secu = http
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/_ah/**").permitAll()
                 .antMatchers(GEN_QUEUE_ENDPOINT).permitAll()
                 .antMatchers(STATUS_QUEUE_ENDPOINT).permitAll()
                 .antMatchers("/login").permitAll()
-                .antMatchers("/api/user/encode/**").permitAll()
-
-//                .anyRequest().permitAll()
-
-                .antMatchers("/api/admin/user/**").hasAuthority("Admin") // .authenticated()
-                .anyRequest().hasAuthority("User")  //.authenticated()
-                .and()
-                .formLogin()
-                .defaultSuccessUrl("/", true)
-                .and()
-                .logout()
-                .deleteCookies("JSESSIONID")
-        ;
+                .antMatchers("/api/user/encode/**").permitAll();
+        if(!enableSecurity) {
+            secu.anyRequest().permitAll();
+        } else {
+            secu.antMatchers("/api/admin/user/**").hasAuthority("Admin") // .authenticated()
+                    .antMatchers("/api/settings/**").hasAuthority("Admin")
+                    .anyRequest().hasAuthority("User")  //.authenticated()
+                    .and()
+                    .formLogin()
+                    .defaultSuccessUrl("/", true)
+                    .and()
+                    .logout()
+                    .deleteCookies("JSESSIONID");
+        }
     }
 
 

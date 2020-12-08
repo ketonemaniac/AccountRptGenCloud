@@ -92,6 +92,7 @@ public class UserServiceImpl implements UserService {
                 .flatMap(existingUser -> Mono.error(new RuntimeException(
                         String.format("user %s already exists", existingUser.getUsername()))))
                 .then(saveWithEncryptedPassword(user.toBuilder()
+                        .id(UUID.randomUUID())
                         .roles(user.getRoles().stream().map(Role::getName).map(roles::get)
                                 .collect(Collectors.toSet()))
                         .password(isInit ? user.getPassword() :
@@ -111,7 +112,7 @@ public class UserServiceImpl implements UserService {
         return Mono.fromCallable(() -> Optional.ofNullable(userRepository.findByUsername(username))
                 .orElse(User.builder().username("Anonymous")
                         .email("anon@mail.com")
-                        .roles(Sets.newHashSet(Role.builder().name("User").build())).build()));
+                        .roles(Sets.newHashSet(Role.builder().name("Admin").build())).build()));
     }
 
     @Override
