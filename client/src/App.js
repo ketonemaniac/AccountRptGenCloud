@@ -15,7 +15,6 @@ import { faRedo } from '@fortawesome/free-solid-svg-icons'
 import Moment from 'react-moment';
 import Dropzone from 'react-dropzone';
 import axios from 'axios';
-import moment from 'moment';
 import { CSSTransition } from 'react-transition-group';
 
 
@@ -296,7 +295,6 @@ class App extends Component {
   }
 
   renderGenerationTime(company) {
-    moment.relativeTimeThreshold('ss', 0);
     switch (company.status) {
       case "PENDING":
       case "GENERATING":
@@ -304,7 +302,7 @@ class App extends Component {
           <Col sm={9}>
             <Input key={company.id + "-generationTime"}
               className="input-text-borderless" type="text" disabled name="generationTime" id="generationTime"
-              value={company.generationTime + " (Elapsed " + moment(company.generationTime).fromNow(true) + ")"} />
+              value={company.generationTime} />
           </Col>
         )
       default:
