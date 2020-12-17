@@ -18,7 +18,7 @@ public abstract class AbstractEmailService implements EmailService {
     @Autowired
     protected CredentialsService credentialsService;
 
-    @Value("${mail.bcc}")
+    @Value("${mail.bcc:}")
     protected String EMAIL_BCC;
 
 
