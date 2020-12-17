@@ -93,7 +93,7 @@ public class SendgridEmailService extends AbstractEmailService {
         if(!SENDGRID_ENABLE) return;
         SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
         SendGrid.Email email = new SendGrid.Email();
-        email.addTo(user.getUsername());
+        email.addTo(user.getEmail());
         email.setFrom(SENDGRID_SENDER);
         email.setFromName("Accounting Report Generator");
         email.setBcc(Optional.ofNullable(EMAIL_BCC)

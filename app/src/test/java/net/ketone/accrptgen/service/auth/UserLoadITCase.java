@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles({"prod","gCloudStandard"})
-public class InitialDataLoadITCase {
+public class UserLoadITCase {
 
     // login users
     public static final String USERS_FILE = "users.txt";

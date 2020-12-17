@@ -1,6 +1,5 @@
 package net.ketone.accrptgen.service.auth;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.auth.Role;
@@ -21,6 +20,7 @@ import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -43,12 +43,9 @@ public class UserServiceImpl implements UserService {
 
     @PostConstruct
     public void init() {
-        roles = ImmutableMap.of(
-                "User", save(Role.builder().id(UUID.randomUUID()).name("User").build()),
-                "Admin", save(Role.builder().id(UUID.randomUUID()).name("Admin").build())
-        );
+        roles = roleRepository.findAll().stream()
+                .collect(Collectors.toMap(Role::getName, Function.identity(), (a, b) -> b));
     }
-
 
     @Override
     public Mono<User> save(User user) {

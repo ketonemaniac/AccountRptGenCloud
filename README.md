@@ -22,6 +22,10 @@ Submitting locally but running the task in App Engine
 ## Deploy ##
 * set project: `gcloud config set project accountrptgen-hk-test`
 * Run `mvn validate appengine:deploy -Dapp.stage.appEngineDirectory=src/main/appengine/staging` in app folder
+### Prod ###
+* set project: `gcloud config set project accountrptgen-hk`
+* Run `mvn validate appengine:deploy -Dapp.stage.appEngineDirectory=src/main/appengine/prod` in app folder
+
 
 ## Setup google services ## 
 
