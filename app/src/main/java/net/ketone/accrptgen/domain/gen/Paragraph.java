@@ -1,11 +1,15 @@
 package net.ketone.accrptgen.domain.gen;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * One paragraph/line of the input Excel
  */
 @Data
+@SuperBuilder
+@NoArgsConstructor
 public class Paragraph implements SectionElement {
 
     // Control Characters
@@ -18,6 +22,7 @@ public class Paragraph implements SectionElement {
     public static final String TABLE_START = "table start";
     public static final String TABLE_END = "table end";
     public static final String ITEM = "item";
+    public static final String TEXT = "text";
 
     // yes/no Characters
     public static final String YES = "y";

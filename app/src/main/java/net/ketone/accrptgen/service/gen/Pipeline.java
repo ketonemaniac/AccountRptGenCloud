@@ -2,6 +2,8 @@ package net.ketone.accrptgen.service.gen;
 
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.config.Constants;
+import net.ketone.accrptgen.service.gen.merge.TemplateMergeProcessor;
+import net.ketone.accrptgen.service.gen.parse.TemplateParseProcessor;
 import net.ketone.accrptgen.service.stats.StatisticsService;
 import net.ketone.accrptgen.domain.dto.AccountJob;
 import net.ketone.accrptgen.domain.gen.AccountData;
@@ -20,8 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -46,6 +46,11 @@ public class Pipeline implements Runnable {
     private StatisticsService statisticsService;
     @Autowired
     private TasksService tasksService;
+    @Autowired
+    private TemplateMergeProcessor templateMergeProcessor;
+    @Autowired
+    private TemplateParseProcessor templateParseProcessor;
+
 
     private String filename;
     private String cacheFilename;
@@ -64,8 +69,8 @@ public class Pipeline implements Runnable {
             filename = GenerationService.getFileName(dto.getCompany(), dto.getGenerationTime());
 
             byte[] workbookArr = tempStorage.load(inputFileName);
-            XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(workbookArr));
-            byte[] preParseOutput = parsingService.preParse(workbook);
+            byte[] preParseOutput = templateMergeProcessor.process(workbookArr);
+
 
             Attachment inputXlsx = new Attachment(filename + "-plain.xlsm", workbookArr);
             // no need to use the template anymore, delete it.
@@ -73,7 +78,9 @@ public class Pipeline implements Runnable {
 
             log.info("template Closing input file stream, " + preParseOutput.length + "_bytes");
             log.info("Start parse operation for " + filename);
-            AccountData data = parsingService.readFile(preParseOutput);
+//            AccountData data = parsingService.readFile(preParseOutput);
+            AccountData data = templateParseProcessor.process(preParseOutput);
+
             data.setGenerationTime(dto.getGenerationTime());
             log.info("template finished parsing, sections=" + data.getSections().size());
 

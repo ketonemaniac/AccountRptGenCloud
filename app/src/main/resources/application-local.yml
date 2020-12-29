@@ -1,0 +1,14 @@
+storage:
+  persistent:
+    folder: ../local/files/
+  temp:
+    folder: ../local/temp/
+    retention:
+      days: 1
+
+mongo:
+  database:
+    name: testing
+
+security:
+  enable: false

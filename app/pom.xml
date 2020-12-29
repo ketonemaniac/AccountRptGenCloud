@@ -178,6 +178,11 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 			<version>2.11.3</version>
 		</dependency>
+		<dependency>
+			<groupId>io.vavr</groupId>
+			<artifactId>vavr</artifactId>
+			<version>0.10.3</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -189,7 +194,7 @@
 					<exclude>**/*.docx</exclude>
 				</excludes>
 				<!-- includes>
-					<include>application.properties</include>
+					<include>application.yml</include>
 				</includes -->
 			</resource>
 			<resource>
