@@ -23,7 +23,7 @@ public class AuditorFooterCommand implements ControlCommand {
     private HeaderProperties properties;
 
     @Getter
-    private String controlType = Paragraph.AUDITOR_HEADING;
+    private String controlType = Paragraph.AUDITOR_FOOTER;
 
     @Override
     public Mono<Tuple2<Section, Boolean>> execute(CellInfo cellInfo, Section section) {

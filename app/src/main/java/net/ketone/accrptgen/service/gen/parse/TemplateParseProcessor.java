@@ -101,8 +101,8 @@ public class TemplateParseProcessor implements FileProcessor<AccountData> {
                         .map(String::toLowerCase)
                         .map(controlCommandMap::get)
                         .orElse(controlCommandMap.get(Paragraph.TEXT))))
-                .flatMap(tuple3 -> tuple3._3.execute(tuple3._1, tuple3._2))
-                .takeUntil(tuple2 -> tuple2._2)
+                .concatMap(tuple3 -> tuple3._3.execute(tuple3._1, tuple3._2))
+                .takeUntil(tuple2 -> !tuple2._2)
                 .blockLast()
         ;
     }

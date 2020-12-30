@@ -56,7 +56,7 @@ public interface ControlCommand {
                         .getOrElse(StringUtils.EMPTY))
                 )
                 .skipWhile(tuple -> tuple._3.equalsIgnoreCase(StringUtils.EMPTY))
-                .filter(tuple -> tuple._3.equalsIgnoreCase(StringUtils.EMPTY))
+                .filter(tuple -> !tuple._3.equalsIgnoreCase(StringUtils.EMPTY))
                 .switchIfEmpty(Flux.just(Tuple.of(0, null, StringUtils.EMPTY)))
                 .switchOnFirst(((signal, tuple3Flux) -> {
                     p.indent(signal.get()._1);

@@ -15,7 +15,11 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class ContentCommand implements ControlCommand {
@@ -53,14 +57,7 @@ public class ContentCommand implements ControlCommand {
 
 
     public static void main(String [] args) {
-        Paragraph.ParagraphBuilder b = Paragraph.builder().indent(1);
-        b.indent(b.build().getIndent() + 99);
-        System.out.println(b.build().getIndent());
-//        Flux.range(1,10)
-//                .scan((a, b) -> {
-//                    System.out.println(a);
-//                    return b;
-//                })
-//                .blockLast();
+        Flux.empty()
+                .blockLast();
     }
 }
