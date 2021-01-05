@@ -1,7 +1,9 @@
 package net.ketone.accrptgen.service.gen;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.config.Constants;
+import net.ketone.accrptgen.exception.GenerationException;
 import net.ketone.accrptgen.service.gen.merge.TemplateMergeProcessor;
 import net.ketone.accrptgen.service.gen.parse.TemplateParseProcessor;
 import net.ketone.accrptgen.service.stats.StatisticsService;
@@ -117,8 +119,13 @@ public class Pipeline implements Runnable {
             dto.setFilename(filename);
             dto.setStatus(Constants.Status.FAILED.name());
             try {
+                if(e instanceof GenerationException) {
+                    dto.setError((GenerationException) e);
+                } else {
+                    dto.setError(new GenerationException(e));
+                }
                 statisticsService.updateTask(dto);
-            } catch (IOException e1) {
+            } catch (Throwable e1) {
                 log.warn("History file write failed", e1);
             }
         }

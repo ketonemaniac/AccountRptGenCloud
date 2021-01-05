@@ -3,6 +3,7 @@ package net.ketone.accrptgen.service.gen.merge;
 import com.google.common.collect.Streams;
 import io.vavr.Tuple;
 import lombok.extern.slf4j.Slf4j;
+import net.ketone.accrptgen.exception.GenerationException;
 import net.ketone.accrptgen.service.credentials.CredentialsService;
 import net.ketone.accrptgen.service.gen.FileProcessor;
 import net.ketone.accrptgen.service.gen.merge.types.CellTypeProcessor;
@@ -132,16 +133,20 @@ public class TemplateMergeProcessor implements FileProcessor<byte[]> {
                 .doOnNext(sheet -> log.info("refreshing sheet={}", sheet.getSheetName()))
                 .flatMap(this::cells)
                 .map(Tuple2::_2)
-                .doOnNext(cell -> {
-                    try {
-                        evaluator.evaluateFormulaCellEnum(cell);
-                    } catch(Exception e) {
-                        log.error("cannot evaluate cell " + cell.getAddress().formatAsString() +
-                                " with formula: " + cell.getCellFormula() +
-                                " cellType=" + cell.getCellTypeEnum().name(), e);
-                        throw e;
-                    }
-                })
+                .flatMap(cell -> Mono.just(cell)
+                        .map(evaluator::evaluateFormulaCellEnum)
+                        .doOnError(err -> {
+                            log.error("cannot evaluate cell " + cell.getAddress().formatAsString() +
+                                    " with formula: " + cell.getCellFormula() +
+                                    " cellType=" + cell.getCellTypeEnum().name(), err);
+                        })
+                        .onErrorMap(err -> new GenerationException(cell.getSheet().getSheetName(),
+                                cell.getAddress().formatAsString(),
+                                "TemplateMerge",
+                                String.format("Cannot evaluate formula: %s", cell.getCellFormula()),
+                                err.getMessage(),
+                                err))
+                )
                 .blockLast();
     }
 
