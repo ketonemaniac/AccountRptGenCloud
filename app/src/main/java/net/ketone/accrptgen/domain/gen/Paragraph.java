@@ -8,7 +8,6 @@ import lombok.experimental.SuperBuilder;
  * One paragraph/line of the input Excel
  */
 @Data
-@SuperBuilder
 @NoArgsConstructor
 public class Paragraph implements SectionElement {
 
@@ -23,6 +22,7 @@ public class Paragraph implements SectionElement {
     public static final String TABLE_END = "table end";
     public static final String ITEM = "item";
     public static final String TEXT = "text";
+    public static final String TABLE_TEXT = "table text";
 
     // yes/no Characters
     public static final String YES = "y";

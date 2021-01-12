@@ -47,7 +47,7 @@ public class BodyStartCommand implements ControlCommand {
                         .map(String::trim)
                         .map(String::length)
                         .orElse(0) > 0)
-                .last(Header.builder().build())     // dummy header if not present
+                .last(new Header())     // dummy header if not present
                 .doOnNext(header -> {
                     header.setLastLine(true);
                 })

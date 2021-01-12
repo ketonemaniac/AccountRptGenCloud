@@ -31,8 +31,7 @@ public class AuditorHeaderCommand implements ControlCommand {
                 .doOnNext(header -> Optional.ofNullable(cellInfo.getRow())
                         .map(row -> row.getCell(0))
                         .map(Cell::getStringCellValue)
-                        .ifPresent(header::auditorName))
-                .map(Header.HeaderBuilder::build)
+                        .ifPresent(header::setAuditorName))
                 .doOnNext(section::addSectionElement)
                 .map(header -> Tuple.of(section, Boolean.TRUE));
     }

@@ -100,7 +100,10 @@ public class TemplateParseProcessor implements FileProcessor<AccountData> {
                         .map(String::trim)
                         .map(String::toLowerCase)
                         .map(controlCommandMap::get)
-                        .orElse(controlCommandMap.get(Paragraph.TEXT))))
+                        .orElse(
+                                tuple2._2.getFlags().isInTable() ?
+                                        controlCommandMap.get(Paragraph.TABLE_TEXT) :
+                                        controlCommandMap.get(Paragraph.TEXT))))
                 .concatMap(tuple3 -> tuple3._3.execute(tuple3._1, tuple3._2))
                 .takeUntil(tuple2 -> !tuple2._2)
                 .blockLast()

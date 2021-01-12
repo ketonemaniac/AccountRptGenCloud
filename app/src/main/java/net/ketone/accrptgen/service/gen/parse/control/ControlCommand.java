@@ -31,20 +31,20 @@ public interface ControlCommand {
      */
     Mono<Tuple2<Section, Boolean>> execute(final CellInfo cellInfo, final Section section);
 
-    default Mono<? extends Header.HeaderBuilder<?, ?>> header(final HeaderProperties properties,
+    default Mono<Header> header(final HeaderProperties properties,
                                                         final Section section) {
-        return Mono.just(Header.builder())
+        return Mono.just(new Header())
                 .doOnNext(header ->
                         Optional.ofNullable(properties.getHeaders())
                                 .map(map -> map.get(section.getName()))
                                 .ifPresent(props -> {
-                                    header.hasCompanyName(props.getCompanyName());
-                                    header.underline(props.getUnderline());
+                                    header.setHasCompanyName(props.getCompanyName());
+                                    header.setUnderline(props.getUnderline());
                                 }));
     }
 
 
-    default <T extends Paragraph.ParagraphBuilder<?, ?>> Mono<T> lineContent(Section section, Row row, T p) {
+    default <T extends Paragraph> Mono<T> lineContent(Section section, Row row, T p) {
 
         StringBuffer sb = new StringBuffer();
 
@@ -59,7 +59,7 @@ public interface ControlCommand {
                 .filter(tuple -> !tuple._3.equalsIgnoreCase(StringUtils.EMPTY))
                 .switchIfEmpty(Flux.just(Tuple.of(0, null, StringUtils.EMPTY)))
                 .switchOnFirst(((signal, tuple3Flux) -> {
-                    p.indent(signal.get()._1);
+                    p.setIndent(signal.get()._1);
                     return tuple3Flux;
                 }))
                 .doOnNext(tuple -> {
@@ -69,11 +69,20 @@ public interface ControlCommand {
                             .map(XSSFCellStyle.class::cast)
                             .map(XSSFCellStyle::getFont)
                             .map(XSSFFont::getBold)
-                            .ifPresent(p::isBold);
+                            .ifPresent(p::setBold);
                 })
                 .last()
-                .doOnNext(last -> p.text(sb.toString().trim()))
+                .doOnNext(last -> p.setText(sb.toString().trim()))
                 .then(Mono.just(p));
+    }
+
+    default boolean includeRow(final CellInfo cellInfo, final Section section) {
+        return Try.of(() -> Optional.ofNullable(cellInfo.getRow())
+                .map(row -> row.getCell(section.getYesNoColumn()))
+                .map(Cell::getStringCellValue)
+                .orElse(Paragraph.NO))
+                .getOrElse(Paragraph.NO)
+                .equalsIgnoreCase(Paragraph.YES);
     }
 
 }

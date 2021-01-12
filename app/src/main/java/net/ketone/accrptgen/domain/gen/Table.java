@@ -1,6 +1,9 @@
 package net.ketone.accrptgen.domain.gen;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +28,17 @@ public class Table implements SectionElement {
     }
 
     @Data
-    public class Cell {
+    public static class Cell {
         private BottomBorderStyle bottomBorderStyle;
         private Alignment alignment;
         private String text;
         private boolean isUnderline;
         private boolean isBold;
+    }
+
+    public void addCellRow(final List<Cell> cellRow) {
+        if(cells == null) cells = new ArrayList<>();
+        cells.add(cellRow);
     }
 
     public Cell addCell(String text) {

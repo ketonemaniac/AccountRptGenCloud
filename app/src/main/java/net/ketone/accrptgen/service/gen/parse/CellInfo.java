@@ -7,6 +7,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+/**
+ * Defines cell coordinates in the source template Excel
+ */
 @Data
 @Builder
 public class CellInfo {

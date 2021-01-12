@@ -25,7 +25,6 @@ public class HeadingCommand implements ControlCommand {
     public Mono<Tuple2<Section, Boolean>> execute(CellInfo cellInfo, Section section) {
         return header(properties, section)
                 .flatMap(header -> lineContent(section, cellInfo.getRow(), header))
-                .map(Header.HeaderBuilder::build)
                 .doOnNext(section::addSectionElement)
                 .map(header -> Tuple.of(section, Boolean.TRUE));
     }

@@ -32,32 +32,23 @@ public class ContentCommand implements ControlCommand {
         return Mono.just(Tuple.of(cellInfo, section))
                 .filter(tuple -> tuple._2.getFlags().isStart())
                 .filter(tuple2 -> this.includeRow(tuple2._1, tuple2._2))
-                .flatMap(tuple2 -> lineContent(section, cellInfo.getRow(), Paragraph.builder())
+                .flatMap(tuple2 -> lineContent(section, cellInfo.getRow(), new Paragraph())
                         .map(tuple2::append))
-                .doOnNext(tuple3 -> {
-                    if(tuple3._2.getFlags().isInItem()) {
-                        tuple3._3.indent(tuple3._3.build().getIndent());
-                    }
-                })
+                .transform(this::transformParagraph)
                 .map(Tuple3::_3)
-                .map(Paragraph.ParagraphBuilder::build)
                 .doOnNext(section::addSectionElement)
                 .map(header -> Tuple.of(section, Boolean.TRUE));
     }
 
-    private boolean includeRow(final CellInfo cellInfo, final Section section) {
-        return Try.of(() -> Optional.ofNullable(cellInfo.getRow())
-                .map(row -> row.getCell(section.getYesNoColumn()))
-                .map(Cell::getStringCellValue)
-                .orElse(Paragraph.NO))
-        .getOrElse(Paragraph.NO)
-        .equalsIgnoreCase(Paragraph.YES);
+    protected Mono<Tuple3<CellInfo, Section, Paragraph>> transformParagraph(
+            final Mono<Tuple3<CellInfo, Section, Paragraph>> tuple3Flux) {
+        return tuple3Flux
+                .doOnNext(tuple3 -> {
+                    if(tuple3._2.getFlags().isInItem()) {
+                        tuple3._3.setIndent(tuple3._3.getIndent()+1);
+                    }
+                });
+
     }
 
-
-
-    public static void main(String [] args) {
-        Flux.empty()
-                .blockLast();
-    }
 }
