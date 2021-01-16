@@ -203,15 +203,15 @@ public class ParserITCase {
         assertThat(outputWb.getSheet("Sheet3")).isNotNull();
     }
 
-    @Test
-    public void testParse() throws IOException {
-        InputStream templateStream = storageSvc.loadAsInputStream(TEMPLATE_FILENAME);
-        XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        templateWb.write(os);
-        AccountData data = svc.readFile(os.toByteArray());
-        System.out.println(data.getCompanyName());
-    }
+//    @Test
+//    public void testParse() throws IOException {
+//        InputStream templateStream = storageSvc.loadAsInputStream(TEMPLATE_FILENAME);
+//        XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
+//        ByteArrayOutputStream os = new ByteArrayOutputStream();
+//        templateWb.write(os);
+//        AccountData data = svc.readFile(os.toByteArray());
+//        System.out.println(data.getCompanyName());
+//    }
 
 
 }

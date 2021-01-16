@@ -8,9 +8,11 @@ import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.xmlbeans.XmlCursor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTInd;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,9 @@ public class ExtractHeaderTest {
 
         XWPFDocument doc = currPgh.getDocument();
         XmlCursor cursor = currPgh.getCTP().newCursor();
+
+        CTInd indent = currPgh.getCTP().getPPr().addNewInd();
+        indent.setLeft(BigInteger.valueOf(-4 * 360));
 
         XWPFRun newR = currPgh.createRun();
         newR.getCTR().setRPr(currPgh.getRuns().get(0).getCTR().getRPr());

@@ -80,7 +80,6 @@ public class Pipeline implements Runnable {
 
             log.info("template Closing input file stream, " + preParseOutput.length + "_bytes");
             log.info("Start parse operation for " + filename);
-//            AccountData data = parsingService.readFile(preParseOutput);
             AccountData data = templateParseProcessor.process(preParseOutput);
 
             data.setGenerationTime(dto.getGenerationTime());
