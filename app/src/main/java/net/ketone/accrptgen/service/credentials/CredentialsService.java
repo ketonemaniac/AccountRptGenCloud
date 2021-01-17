@@ -17,23 +17,4 @@ public interface CredentialsService {
 
     void saveCredentials(Map<String, String> credentials);
 
-    default Map<String, String> getCredentialsMap(final String prefix) {
-        return getCredentials().entrySet().stream()
-                .filter(entry -> entry.getKey().toString().startsWith(prefix))
-                .collect(Collectors.collectingAndThen(
-                        Collectors.groupingBy(entry -> entry.getKey().toString().split("\\.")[1]),
-                        map -> map.entrySet().stream()
-                                .collect(Collectors.toMap(entry -> entry.getValue()
-                                                .stream()
-                                                .filter(e -> e.getKey().toString().contains(".name"))
-                                                .findFirst()
-                                                .get().getValue().toString(),
-                                        entry -> entry.getValue()
-                                                .stream()
-                                                .filter(e -> e.getKey().toString().contains(".banner"))
-                                                .findFirst()
-                                                .get().getValue().toString())
-                                ))
-                );
-    }
 }

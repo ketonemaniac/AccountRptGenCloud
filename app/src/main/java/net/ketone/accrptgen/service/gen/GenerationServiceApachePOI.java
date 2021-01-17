@@ -1,6 +1,8 @@
 package net.ketone.accrptgen.service.gen;
 
 import io.vavr.control.Try;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.gen.*;
 import net.ketone.accrptgen.service.credentials.CredentialsService;
@@ -49,11 +51,9 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     private static final int twipsPerIndent = 360;
 
-    @Autowired
-    private StorageService persistentStorage;
+    private final StorageService persistentStorage;
 
-    @Autowired
-    private CredentialsService credentialsService;
+    private final CredentialsService credentialsService;
 
 
     private Map<String, XWPFParagraph> currPghs = new HashMap<>();
@@ -66,14 +66,36 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     private Map<String, String> bannerMap;
 
-    @PostConstruct
-    public void init() {
+    public GenerationServiceApachePOI(final StorageService persistentStorage,
+                                      final CredentialsService credentialsService) {
+        this.persistentStorage = persistentStorage;
+        this.credentialsService = credentialsService;
         try {
             FunctionEval.registerFunction("DATEDIF", new DateDifFunc());
         } catch (IllegalArgumentException e) {
             // skip error: POI already implememts DATEDIF for duplicate registers in the JVM
         }
-        bannerMap = credentialsService.getCredentialsMap("auditor.");
+        bannerMap = getCredentialsMap("auditor.");
+    }
+
+    private Map<String, String> getCredentialsMap(final String prefix) {
+        return credentialsService.getCredentials().entrySet().stream()
+                .filter(entry -> entry.getKey().toString().startsWith(prefix))
+                .collect(Collectors.collectingAndThen(
+                        Collectors.groupingBy(entry -> entry.getKey().toString().split("\\.")[1]),
+                        map -> map.entrySet().stream()
+                                .collect(Collectors.toMap(entry -> entry.getValue()
+                                                .stream()
+                                                .filter(e -> e.getKey().toString().contains(".name"))
+                                                .findFirst()
+                                                .get().getValue().toString(),
+                                        entry -> entry.getValue()
+                                                .stream()
+                                                .filter(e -> e.getKey().toString().contains(".banner"))
+                                                .findFirst()
+                                                .get().getValue().toString())
+                                ))
+                );
     }
 
 

@@ -62,17 +62,4 @@ public class FileBasedCredentialsServiceTest {
         assertThat(props.getProperty("hello")).isEqualToIgnoringCase("world");
     }
 
-    @Test
-    public void testLoadCredentialsMap() {
-        svc.saveCredential("auditor.0.name", "auditor0");
-        svc.saveCredential("auditor.0.banner", "banner0");
-        svc.saveCredential("auditor.1.name", "auditor1");
-        svc.saveCredential("auditor.1.banner", "banner1");
-        Map<String, String> credentialsMap = svc.getCredentialsMap("auditor.");
-        System.out.println("keyset=" + credentialsMap.keySet());
-        assertThat(credentialsMap.get("auditor0")).isEqualTo("banner0");
-        assertThat(credentialsMap.get("auditor1")).isEqualTo("banner1");
-
-    }
-
 }
