@@ -2,6 +2,7 @@ package net.ketone.accrptgen.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import net.ketone.accrptgen.exception.GenerationException;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Id;
@@ -25,9 +26,15 @@ public class AccountJob implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     @Temporal( TemporalType.TIMESTAMP )
     private LocalDateTime generationTime;
+
     private String status;
+
     private String referredBy;
+
     private String submittedBy;
 
     private String handleName;      // For GCloudStandard, ID in queue
+
+    private GenerationException error;
+
 }

@@ -68,32 +68,32 @@ public class ParserITCase {
     @Value("${plain.filename}${plain.filename.extension}")
     private String PLAIN_FILENAME;
 
-    @Test
-    public void testPreParse() throws Exception {
-        InputStream in = this.getClass().getClassLoader()
-                .getResourceAsStream(PLAIN_FILENAME);
-        XSSFWorkbook workbook = new XSSFWorkbook(in);
-        byte[] preParseOutput = svc.preParse(workbook);
-        AccountData data = svc.readFile(preParseOutput);
-        assertThat(data.getCompanyName()).isEqualTo("MOP ENTERTAINMENT LIMITED");
-
-        for(Section section : data.getSections()) {
-            switch (section.getName()) {
-                case "Section3":
-                    testSection3(section); break;
-                case "Section4":
-                    testSection4(section); break;
-                case "Section5":
-                    testSection5(section); break;
-                case "Section6":
-                    testSection6(section); break;
-            }
-        }
-
-        // TODO: remove, this is integration flow
-        // data.setGenerationTime(new Date());
-        // byte[] out = genSvc.generate(data);
-    }
+//    @Test
+//    public void testPreParse() throws Exception {
+//        InputStream in = this.getClass().getClassLoader()
+//                .getResourceAsStream(PLAIN_FILENAME);
+//        XSSFWorkbook workbook = new XSSFWorkbook(in);
+//        byte[] preParseOutput = svc.preParse(workbook);
+//        AccountData data = svc.readFile(preParseOutput);
+//        assertThat(data.getCompanyName()).isEqualTo("MOP ENTERTAINMENT LIMITED");
+//
+//        for(Section section : data.getSections()) {
+//            switch (section.getName()) {
+//                case "Section3":
+//                    testSection3(section); break;
+//                case "Section4":
+//                    testSection4(section); break;
+//                case "Section5":
+//                    testSection5(section); break;
+//                case "Section6":
+//                    testSection6(section); break;
+//            }
+//        }
+//
+//        // TODO: remove, this is integration flow
+//        // data.setGenerationTime(new Date());
+//        // byte[] out = genSvc.generate(data);
+//    }
 
     private void testSection6(Section section) {
         List<SectionElement> t = section.getElements().stream().filter(s -> s instanceof Table).collect(Collectors.toList());
@@ -203,15 +203,15 @@ public class ParserITCase {
         assertThat(outputWb.getSheet("Sheet3")).isNotNull();
     }
 
-    @Test
-    public void testParse() throws IOException {
-        InputStream templateStream = storageSvc.loadAsInputStream(TEMPLATE_FILENAME);
-        XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        templateWb.write(os);
-        AccountData data = svc.readFile(os.toByteArray());
-        System.out.println(data.getCompanyName());
-    }
+//    @Test
+//    public void testParse() throws IOException {
+//        InputStream templateStream = storageSvc.loadAsInputStream(TEMPLATE_FILENAME);
+//        XSSFWorkbook templateWb = new XSSFWorkbook(templateStream);
+//        ByteArrayOutputStream os = new ByteArrayOutputStream();
+//        templateWb.write(os);
+//        AccountData data = svc.readFile(os.toByteArray());
+//        System.out.println(data.getCompanyName());
+//    }
 
 
 }

@@ -2,6 +2,7 @@ package net.ketone.accrptgen.service.credentials;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public interface CredentialsService {
 

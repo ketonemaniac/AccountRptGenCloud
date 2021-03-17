@@ -1,10 +1,18 @@
 package net.ketone.accrptgen.service.gen;
 
+import io.vavr.control.Try;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.gen.*;
+import net.ketone.accrptgen.service.credentials.CredentialsService;
 import net.ketone.accrptgen.service.store.StorageService;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.formula.eval.FunctionEval;
 import org.apache.poi.ss.formula.functions.DateDifFunc;
+import org.apache.poi.util.Units;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.xmlbeans.XmlCursor;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
@@ -13,12 +21,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,22 +51,51 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     private static final int twipsPerIndent = 360;
 
-    @Autowired
-    private StorageService persistentStorage;
+    private final StorageService persistentStorage;
 
-    Map<String, XWPFParagraph> currPghs = new HashMap<>();
-    Map<String, XWPFParagraph> pghHeaders = new HashMap<>();
-    Map<String, XWPFParagraph> pghFooters = new HashMap<>();
+    private final CredentialsService credentialsService;
 
-    Map<Integer, BigInteger> numberedLists = new HashMap<>();
 
-    @PostConstruct
-    public void init() {
+    private Map<String, XWPFParagraph> currPghs = new HashMap<>();
+
+    private Map<String, XWPFParagraph> pghHeaders = new HashMap<>();
+
+    private Map<String, XWPFParagraph> pghFooters = new HashMap<>();
+
+    private Map<Integer, BigInteger> numberedLists = new HashMap<>();
+
+    private Map<String, String> bannerMap;
+
+    public GenerationServiceApachePOI(final StorageService persistentStorage,
+                                      final CredentialsService credentialsService) {
+        this.persistentStorage = persistentStorage;
+        this.credentialsService = credentialsService;
         try {
             FunctionEval.registerFunction("DATEDIF", new DateDifFunc());
         } catch (IllegalArgumentException e) {
             // skip error: POI already implememts DATEDIF for duplicate registers in the JVM
         }
+        bannerMap = getCredentialsMap("auditor.");
+    }
+
+    private Map<String, String> getCredentialsMap(final String prefix) {
+        return credentialsService.getCredentials().entrySet().stream()
+                .filter(entry -> entry.getKey().toString().startsWith(prefix))
+                .collect(Collectors.collectingAndThen(
+                        Collectors.groupingBy(entry -> entry.getKey().toString().split("\\.")[1]),
+                        map -> map.entrySet().stream()
+                                .collect(Collectors.toMap(entry -> entry.getValue()
+                                                .stream()
+                                                .filter(e -> e.getKey().toString().contains(".name"))
+                                                .findFirst()
+                                                .get().getValue().toString(),
+                                        entry -> entry.getValue()
+                                                .stream()
+                                                .filter(e -> e.getKey().toString().contains(".banner"))
+                                                .findFirst()
+                                                .get().getValue().toString())
+                                ))
+                );
     }
 
 
@@ -72,12 +109,8 @@ public class GenerationServiceApachePOI implements GenerationService {
      */
     public byte[] generate(AccountData data) throws IOException {
 
-        ClassLoader classLoader = getClass().getClassLoader();
-        // File file = new File(classLoader.getResource("template.docx").getFile());
-
         XWPFDocument document = null;
         try {
-//            document = new XWPFDocument(new FileInputStream(file));
             document = new XWPFDocument(persistentStorage.loadAsInputStream(TEMPLATE_FILE));
         } catch (IOException e) {
             log.error("Error in opening " + TEMPLATE_FILE, e);
@@ -133,9 +166,11 @@ public class GenerationServiceApachePOI implements GenerationService {
             findCurrPgh:
             for(XWPFParagraph pgh : paragraphs) {
                 for(XWPFRun run : pgh.getRuns()) {
-                    if(run.text().trim().startsWith(sectionName)) {
+                    if(run.text().trim().equalsIgnoreCase(sectionName)) {
                         pghsMap.put(sectionName, pgh);
-                        break findCurrPgh;
+//                        break findCurrPgh;
+                    } else if(run.text().trim().equalsIgnoreCase(sectionName + "Auditor")) {
+                        pghsMap.put(sectionName + "Auditor", pgh);
                     }
                 }
             }
@@ -151,6 +186,26 @@ public class GenerationServiceApachePOI implements GenerationService {
         XWPFParagraph currPgh = currPghs.get(sectionName);
         doWrite(currPgh, paragraph, null);
     }
+
+    /**
+     * Places the runContent directly in the run that is passed in
+     * @param currPgh
+     * @param runContent
+     */
+    private void doWriteRun(XWPFParagraph currPgh, Consumer<XWPFRun> runContent) {
+        if(currPgh != null) {
+            XWPFDocument doc = currPgh.getDocument();
+            XmlCursor cursor = currPgh.getCTP().newCursor();
+            XWPFRun newR = currPgh.getRuns().get(0);
+            newR.getCTR().removeT(0);
+            newR.setText(StringUtils.EMPTY);
+            runContent.accept(newR);
+            XmlCursor c2 = currPgh.getCTP().newCursor();
+            c2.moveXml(cursor);
+            c2.dispose();
+        }
+    }
+
 
     private void doWrite(XWPFParagraph currPgh, Paragraph paragraph, Consumer<XWPFParagraph> formatting) {
         if(currPgh != null) {
@@ -189,11 +244,21 @@ public class GenerationServiceApachePOI implements GenerationService {
     public void write(String sectionName, Header header, String companyName) {
         XWPFParagraph currPgh = pghHeaders.get("Header" + sectionName);
         if(header.getAuditorName() != null) {
-            header.setText(header.getAuditorName());
-            doWrite(currPgh, header, p -> {
-                p.getRuns().get(0).setFontSize(17);
-                p.getRuns().get(0).setUnderline(UnderlinePatterns.SINGLE);
-                p.setAlignment(ParagraphAlignment.CENTER);
+            String banner = Optional.ofNullable(header.getAuditorName().trim())
+                        .map(s -> s.split(" "))
+                        .map(arr -> arr[0])
+                        .map(bannerMap::get)
+                    .orElseThrow(() -> new RuntimeException("Unable to find banner from Auditor name" +
+                            header.getAuditorName()));
+            XWPFParagraph currAuditorPgh = pghHeaders.get("Header" + sectionName + "Auditor");
+            doWriteRun(currAuditorPgh, newR -> {
+                Try.run(() -> {
+                    newR.addPicture(persistentStorage.loadAsInputStream(banner),
+                            XWPFDocument.PICTURE_TYPE_PNG,
+                            "TKH", Units.toEMU(550), Units.toEMU(37));
+                    CTInd indent = newR.getParagraph().getCTP().getPPr().addNewInd();
+                    indent.setLeft(BigInteger.valueOf(-3 * twipsPerIndent));
+                }).get();
             });
             // one more empty line
             Paragraph p = new Paragraph();

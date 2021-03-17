@@ -1,0 +1,37 @@
+spring:
+  jmx:
+    enabled: false
+
+mail:
+  enabled: true
+# mail.bcc=
+
+build:
+  version: @project.version@
+  timestamp: @timestamp@
+
+parse:
+  headers:
+    Section1:
+      company-name: true
+      underline: no_underline
+    Section2:
+      company-name: false
+      underline: after_last
+    Section3:
+      company-name: true
+      underline: before_last
+    Section4:
+      company-name: true
+      underline: before_last
+    Section5:
+      company-name: true
+      underline: before_last
+    Section6:
+      company-name: true
+      underline: before_last
+    Contents:
+      company-name: true
+      underline: after_last
+
+

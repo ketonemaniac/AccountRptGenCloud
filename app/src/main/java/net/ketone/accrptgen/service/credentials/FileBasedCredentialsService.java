@@ -1,5 +1,7 @@
 package net.ketone.accrptgen.service.credentials;
 
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +10,7 @@ import java.io.*;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static net.ketone.accrptgen.config.Constants.CREDENTIALS_FILE;
 

@@ -1,0 +1,17 @@
+storage:
+  persistent:
+    bucket: accountrptgen-storage-hk-test
+  temp:
+    bucket: accountrptgen-test-storage-temp
+    retention:
+      days: 1
+
+tasks:
+  projectId: accountrptgen-hk-test
+
+mail:
+  sender: ketonemaniac@gmail.com
+
+mongo:
+  database:
+    name: testing

@@ -10,6 +10,6 @@ import java.util.UUID;
 @Repository
 public interface AccountJobRepository extends MongoRepository<AccountJob, UUID> {
 
-    public List<AccountJob> findTop10BySubmittedByOrderByGenerationTimeDesc(
+    List<AccountJob> findTop10BySubmittedByOrderByGenerationTimeDesc(
             final String submittedBy);
 }

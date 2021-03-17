@@ -1,10 +1,12 @@
-package net.ketone.accrptgen.config;
+package net.ketone.accrptgen.config.mongo;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.connection.SslSettings;
 import net.ketone.accrptgen.service.credentials.CredentialsService;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +15,9 @@ import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 
 import java.util.List;
 import java.util.Properties;
+
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 @Configuration
 @Profile("!test")
@@ -47,6 +52,15 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
                         .enabled(true)
                         .invalidHostNameAllowed(true)
                         .build()))
+                // https://www.mongodb.com/blog/post/rest-apis-with-java-spring-boot-and-mongodb
+                .codecRegistry(fromRegistries(
+                        MongoClientSettings.getDefaultCodecRegistry(),
+                        CodecRegistries.fromCodecs(new ClassCodec()),
+                        fromProviders(
+                                new CustomCodecProvider(),
+                                PojoCodecProvider.builder().automatic(true).build())
+
+                        ))
                 ;
     }
 }
