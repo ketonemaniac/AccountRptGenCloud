@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Table, Container ,Button, Row, Col } from 'reactstrap';
-import Endpoints from '../services/Endpoints.js';
+import Endpoints from '../../api/Endpoints.js';
 import UserEditModal from './UserEditModal.js'
 import UserDeleteModal from './UserDeleteModal.js'
 import PasswordResetModal from './PasswordResetModal.js'
+import '../../styles/useradmin/UserAdmin.scss';
 
 class UserAdmin extends Component {
 
@@ -85,15 +86,15 @@ class UserAdmin extends Component {
 
     render() {
         return (
-            <main>
-                <Container className="themed-container">
+            <React.Fragment>
+                <Container className="user-admin">
                 <Row className="py-3">
                     <Col><h1>User Maintenance</h1></Col>
                     <Col><Button outline className="float-right" color="primary"
                     onClick={this.toggleUserEditModal.bind(this)}>Add User</Button></Col>
                 </Row>
                     
-                    <Table striped>
+                    <Table className="user-admin-table">
                         <thead>
                             <tr>
                                 <th>Username</th>
@@ -134,7 +135,7 @@ class UserAdmin extends Component {
                 <PasswordResetModal isPasswordResetModalOpen={this.state.isPasswordResetModalOpen} 
                                 togglePasswordResetModal={this.togglePasswordResetModal.bind(this)}
                                 selectedUser={this.state.selectedUser} />
-            </main>
+            </React.Fragment>
         );
     }
 }

@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import AppHeader from './AppHeader.js';
+import AppHeader from './header/AppHeader.js';
 import SideBar from './SideBar.js'
-import User from './User.js';
-import './Frame.css'
+import User from './header/User.js';
+import '../styles/Frame.css'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Endpoints from './services/Endpoints.js';
+import Endpoints from '../api/Endpoints.js';
 
 class Frame extends Component {
 

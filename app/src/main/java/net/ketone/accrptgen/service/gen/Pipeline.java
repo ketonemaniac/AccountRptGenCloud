@@ -3,7 +3,10 @@ package net.ketone.accrptgen.service.gen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.config.Constants;
+import net.ketone.accrptgen.domain.gen.AuditProgrammeMapping;
 import net.ketone.accrptgen.exception.GenerationException;
+import net.ketone.accrptgen.service.gen.auditprg.AuditProgrammeMappingExtract;
+import net.ketone.accrptgen.service.gen.auditprg.AuditProgrammeProcessor;
 import net.ketone.accrptgen.service.gen.merge.TemplateMergeProcessor;
 import net.ketone.accrptgen.service.gen.parse.TemplateParseProcessor;
 import net.ketone.accrptgen.service.stats.StatisticsService;
@@ -52,7 +55,10 @@ public class Pipeline implements Runnable {
     private TemplateMergeProcessor templateMergeProcessor;
     @Autowired
     private TemplateParseProcessor templateParseProcessor;
-
+    @Autowired
+    private AuditProgrammeMappingExtract auditProgrammeMappingExtract;
+    @Autowired
+    private AuditProgrammeProcessor auditProgrammeProcessor;
 
     private String filename;
     private String cacheFilename;
@@ -72,7 +78,7 @@ public class Pipeline implements Runnable {
 
             byte[] workbookArr = tempStorage.load(inputFileName);
             byte[] preParseOutput = templateMergeProcessor.process(workbookArr);
-
+            List<AuditProgrammeMapping> mappings = auditProgrammeMappingExtract.process(workbookArr);
 
             Attachment inputXlsx = new Attachment(filename + "-plain.xlsm", workbookArr);
             // no need to use the template anymore, delete it.
@@ -97,9 +103,14 @@ public class Pipeline implements Runnable {
 
             byte[] generatedDoc = generationService.generate(data);
             log.info("Generated doc. " + generatedDoc.length + "_bytes");
+
+            byte[] generatedAuditProgramme = auditProgrammeProcessor.process(new byte[0]);
+
             Attachment doc = new Attachment(filename + ".docx", generatedDoc);
+            Attachment auditPrgAttachment = new Attachment(filename + "-auditProgramme.xlsm",
+                    generatedAuditProgramme);
             Attachment template = new Attachment(filename + "-allDocs.xlsm", os.toByteArray());
-            List<Attachment> attachments = Arrays.asList(doc, template, inputXlsx);
+            List<Attachment> attachments = Arrays.asList(doc, template, inputXlsx, auditPrgAttachment);
             emailService.sendEmail(dto, attachments);
 
             // zip files and store them just in case needed

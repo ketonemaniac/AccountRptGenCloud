@@ -39,6 +39,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RestController
+@RequestMapping("/api/accrptgen")
 @Slf4j
 public class AccRptGenController {
 
@@ -55,24 +56,7 @@ public class AccRptGenController {
     @Autowired
     private TasksService tasksService;
 
-    @Value("${build.version}")
-    private String buildVersion;
-
-    @Value("${build.timestamp}")
-    private String buildTimestamp;
-
-    @GetMapping("/version")
-    public Map<String, String> getVersion() {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        LocalDateTime localDateTime = LocalDateTime.parse(buildTimestamp, df);
-        String timestamp = df.format(localDateTime.toInstant(ZoneOffset.UTC).atOffset(ZoneOffset.of("+8")));
-        Map<String, String> verMap = new HashMap<>();
-        verMap.put("version", buildVersion);
-        verMap.put("timestamp" , timestamp);
-        return verMap;
-    }
-
-    @PostMapping("/uploadFile")
+    @PostMapping("/file")
     public AccountJob handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
         if(file.getOriginalFilename().lastIndexOf(".") == -1) {
             throw new ValidationException("sadfa");
@@ -125,9 +109,9 @@ public class AccRptGenController {
     }
 
 
-    @PostMapping("/downloadFile")
-    public ResponseEntity<Resource> downloadFile(@RequestBody DownloadFileDto dto) throws IOException {
-        String fileName = dto.getFilename() + ".zip";
+    @GetMapping("/file")
+    public ResponseEntity<Resource> downloadFile(@RequestParam("file") String file) throws IOException {
+        String fileName = file + ".zip";
         log.info("filename is " + fileName);
         InputStream is = tempStorage.loadAsInputStream(fileName);
         Resource resource = new InputStreamResource(is);
@@ -137,7 +121,7 @@ public class AccRptGenController {
                 "attachment; filename=\"" + fileName + "\"").body(resource);
     }
 
-    @GetMapping("/listFiles")
+    @GetMapping("/taskList")
     public List<AccountJob> listFiles() {
         return statisticsService.getRecentTasks(UserUtils.getAuthenticatedUser());
     }

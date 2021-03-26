@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ModalHeader, ModalBody, Button, Modal, Container, Row } from 'reactstrap';
-import Endpoints from '../services/Endpoints.js';
+import Endpoints from '../../api/Endpoints.js';
 import { toast } from 'react-toastify';
 
 class PasswordResetModal extends Component {

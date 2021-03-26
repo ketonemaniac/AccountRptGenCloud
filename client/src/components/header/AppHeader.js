@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { Navbar, NavbarBrand, Nav, NavItem, NavLink, NavbarToggler, Collapse  } from 'reactstrap';
-import './AppHeader.css';
+import '../../styles/AppHeader.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserAlt } from '@fortawesome/free-solid-svg-icons';
+import Endpoints from '../../api/Endpoints.js';
 
 class AppHeader extends Component {
 
@@ -11,17 +12,10 @@ class AppHeader extends Component {
   }
 
   componentDidMount() {
-    this.callApi()
+    Endpoints.getVersion()
       .then(res => this.setState({ info: res }))
       .catch(err => console.log(err));
   }
-
-  callApi = async () => {
-    const response = await fetch('/version');
-    const body = await response.json();
-    if (response.status !== 200) throw Error(body.message);
-    return body;
-  };
 
   render() {
     return (

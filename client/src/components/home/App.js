@@ -1,6 +1,6 @@
 import React, { Component, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
+import '../../styles/App.css';
 import {
   Container, Row, Col,
   Jumbotron,
@@ -12,9 +12,8 @@ import {
 import Button from 'reactstrap-button-loader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRedo } from '@fortawesome/free-solid-svg-icons'
-import Moment from 'react-moment';
 import Dropzone from 'react-dropzone';
-import axios from 'axios';
+import Endpoints from '../../api/Endpoints';
 import { CSSTransition } from 'react-transition-group';
 
 
@@ -36,13 +35,11 @@ class App extends Component {
   }
 
   getProgress() {
-    return axios.get('/listFiles')
-      .catch(error => { console.log(error); throw Error(error) })
-      .then(res => {
-        var inProgress = res.data.filter(company => company.status != null);
+    return Endpoints.listFiles()
+      .then(data => data.filter(company => company.status != null))
+      .then(inProgress => {
         this.setState({ companies: inProgress })
       });
-
   }
 
   componentDidUpdate() {
@@ -69,23 +66,14 @@ class App extends Component {
       const data = new FormData()
       data.append('file', file, file.name)
 
-      axios
-        .post("/uploadFile", data, {
-          onUploadProgress: ProgressEvent => {
-            console.log("loaded" + (ProgressEvent.loaded / ProgressEvent.total * 100));
-            /*this.setState({
-              loaded: (ProgressEvent.loaded / ProgressEvent.total*100),
-            })*/
-          }
-        })
-        .then(res => {
-
+      Endpoints.uploadFile(data)
+        .then(resData => {
           this.setState(state => {
             const companies = [{
-              company: res.data.company,
-              filename: res.data.filename,
+              company: resData.company,
+              filename: resData.filename,
               status: "PRELOADED",
-              id: res.data.id
+              id: resData.id
             }, ...state.companies];
             return {
               companies: companies,
@@ -133,37 +121,14 @@ class App extends Component {
     event.preventDefault();
     const data = new FormData(event.target);
 
-    axios
-      .post("/startGeneration", data)
+    Endpoints.generate(data)
       .then(res => this.getProgress());
   }
 
   // FINISHED ===============================
   handleDownload(company) {
     console.log("company=" + company.filename);
-    // ajax doesn't handle file downloads elegantly
-    var req = new XMLHttpRequest();
-    req.open("POST", "/downloadFile", true);
-    req.setRequestHeader("Content-Type", "application/json");
-    req.responseType = "blob";
-    req.onreadystatechange = function () {
-      if (req.readyState === 4 && req.status === 200) {
-        // test for IE
-        if (typeof window.navigator.msSaveBlob === 'function') {
-          window.navigator.msSaveBlob(req.response, company.filename + ".zip");
-        } else {
-          var blob = req.response;
-          var link = document.createElement('a');
-          link.href = window.URL.createObjectURL(blob);
-          link.download = company.filename + ".zip";
-          // append the link to the document body
-          document.body.appendChild(link);
-          link.click();
-          link.remove();// you need to remove that elelment which is created before
-        }
-      }
-    };
-    req.send(JSON.stringify({ "filename": company.filename }));
+    Endpoints.downloadGeneratedZip(company.filename)
   }
 
   render() {
@@ -250,7 +215,7 @@ class App extends Component {
           </CardDeck>
         </main>
         <Container className="footer text-center">
-          <span className="text-muted"> © Ketone Maniac @ 2020</span>          
+          <span className="text-muted"> © Ketone Maniac @ 2021</span>          
         </Container>
 
 

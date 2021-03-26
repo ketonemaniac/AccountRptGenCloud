@@ -55,13 +55,8 @@ public class SettingsController {
         return dto;
     }
 
-
-    @GetMapping("/template")
-    public ResponseEntity<Resource> getTemplate() throws IOException {
-        String filename = Optional.ofNullable(credentialsService.getCredentials())
-                .map(cred -> cred.get(CredentialsService.PREPARSE_TEMPLATE_PROP))
-                .map(Object::toString)
-                .orElseThrow();
+    @GetMapping("file")
+    public ResponseEntity<Resource> getFile(@RequestParam("file") String filename) throws IOException {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -72,6 +67,7 @@ public class SettingsController {
                         .orElseThrow()
                 );
     }
+
 
     @PostMapping("/upsert")
     public Map<String, String> saveParameters(@RequestBody Map<String, String> params) {

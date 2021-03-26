@@ -1,0 +1,108 @@
+import axios from 'axios';
+
+function get(path) {
+    return axios.get(path)
+            .catch(error => { console.log(error); throw Error(error) })
+            .then(res => res.data);
+}
+
+function post(path, data) {
+    return axios.post(path, data)
+            .catch(error => { console.log(error); throw Error(error) })
+            .then(res => res.data);
+}
+
+function put(path, data) {
+    return axios.put(path, data)
+            .catch(error => { console.log(error); throw Error(error) })
+            .then(res => res.data);
+}
+
+function del(path) {
+    return axios.delete(path)
+            .catch(error => { console.log(error); throw Error(error) })
+            .then(res => res.data);
+}
+
+/**
+ * ajax doesn't handle file downloads elegantly
+ * @param {*} filename 
+ */
+function download(url, filename, fileType) {
+    var req = new XMLHttpRequest();
+    var fullUrl = url + "?file=" + encodeURIComponent(filename); 
+    req.open("GET", fullUrl, true);
+    req.setRequestHeader("Content-Type", "application/json");
+    req.responseType = "blob";
+    req.onreadystatechange = function () {
+        if (req.readyState === 4 && req.status === 200) {
+        // test for IE
+        if (typeof window.navigator.msSaveBlob === 'function') {
+            window.navigator.msSaveBlob(req.response, filename + fileType);
+        } else {
+            var blob = req.response;
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = filename + fileType;
+            // append the link to the document body
+            document.body.appendChild(link);
+            link.click();
+            link.remove();// you need to remove that elelment which is created before
+        }
+        }
+    };
+    req.send(JSON.stringify({ "filename": filename }));
+}
+
+
+export default {
+
+    getAllUsers() {
+        return get('/api/admin/user/all')
+    },
+    createUser(user) {
+        return post('/api/admin/user', user)
+    },
+    updateUser(user) {
+        return put('/api/admin/user', user)
+    },
+    deleteUser(user) {
+        return del('/api/admin/user/' + user.username)
+    },
+    passwordReset(user) {
+        return post('/api/admin/user/password/reset', user)
+    },
+    getUser() {
+        return get('/api/user')
+    },
+    getAllSettings() {
+        return get('/api/settings/all')
+    },
+    saveSettings(settings) {
+        return post('/api/settings/upsert', settings)
+    },
+    putTemplate(template) {
+        return post('/api/settings/template', template)
+    },
+    getVersion() {
+        return get('/api/version')
+    },
+    resetPassword(pass) {
+        return post('/api/user/password', pass)
+    },
+    listFiles() {
+        return get('/api/accrptgen/taskList')
+    },
+    uploadFile(file) {
+        return post('/api/accrptgen/file', file)
+    },
+    generate(accountJob) {
+        return post('/api/accrptgen/startGeneration', accountJob)
+    },
+    downloadGeneratedZip(filename) {
+        return download('/api/accrptgen/file', filename, ".zip")
+    },
+    downloadTemplate(filename) {
+        return download('/api/settings/file', filename, "")
+    }
+}

@@ -9,6 +9,7 @@ public interface CredentialsService {
     String SENDGRID_API_KEY_PROP = "mail.sendgrid.api-key";
     String SEND_TO_PROP = "mail.sendto";
     String PREPARSE_TEMPLATE_PROP = "xlsx.template.name";
+    String PREPARSE_AUIDTPRG_TEMPLATE_PROP = "xlsx.template.auditprg.name";
     String MONGODB_PASS = "mongodb.password";
 
     Properties getCredentials();

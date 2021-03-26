@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Container ,Button, Form, FormGroup, Label, Input, Row, Col } from 'reactstrap';
-import Endpoints from '../services/Endpoints.js';
-import axios from 'axios';
+import Endpoints from '../../api/Endpoints.js';
 import { toast } from 'react-toastify';
 
 class Settings extends Component {
@@ -25,14 +24,12 @@ class Settings extends Component {
         const data = new FormData()
         data.append('file', file, file.name)
 
-        axios
-            .put("/api/settings/template", data)
-            .then(res => {
-                console.log("res is " + res.data.filename);
-                toast.info("File updated: " + res.data.filename);
+        Endpoints.putTemplate(data)
+            .then(resData => {
+                toast.info("File updated: " + resData.filename);
                 this.setState(oldState => {
                     console.log(oldState.settings);
-                    oldState.settings['xlsx.template.name'] = res.data.filename;
+                    oldState.settings['xlsx.template.name'] = resData.filename;
                     return {
                         settings : oldState.settings
                     }
@@ -41,24 +38,7 @@ class Settings extends Component {
     };
 
     handleDownloadTemplate() {
-        // ajax doesn't handle file downloads elegantly
-        var req = new XMLHttpRequest();
-        req.open("GET", "/api/settings/template", true);
-        req.responseType = "blob";
-        const templateName = this.state.settings['xlsx.template.name'];
-        req.onreadystatechange = function () {
-          if (req.readyState === 4 && req.status === 200) {            
-            var blob = req.response;
-            var link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = templateName;
-            // append the link to the document body
-            document.body.appendChild(link);
-            link.click();
-            link.remove();// you need to remove that elelment which is created before
-          }
-        };
-        req.send();
+        Endpoints.downloadTemplate(this.state.settings['xlsx.template.name'])
     }
 
     handleMailChange(event) {
@@ -75,7 +55,6 @@ class Settings extends Component {
         const toChange = { "mail.sendto" : this.state.mailString };
         Endpoints.saveSettings(toChange)
         .then(res => {
-            console.log("res is = " + res);
             toast.info("Mailing List updated");
         });
     }

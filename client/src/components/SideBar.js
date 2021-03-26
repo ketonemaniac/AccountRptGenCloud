@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ListGroup, ListGroupItem } from 'reactstrap';
 import { Link } from "react-router-dom";
-import './SideBar.css';
+import '../styles/SideBar.css';
 
 class SideBar extends Component {
 

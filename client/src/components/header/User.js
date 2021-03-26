@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import { Alert, Button, Modal, ModalHeader, ModalBody, ModalFooter, Input, Label, Form, FormGroup } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserCircle } from '@fortawesome/free-regular-svg-icons';
 import { toast } from 'react-toastify';
-import './User.css'
+import '../../styles/User.css'
+import Endpoints from '../../api/Endpoints';
 
 class User extends Component {
 
@@ -39,9 +39,8 @@ class User extends Component {
     } else if (data.password.value != data.confirmPassword.value) {
       this.setState({passwordErr : "passwords do not match"});
     } else {
-      axios
-        .post("/api/user/password", {"password" : data.password.value})
-        .then(res => {
+      Endpoints.resetPassword({"password" : data.password.value})
+        .then(resData => {
           // on success
           toast.info('Password updated successfully');
           this.props.toggleUserModal();
