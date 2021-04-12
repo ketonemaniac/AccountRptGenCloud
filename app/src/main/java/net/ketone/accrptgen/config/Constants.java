@@ -17,10 +17,13 @@ public class Constants {
     // Files
     // stores google API key, SendGrid key
     public static final String CREDENTIALS_FILE = "credentials.properties";
+    // stores non-password settings
+    public static final String CONFIGURATION_FILE = "configuration.properties";
     // template Doc for report generation
     public static final String TEMPLATE_FILE = "template.docx";
     // all history, latest first
     // must be of format xxxxx.yyy
+    @Deprecated
     public static final String HISTORY_FILE = "history.txt";
 
 }

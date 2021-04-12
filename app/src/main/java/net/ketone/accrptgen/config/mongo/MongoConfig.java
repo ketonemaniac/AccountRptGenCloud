@@ -4,7 +4,7 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.connection.SslSettings;
-import net.ketone.accrptgen.service.credentials.CredentialsService;
+import net.ketone.accrptgen.service.credentials.SettingsService;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Autowired
-    private CredentialsService credentialsService;
+    private SettingsService credentialsService;
 
 
     @Value("${mongo.database.name}")
@@ -37,10 +37,10 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Override
     protected void configureClientSettings(MongoClientSettings.Builder builder) {
-        Properties p = credentialsService.getCredentials();
+        Properties p = credentialsService.getSettings();
         builder
                 .credential(MongoCredential.createCredential("root", "admin",
-                        p.get(CredentialsService.MONGODB_PASS).toString().toCharArray()))
+                        p.get(SettingsService.MONGODB_PASS).toString().toCharArray()))
                 .applyToClusterSettings(settings  -> {
                     settings.hosts(List.of(new ServerAddress("cluster0-shard-00-00.yztpq.mongodb.net", 27017),
                             new ServerAddress("cluster0-shard-00-01.yztpq.mongodb.net", 27017),

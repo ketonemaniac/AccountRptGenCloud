@@ -1,36 +1,73 @@
 package net.ketone.accrptgen.service.gen.auditprg;
 
+import io.vavr.Tuple;
+import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
-import net.ketone.accrptgen.service.credentials.CredentialsService;
-import net.ketone.accrptgen.service.gen.FileProcessor;
+import net.ketone.accrptgen.domain.gen.AuditProgrammeMapping;
+import net.ketone.accrptgen.service.credentials.SettingsService;
 import net.ketone.accrptgen.service.store.StorageService;
+import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static net.ketone.accrptgen.util.ExcelUtils.openExcelWorkbook;
+import static net.ketone.accrptgen.util.NumberUtils.numberFormat;
 
 @Slf4j
 @Component
-public class AuditProgrammeProcessor implements FileProcessor<byte[]> {
+public class AuditProgrammeProcessor {
 
     @Autowired
-    private CredentialsService credentialsService;
+    private SettingsService configurationService;
 
     @Autowired
     private StorageService persistentStorage;
 
-    @Override
-    public byte[] process(byte[] input) throws IOException {
+    public byte[] process(final List<AuditProgrammeMapping> mappingList, byte[] preParseOutput) throws IOException {
+
+        XSSFWorkbook allDocs = new XSSFWorkbook(new ByteArrayInputStream(preParseOutput));
         
-        String auditPrgTemplateName = credentialsService.getCredentials().getProperty(
-                CredentialsService.PREPARSE_AUIDTPRG_TEMPLATE_PROP);
+        String auditPrgTemplateName = configurationService.getSettings().getProperty(
+                SettingsService.PREPARSE_AUIDTPRG_TEMPLATE_PROP);
         log.info("starting fetch audit programme template " + auditPrgTemplateName);
-        XSSFWorkbook auditPrgTemplateWb = Optional.ofNullable(
-                openExcelWorkbook(persistentStorage.loadAsInputStream(auditPrgTemplateName)))
-                .orElseThrow(() -> new IOException("Unable to get File " + auditPrgTemplateName));
+        XSSFWorkbook auditPrgTemplateWb =
+                openExcelWorkbook(persistentStorage.loadAsInputStream(StorageService.AUDIT_PRG_PATH +
+                        auditPrgTemplateName));
+
+        Flux.fromIterable(mappingList)
+                .map(mapping -> Tuple.of(mapping.getSourceCells().stream()
+                        .map(mappingCell -> {
+                            CellReference cr = new CellReference(mappingCell.getCell());
+                            Cell c = allDocs.getSheet(mappingCell.getSheet()).getRow(cr.getRow())
+                                    .getCell(cr.getCol());
+                            switch(c.getCellTypeEnum()) {
+                                case NUMERIC:
+                                    return String.valueOf(c.getNumericCellValue());
+                                case FORMULA:
+                                    return Try.of(() -> numberFormat(c.getNumericCellValue(), c.getCellStyle()))
+                                            .getOrElse(() -> Try.of(c::getStringCellValue)
+                                                    .getOrElse(c::getCellFormula));
+                                default:
+                                    return c.getStringCellValue();
+                            }
+                        })
+                        .collect(Collectors.joining()), mapping.getDestCell()))
+                .doOnNext(tuple2 -> {
+                    CellReference cr = new CellReference(tuple2._2.getCell());
+                    auditPrgTemplateWb.getSheet(tuple2._2.getSheet()).getRow(cr.getRow())
+                            .getCell(cr.getCol()).setCellValue(tuple2._1);
+                        }
+                ).blockLast();
 
         // refresh everything
 //        log.debug("start refreshing template");

@@ -1,7 +1,13 @@
 package net.ketone.accrptgen.service.store;
 
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.input.NullInputStream;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.util.StringUtil;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -9,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+
+import static java.util.function.Predicate.not;
 
 @Slf4j
 public class FileStorageService implements StorageService {
@@ -49,8 +57,20 @@ public class FileStorageService implements StorageService {
 
     @Override
     public List<String> list() {
-        File f = new File(storageFolder);
-        return Arrays.asList(f.list());
+        return listDir(storageFolder)
+                .filter(not(File::isDirectory))
+                .map(tuple2 -> tuple2.getPath())
+                .map(s -> s.substring(storageFolder.length()))
+                .collectList()
+                .block();
+    }
+
+    private Flux<File> listDir(final String dir) {
+        return Mono.just(new File(dir))
+                .map(File::listFiles)
+                .flatMapIterable(Arrays::asList)
+                .expand(f -> f.isDirectory() ?
+                        listDir(f.getPath()) : Flux.empty());
     }
 
     @Override

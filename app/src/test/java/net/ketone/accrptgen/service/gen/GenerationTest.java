@@ -1,22 +1,17 @@
 package net.ketone.accrptgen.service.gen;
 
-import net.ketone.accrptgen.service.credentials.CredentialsService;
+import net.ketone.accrptgen.service.credentials.SettingsService;
 import net.ketone.accrptgen.domain.gen.*;
-import net.ketone.accrptgen.service.store.FileStorageService;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -25,7 +20,6 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
@@ -45,7 +39,7 @@ public class GenerationTest {
     private StorageService storageService;
 
     @MockBean
-    private CredentialsService credentialsService;
+    private SettingsService settingsService;
 
     private GenerationServiceApachePOI svc;
 
@@ -68,13 +62,13 @@ public class GenerationTest {
                 return filename;
             }
         });
-        String apiKey = CredentialsService.SENDGRID_API_KEY_PROP + "=1234567890";
+        String apiKey = SettingsService.SENDGRID_API_KEY_PROP + "=1234567890";
         Mockito.when(storageService.loadAsInputStream(eq(CREDENTIALS_FILE))).thenReturn(new ByteArrayInputStream(apiKey.getBytes()));
 
         InputStream inputStream = this.getClass().getResourceAsStream("/" + TEMPLATE_FILE);
         Mockito.when(storageService.loadAsInputStream(eq(TEMPLATE_FILE))).thenReturn(inputStream);
 
-        Mockito.when(credentialsService.getCredentials()).thenAnswer((invocationOnMock) -> {
+        Mockito.when(settingsService.getSettings()).thenAnswer((invocationOnMock) -> {
             Properties properties = new Properties();
             properties.setProperty("auditor.0.name","auditor0");
             properties.setProperty("auditor.0.banner","banner0");
@@ -82,7 +76,7 @@ public class GenerationTest {
             properties.setProperty("auditor.1.banner","banner1");
             return properties;
         });
-        svc = new GenerationServiceApachePOI(storageService, credentialsService);
+        svc = new GenerationServiceApachePOI(storageService, settingsService);
     }
 
     @Test

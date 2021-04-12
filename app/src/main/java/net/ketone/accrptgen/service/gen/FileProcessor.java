@@ -10,16 +10,4 @@ public interface FileProcessor<T> {
 
     T process(final byte[] input) throws IOException;
 
-    default XSSFWorkbook openExcelWorkbook(final byte[] workbookArr) throws IOException {
-        return new XSSFWorkbook(new ByteArrayInputStream(workbookArr));
-    }
-
-    default XSSFWorkbook openExcelWorkbook(final InputStream workbookStream) throws IOException {
-        try(workbookStream) {
-            return new XSSFWorkbook(workbookStream);
-        } finally {
-            workbookStream.close();
-        }
-    }
-
 }

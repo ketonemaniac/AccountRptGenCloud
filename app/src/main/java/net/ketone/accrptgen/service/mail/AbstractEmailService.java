@@ -1,7 +1,7 @@
 package net.ketone.accrptgen.service.mail;
 
 import com.google.common.collect.ImmutableMap;
-import net.ketone.accrptgen.service.credentials.CredentialsService;
+import net.ketone.accrptgen.service.credentials.SettingsService;
 import net.ketone.accrptgen.domain.auth.User;
 import net.ketone.accrptgen.service.auth.UserService;
 import net.ketone.accrptgen.domain.dto.AccountJob;
@@ -16,7 +16,7 @@ public abstract class AbstractEmailService implements EmailService {
     @Autowired
     private UserService userService;
     @Autowired
-    protected CredentialsService credentialsService;
+    protected SettingsService configurationService;
 
     @Value("${mail.bcc:}")
     protected String EMAIL_BCC;
@@ -29,8 +29,8 @@ public abstract class AbstractEmailService implements EmailService {
                         .map(User::getEmail)
                         .map(s -> s.split(";"))
                         .orElse(new String[]{}),
-                "cc", Optional.ofNullable(credentialsService.getCredentials())
-                        .map(c -> c.getProperty(CredentialsService.SEND_TO_PROP))
+                "cc", Optional.ofNullable(configurationService.getSettings())
+                        .map(c -> c.getProperty(SettingsService.SEND_TO_PROP))
                         .map(s -> s.split(";"))
                         .orElse(new String[]{}),
                 "bcc", Optional.ofNullable(EMAIL_BCC)

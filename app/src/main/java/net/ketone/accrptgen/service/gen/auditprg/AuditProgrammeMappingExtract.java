@@ -2,7 +2,9 @@ package net.ketone.accrptgen.service.gen.auditprg;
 
 import com.google.common.collect.Lists;
 import io.vavr.control.Try;
+import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.gen.AuditProgrammeMapping;
+import net.ketone.accrptgen.service.credentials.SettingsService;
 import net.ketone.accrptgen.service.gen.FileProcessor;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -16,11 +18,17 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static net.ketone.accrptgen.util.ExcelUtils.openExcelWorkbook;
+
+@Slf4j
 @Component
-public class AuditProgrammeMappingExtract implements FileProcessor<List<AuditProgrammeMapping>> {
+public class AuditProgrammeMappingExtract {
 
     @Autowired
     private StorageService persistentStorage;
+
+    @Autowired
+    private SettingsService configurationService;
 
     /**
      * Maps each row to AuditProgrammeMapping
@@ -31,8 +39,8 @@ public class AuditProgrammeMappingExtract implements FileProcessor<List<AuditPro
      * @return
      * @throws IOException
      */
-    @Override
     public List<AuditProgrammeMapping> process(byte[] input) throws IOException {
+
         XSSFWorkbook workbook = Optional.ofNullable(openExcelWorkbook(
                 persistentStorage.loadAsInputStream("auditPrg-mapping.xlsx")))
                 .orElseThrow(() -> new IOException("Unable to get File auditPrg-mapping.xlsx"));

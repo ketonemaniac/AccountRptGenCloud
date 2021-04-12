@@ -104,7 +104,7 @@ public class Pipeline implements Runnable {
             byte[] generatedDoc = generationService.generate(data);
             log.info("Generated doc. " + generatedDoc.length + "_bytes");
 
-            byte[] generatedAuditProgramme = auditProgrammeProcessor.process(new byte[0]);
+            byte[] generatedAuditProgramme = auditProgrammeProcessor.process(mappings, preParseOutput);
 
             Attachment doc = new Attachment(filename + ".docx", generatedDoc);
             Attachment auditPrgAttachment = new Attachment(filename + "-auditProgramme.xlsm",

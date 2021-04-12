@@ -4,7 +4,7 @@ import com.google.common.collect.Streams;
 import io.vavr.Tuple;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.exception.GenerationException;
-import net.ketone.accrptgen.service.credentials.CredentialsService;
+import net.ketone.accrptgen.service.credentials.SettingsService;
 import net.ketone.accrptgen.service.gen.FileProcessor;
 import net.ketone.accrptgen.service.gen.merge.types.CellTypeProcessor;
 import net.ketone.accrptgen.service.store.StorageService;
@@ -24,9 +24,11 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static net.ketone.accrptgen.util.ExcelUtils.openExcelWorkbook;
+
 @Component
 @Slf4j
-public class TemplateMergeProcessor implements FileProcessor<byte[]> {
+public class TemplateMergeProcessor {
 
     private static final List<String> COPY_COLORS = Arrays.asList("4F81BD", "8064A2");
 
@@ -34,7 +36,7 @@ public class TemplateMergeProcessor implements FileProcessor<byte[]> {
             Arrays.asList("Control", "Dir info", "Section3", "Section4", "Section6");
 
     @Autowired
-    private CredentialsService credentialsService;
+    private SettingsService configurationService;
 
     @Autowired
     private StorageService persistentStorage;
@@ -50,12 +52,12 @@ public class TemplateMergeProcessor implements FileProcessor<byte[]> {
                 CellTypeProcessor::getCellType, Function.identity()));
     }
 
-    @Override
     public byte[] process(byte[] input) throws IOException {
         XSSFWorkbook workbook = openExcelWorkbook(input);
-        String templateName = credentialsService.getCredentials().getProperty(CredentialsService.PREPARSE_TEMPLATE_PROP);
+        String templateName = configurationService.getSettings().getProperty(SettingsService.PREPARSE_TEMPLATE_PROP);
         log.info("starting pre-parse to template " + templateName);
-        XSSFWorkbook templateWb = Optional.ofNullable(openExcelWorkbook(persistentStorage.loadAsInputStream(templateName)))
+        XSSFWorkbook templateWb = Optional.ofNullable(openExcelWorkbook(persistentStorage.loadAsInputStream(
+                StorageService.ALLDOCS_PATH + templateName)))
                 .orElseThrow(() -> new IOException("Unable to get File " + templateName));
         Map<String, Sheet> templateSheetMap = initSheetMap(templateWb);
         Map<String, Sheet> inputSheetMap = initSheetMap(workbook);

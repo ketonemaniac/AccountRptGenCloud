@@ -1,6 +1,6 @@
 import React, { Component, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../../styles/App.css';
+import '../../styles/home/App.css';
 import {
   Container, Row, Col,
   Jumbotron,
@@ -193,6 +193,10 @@ class App extends Component {
                                   <Col sm={9}>
                                     <Input key={c.generationTime + "-status"}
                                       className="input-text-borderless" type="text" disabled name="status" id="status" value={c.status} />
+                                      {c?.error?.message ? 
+                                      (<Input key={c.generationTime + "-error"}
+                                      className="input-text-borderless" type="text" disabled name="error" id="error" value={c?.error?.message} />)
+                                      : (<span/>)}
                                   </Col>
                                 </FormGroup>
                                 <FormGroup row>

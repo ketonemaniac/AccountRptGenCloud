@@ -78,11 +78,20 @@ export default {
     getAllSettings() {
         return get('/api/settings/all')
     },
+    getFileList() {
+        return get('/api/settings/fileList')
+    },
     saveSettings(settings) {
         return post('/api/settings/upsert', settings)
     },
-    putTemplate(template) {
-        return post('/api/settings/template', template)
+    putTemplate(fileType, template) {
+        return put('/api/settings/template/' + fileType, template)
+    },
+    setActiveTemplate(fileType, template) {
+        return post('/api/settings/template/' + fileType + '/active/' + template)
+    },
+    deleteTemplate(fileType, template) {
+        return del('/api/settings/template/' + fileType + '/' + template)
     },
     getVersion() {
         return get('/api/version')

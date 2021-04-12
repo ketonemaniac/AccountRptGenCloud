@@ -21,6 +21,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Optional;
 
+import static net.ketone.accrptgen.util.NumberUtils.numberFormat;
+
 @Slf4j
 @Component
 public class TableContentCommand implements ControlCommand {
@@ -140,20 +142,6 @@ public class TableContentCommand implements ControlCommand {
                 default:
                     return Table.BottomBorderStyle.NO_LINE;
         }
-    }
-
-    private String numberFormat(double value, CellStyle cellStyle) {
-        if(value == 0) {
-            return "-";
-        }
-        if(cellStyle != null && cellStyle.getDataFormat() == 9) {
-            // Percentages
-            NumberFormat percentageFormatter = new DecimalFormat("###.##%;(###.##%)");
-            return percentageFormatter.format(value);
-        }
-        NumberFormat myFormatter = new DecimalFormat("###,###,###,###,###;(###,###,###,###,###)");
-        String output = myFormatter.format(value);
-        return output;
     }
 
 }

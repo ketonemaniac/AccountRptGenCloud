@@ -51,7 +51,7 @@ public class ExtractHeaderTest {
 
         c2.dispose();
 
-        File output = new File("extractHeaderOutput.docx");
+        File output = new File("target/extractHeaderOutput.docx");
         templateDoc.write(new FileOutputStream(output));
         templateDoc.close();
     }

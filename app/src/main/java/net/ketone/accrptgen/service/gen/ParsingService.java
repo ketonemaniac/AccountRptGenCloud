@@ -1,29 +1,14 @@
 package net.ketone.accrptgen.service.gen;
 
 import lombok.extern.slf4j.Slf4j;
-import net.ketone.accrptgen.service.credentials.CredentialsService;
-import net.ketone.accrptgen.domain.gen.*;
-import net.ketone.accrptgen.domain.gen.Header;
-import net.ketone.accrptgen.domain.gen.Table;
 import net.ketone.accrptgen.service.store.StorageService;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.*;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 // import org.springframework.util.StringUtils;
 
@@ -33,8 +18,6 @@ public class ParsingService {
 
     @Autowired
     private StorageService persistentStorage;
-    @Autowired
-    private CredentialsService credentialsService;
 
 
     public String extractCompanyName(Workbook workbook) throws IOException {
