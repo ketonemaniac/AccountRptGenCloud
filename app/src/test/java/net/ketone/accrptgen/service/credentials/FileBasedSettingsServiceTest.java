@@ -7,6 +7,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -20,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {FileBasedSettingsService.class})
+@ContextConfiguration(classes = {FileBasedSettingsServiceTest.ContextCfg.class})
 public class FileBasedSettingsServiceTest {
 
     @MockBean(name = "persistentStorage")
@@ -28,6 +30,16 @@ public class FileBasedSettingsServiceTest {
 
     @Autowired
     private FileBasedSettingsService svc;
+
+    @Configuration
+    static class ContextCfg {
+
+        @Bean
+        public FileBasedSettingsService fileBasedSettingsService(final StorageService persistentStorage) {
+            return new FileBasedSettingsService(persistentStorage, CREDENTIALS_FILE);
+        }
+
+    }
 
     private Properties prop = new Properties();
 
