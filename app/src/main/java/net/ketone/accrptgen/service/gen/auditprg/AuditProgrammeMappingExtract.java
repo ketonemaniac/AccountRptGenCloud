@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,11 +42,7 @@ public class AuditProgrammeMappingExtract {
      */
     public List<AuditProgrammeMapping> process(byte[] input) throws IOException {
 
-        XSSFWorkbook workbook = Optional.ofNullable(openExcelWorkbook(
-                persistentStorage.loadAsInputStream("auditPrg-mapping.xlsx")))
-                .orElseThrow(() -> new IOException("Unable to get File auditPrg-mapping.xlsx"));
-
-//        XSSFWorkbook workbook = openExcelWorkbook(input);
+        XSSFWorkbook workbook = openExcelWorkbook(input);
         return Mono.just(workbook.getSheet("auditPrg"))
                 .flatMapMany(sheet -> Flux.range(2, sheet.getLastRowNum())
                         .filter(r -> Optional.ofNullable(sheet.getRow(r)).isPresent())

@@ -1,13 +1,17 @@
 package net.ketone.accrptgen.service.gen.auditprg;
 
+import com.google.common.collect.Streams;
 import io.vavr.Tuple;
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.gen.AuditProgrammeMapping;
 import net.ketone.accrptgen.service.credentials.SettingsService;
 import net.ketone.accrptgen.service.store.StorageService;
+import net.ketone.accrptgen.util.ExcelUtils;
 import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,7 +20,9 @@ import reactor.core.publisher.Flux;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -70,9 +76,11 @@ public class AuditProgrammeProcessor {
                 ).blockLast();
 
         // refresh everything
-//        log.debug("start refreshing template");
-//        evaluateAll(templateWb, templateSheetMap);
-//        log.info("template refreshed. Writing to stream");
+
+        log.debug("start refreshing auditPrgTemplateWb");
+        ExcelUtils.evaluateAll(auditPrgTemplateWb, Streams.stream(auditPrgTemplateWb.sheetIterator())
+                .collect(Collectors.toList()));
+        log.info("auditPrgTemplateWb refreshed. Writing to stream");
         ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
         log.debug("writing template. os.size()=" + os.size());
         auditPrgTemplateWb.write(os);
@@ -83,4 +91,9 @@ public class AuditProgrammeProcessor {
         return result;
     }
 
+    private void evaluateAll(final XSSFWorkbook templateWb) {
+        FormulaEvaluator evaluator = templateWb.getCreationHelper().createFormulaEvaluator();
+        evaluator.clearAllCachedResultValues();
+        evaluator.evaluateAll();
+    }
 }

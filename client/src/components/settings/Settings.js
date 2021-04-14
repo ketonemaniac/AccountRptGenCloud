@@ -14,8 +14,8 @@ const Settings = (props) => {
         const resp = await Endpoints.getFileList()
         const configs = await Endpoints.getAllSettings()
 
-        setAllDocsData(resp.alldocs.map(filename => ({"filename" : filename, "inUse" : filename == configs.allDocs})))
-        setAuditPrgData(resp.auditprg.map(filename => ({"filename" : filename, "inUse" : filename == configs.auditPrg})))
+        setAllDocsData(resp.allDocs.map(filename => ({"filename" : filename, "inUse" : filename == configs.allDocs})))
+        setAuditPrgData(resp.auditPrg.map(filename => ({"filename" : filename, "inUse" : filename == configs.auditPrg})))
         setMailString(configs.sendTo)
     }
 
@@ -53,7 +53,7 @@ const Settings = (props) => {
                     <Button color="primary" onClick={submitMailChange}>Update</Button>
                 </Form>             
                 <TemplateList rowData={allDocsData} init={init} fileType={"allDocs"} title={"Template Excel"}/>
-                <TemplateList rowData={auditPrgData} init={init} fileType={"auditprg"} title={"Audit Programme Excel"}/>
+                <TemplateList rowData={auditPrgData} init={init} fileType={"auditPrg"} title={"Audit Programme Excel"}/>
             </Container>
         </React.Fragment>
     );

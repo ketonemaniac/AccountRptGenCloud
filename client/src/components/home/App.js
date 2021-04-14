@@ -194,8 +194,11 @@ class App extends Component {
                                     <Input key={c.generationTime + "-status"}
                                       className="input-text-borderless" type="text" disabled name="status" id="status" value={c.status} />
                                       {c?.error?.message ? 
-                                      (<Input key={c.generationTime + "-error"}
-                                      className="input-text-borderless" type="text" disabled name="error" id="error" value={c?.error?.message} />)
+                                      (<Alert color="danger">
+                                      <Label>{c?.error?.reason}</Label>
+                                      <Label>{c?.error?.message}</Label>
+                                      </Alert>
+                                      )
                                       : (<span/>)}
                                   </Col>
                                 </FormGroup>

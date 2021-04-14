@@ -61,8 +61,9 @@ public class ConfigurationController {
     @PostMapping("template/{fileType}/active/{filename}")
     public AccountJob setActiveTemplate(@PathVariable final String fileType,
             @PathVariable("filename") final String filename) {
-        configurationService.saveSetting(SettingsService.PREPARSE_TEMPLATE_PROP, filename);
-//        return AccountJob.builder().filename(filename).build();
+        configurationService.saveSetting(
+                fileType.equals("allDocs") ? SettingsService.PREPARSE_TEMPLATE_PROP :
+                        SettingsService.PREPARSE_AUIDTPRG_TEMPLATE_PROP, filename);
         AccountJob accountJob = new AccountJob();
         accountJob.setFilename(filename);
         return accountJob;
