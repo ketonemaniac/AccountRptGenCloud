@@ -73,6 +73,6 @@ public class ExcelUtils {
                         .map(sheet::getRow)
                 )
                 .flatMap(row -> Flux.fromIterable(row::cellIterator))
-                .map(cell -> Tuple.of(s, cell));
+                .map(cell -> Tuple.of(s, (Cell) cell));
     }
 }
