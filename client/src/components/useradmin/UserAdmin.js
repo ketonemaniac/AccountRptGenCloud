@@ -88,42 +88,43 @@ class UserAdmin extends Component {
         return (
             <React.Fragment>
                 <Container className="user-admin">
-                <Row className="py-3">
-                    <Col><h1>User Maintenance</h1></Col>
-                    <Col><Button outline className="float-right" color="primary"
-                    onClick={this.toggleUserEditModal.bind(this)}>Add User</Button></Col>
-                </Row>
-                    
-                    <Table className="user-admin-table">
-                        <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Email</th>
-                                <th>Roles</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {this.state.users.map(user => {
-                                return (
-                                    <tr>
-                                        <td scope="row">{user.username}</td>
-                                        <td>{user.email}</td>
-                                        <td>{user.roles.map(
-                                            role => {return role.name + " ";}
-                                        )}</td>
-                                        <td>
-                                        <Button outline color="primary" size="sm"
-                                        onClick={this.toggleUserEditModal.bind(this,user)}>Edit</Button>&nbsp;
+                    <Row className="py-3">
+                        <Col><h1>User Maintenance</h1></Col>
+                        <Col><Button outline className="float-right" color="primary"
+                        onClick={this.toggleUserEditModal.bind(this)}>Add User</Button></Col>
+                    </Row>
+                    <Row className="py-3"><Col>
+                        <Table className="user-admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Roles</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.state.users.map(user => {
+                                    return (
+                                        <tr>
+                                            <td scope="row">{user.username}</td>
+                                            <td>{user.email}</td>
+                                            <td>{user.roles.map(
+                                                role => {return role.name + " ";}
+                                            )}</td>
+                                            <td>
                                             <Button outline color="primary" size="sm"
-                                        onClick={this.togglePasswordResetModal.bind(this,user)}>Reset Password</Button>&nbsp;
-                                        <Button outline color="danger" size="sm"
-                                        onClick={this.toggleUserDeleteModal.bind(this,user)}>Delete User</Button></td>
-                                    </tr>
-                                )
-                            })}
-                        </tbody>
-                    </Table>
+                                            onClick={this.toggleUserEditModal.bind(this,user)}>Edit</Button>&nbsp;
+                                                <Button outline color="primary" size="sm"
+                                            onClick={this.togglePasswordResetModal.bind(this,user)}>Reset Password</Button>&nbsp;
+                                            <Button outline color="danger" size="sm"
+                                            onClick={this.toggleUserDeleteModal.bind(this,user)}>Delete User</Button></td>
+                                        </tr>
+                                    )
+                                })}
+                            </tbody>
+                        </Table>
+                    </Col></Row>
                 </Container>
                 <UserEditModal isUserEditModalOpen={this.state.isUserEditModalOpen} 
                                 toggleUserEditModal={this.toggleUserEditModal.bind(this)}
