@@ -3,6 +3,7 @@ import Endpoints from '../../api/Endpoints.js';
 import { toast } from 'react-toastify';
 import TemplateList from './TemplateList.js'
 import React, { useState, useEffect } from 'react';
+import '../../styles/settings/Settings.scss';
 
 const Settings = (props) => {
 
@@ -41,7 +42,7 @@ const Settings = (props) => {
 
     return (
         <React.Fragment>
-            <Container className="themed-container">
+            <Container className="settings">
             
                 <h1>Settings</h1>
 

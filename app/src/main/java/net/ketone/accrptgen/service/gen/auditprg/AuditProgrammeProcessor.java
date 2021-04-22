@@ -8,10 +8,9 @@ import net.ketone.accrptgen.domain.gen.AuditProgrammeMapping;
 import net.ketone.accrptgen.service.credentials.SettingsService;
 import net.ketone.accrptgen.service.store.StorageService;
 import net.ketone.accrptgen.util.ExcelUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.util.CellReference;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,10 +19,7 @@ import reactor.core.publisher.Flux;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static net.ketone.accrptgen.util.ExcelUtils.openExcelWorkbook;
@@ -51,31 +47,26 @@ public class AuditProgrammeProcessor {
                         auditPrgTemplateName));
 
         Flux.fromIterable(mappingList)
-                .map(mapping -> Tuple.of(mapping.getSourceCells().stream()
+                .map(mapping -> Tuple.of(Optional.ofNullable(mapping.getSourceCell())
                         .map(mappingCell -> {
                             CellReference cr = new CellReference(mappingCell.getCell());
                             Cell c = allDocs.getSheet(mappingCell.getSheet()).getRow(cr.getRow())
                                     .getCell(cr.getCol());
-                            switch(c.getCellTypeEnum()) {
-                                case NUMERIC:
-                                    return String.valueOf(c.getNumericCellValue());
-                                case FORMULA:
-                                    return Try.of(() -> numberFormat(c.getNumericCellValue(), c.getCellStyle()))
-                                            .getOrElse(() -> Try.of(c::getStringCellValue)
-                                                    .getOrElse(c::getCellFormula));
-                                default:
-                                    return c.getStringCellValue();
-                            }
-                        })
-                        .collect(Collectors.joining()), mapping.getDestCell()))
+                            return getCellValue(c);
+                        }).get(), mapping.getDestCell()))
                 .doOnNext(tuple2 -> {
                     CellReference cr = new CellReference(tuple2._2.getCell());
-                    auditPrgTemplateWb.getSheet(tuple2._2.getSheet()).getRow(cr.getRow())
-                            .getCell(cr.getCol()).setCellValue(tuple2._1);
-                        }
-                ).blockLast();
-
-        // refresh everything
+                    Cell c = auditPrgTemplateWb.getSheet(tuple2._2.getSheet()).getRow(cr.getRow())
+                            .getCell(cr.getCol());
+                    switch(tuple2._1.getCellType()) {
+                        case DATE:
+                            c.setCellValue(tuple2._1.getDateVal()); break;
+                        case NUMERIC:
+                            c.setCellValue(tuple2._1.getNumVal()); break;
+                        case STRING:
+                            c.setCellValue(tuple2._1.getStrVal()); break;
+                    }
+                }).blockLast();
 
         log.debug("start refreshing auditPrgTemplateWb");
         ExcelUtils.evaluateAll(auditPrgTemplateWb, Streams.stream(auditPrgTemplateWb.sheetIterator())
@@ -91,9 +82,28 @@ public class AuditProgrammeProcessor {
         return result;
     }
 
-    private void evaluateAll(final XSSFWorkbook templateWb) {
-        FormulaEvaluator evaluator = templateWb.getCreationHelper().createFormulaEvaluator();
-        evaluator.clearAllCachedResultValues();
-        evaluator.evaluateAll();
+    public CellValueHolder getCellValue(Cell c) {
+        String dataFormatStr = Optional.ofNullable(c.getCellStyle()).map(CellStyle::getDataFormatString)
+                .orElse(StringUtils.EMPTY);
+        if(CellType.NUMERIC.equals(c.getCellTypeEnum()) &&
+                dataFormatStr.contains("y") && dataFormatStr.contains("m") && dataFormatStr.contains("d")) {
+            // this should be a date type
+            return CellValueHolder.builder()
+                    .cellType(CellValueHolder.CellType.DATE)
+                    .dateVal(c.getDateCellValue())
+                    .build();
+        }
+        // numeric or String
+        return Try.of(() -> c.getNumericCellValue()).map(val ->
+                CellValueHolder.builder()
+                        .cellType(CellValueHolder.CellType.NUMERIC)
+                        .numVal(val)
+                .build())
+                .getOrElse(() ->
+                        CellValueHolder.builder()
+                                .cellType(CellValueHolder.CellType.STRING)
+                                .strVal(c.getStringCellValue())
+                                .build()
+                );
     }
 }

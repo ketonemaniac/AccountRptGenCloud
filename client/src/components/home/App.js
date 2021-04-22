@@ -1,6 +1,6 @@
 import React, { Component, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../../styles/home/App.css';
+import '../../styles/home/App.scss';
 import {
   Container, Row, Col,
   Jumbotron,
@@ -135,8 +135,8 @@ class App extends Component {
     const dropzoneRef = React.createRef();
     const showAddDetail = this.state.companies.length > 0;
     return (
-      <div>
-        <main>
+      <React.Fragment>
+        <div className="app">
           <Dropzone ref={dropzoneRef} onDrop={this.onDrop.bind(this)}>
             {({ getRootProps, getInputProps, isDragActive }) => {
               return (
@@ -220,14 +220,14 @@ class App extends Component {
                 )
               })}
           </CardDeck>
-        </main>
+        </div>
         <Container className="footer text-center">
           <span className="text-muted"> © Ketone Maniac @ 2021</span>          
         </Container>
 
 
         {this.uploadErrorModalAlert(this.state.uploadError)}
-      </div>
+      </React.Fragment>
     );
   }
 

@@ -78,7 +78,7 @@ public class Pipeline implements Runnable {
 
             byte[] workbookArr = tempStorage.load(inputFileName);
             byte[] preParseOutput = templateMergeProcessor.process(workbookArr);
-            List<AuditProgrammeMapping> mappings = auditProgrammeMappingExtract.process(workbookArr);
+            List<AuditProgrammeMapping> mappings = auditProgrammeMappingExtract.process();
 
             Attachment inputXlsx = new Attachment(filename + "-plain.xlsm", workbookArr);
             // no need to use the template anymore, delete it.

@@ -12,8 +12,7 @@ public class AuditProgrammeMapping {
 
     private MappingCell destCell;
 
-    @Singular
-    private List<MappingCell> sourceCells;
+    private MappingCell sourceCell;
 
     @Data
     @Builder
