@@ -1,26 +1,20 @@
 package net.ketone.accrptgen.service.gen;
 
 import io.vavr.control.Try;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.domain.gen.*;
-import net.ketone.accrptgen.service.credentials.CredentialsService;
+import net.ketone.accrptgen.service.credentials.SettingsService;
 import net.ketone.accrptgen.service.store.StorageService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.formula.eval.FunctionEval;
 import org.apache.poi.ss.formula.functions.DateDifFunc;
 import org.apache.poi.util.Units;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.xmlbeans.XmlCursor;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.*;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -28,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static net.ketone.accrptgen.config.Constants.TEMPLATE_FILE;
@@ -53,7 +45,7 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     private final StorageService persistentStorage;
 
-    private final CredentialsService credentialsService;
+    private final SettingsService configurationService;
 
 
     private Map<String, XWPFParagraph> currPghs = new HashMap<>();
@@ -67,9 +59,9 @@ public class GenerationServiceApachePOI implements GenerationService {
     private Map<String, String> bannerMap;
 
     public GenerationServiceApachePOI(final StorageService persistentStorage,
-                                      final CredentialsService credentialsService) {
+                                      final SettingsService configurationService) {
         this.persistentStorage = persistentStorage;
-        this.credentialsService = credentialsService;
+        this.configurationService = configurationService;
         try {
             FunctionEval.registerFunction("DATEDIF", new DateDifFunc());
         } catch (IllegalArgumentException e) {
@@ -79,7 +71,7 @@ public class GenerationServiceApachePOI implements GenerationService {
     }
 
     private Map<String, String> getCredentialsMap(final String prefix) {
-        return credentialsService.getCredentials().entrySet().stream()
+        return configurationService.getSettings().entrySet().stream()
                 .filter(entry -> entry.getKey().toString().startsWith(prefix))
                 .collect(Collectors.collectingAndThen(
                         Collectors.groupingBy(entry -> entry.getKey().toString().split("\\.")[1]),
@@ -243,7 +235,7 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     public void write(String sectionName, Header header, String companyName) {
         XWPFParagraph currPgh = pghHeaders.get("Header" + sectionName);
-        if(header.getAuditorName() != null) {
+        if(StringUtils.isNotEmpty(header.getAuditorName())) {
             String banner = Optional.ofNullable(header.getAuditorName().trim())
                         .map(s -> s.split(" "))
                         .map(arr -> arr[0])
@@ -253,9 +245,11 @@ public class GenerationServiceApachePOI implements GenerationService {
             XWPFParagraph currAuditorPgh = pghHeaders.get("Header" + sectionName + "Auditor");
             doWriteRun(currAuditorPgh, newR -> {
                 Try.run(() -> {
-                    newR.addPicture(persistentStorage.loadAsInputStream(banner),
+                    newR.addPicture(persistentStorage.loadAsInputStream(
+                            StorageService.BANNER_PATH + banner),
                             XWPFDocument.PICTURE_TYPE_PNG,
-                            "TKH", Units.toEMU(550), Units.toEMU(37));
+                            header.getAuditorName().trim(),
+                            Units.toEMU(550), Units.toEMU(37));
                     CTInd indent = newR.getParagraph().getCTP().getPPr().addNewInd();
                     indent.setLeft(BigInteger.valueOf(-3 * twipsPerIndent));
                 }).get();

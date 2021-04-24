@@ -18,9 +18,10 @@ package net.ketone.accrptgen.service.mail;
 
 import com.sendgrid.SendGrid;
 import lombok.extern.slf4j.Slf4j;
-import net.ketone.accrptgen.service.credentials.CredentialsService;
+import net.ketone.accrptgen.service.credentials.SettingsService;
 import net.ketone.accrptgen.domain.auth.User;
 import net.ketone.accrptgen.domain.dto.AccountJob;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,6 @@ import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -49,11 +49,13 @@ public class SendgridEmailService extends AbstractEmailService {
     @Value("${mail.sender}")
     private String SENDGRID_SENDER;
 
+    @Autowired
+    protected SettingsService credentialsService;
 
     @PostConstruct
     public void init() {
-        Properties props = credentialsService.getCredentials();
-        SENDGRID_API_KEY = props.getProperty(CredentialsService.SENDGRID_API_KEY_PROP);
+        Properties props = credentialsService.getSettings();
+        SENDGRID_API_KEY = props.getProperty(SettingsService.SENDGRID_API_KEY_PROP);
     }
 
     @Override

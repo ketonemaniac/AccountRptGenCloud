@@ -1,0 +1,39 @@
+@import "../../../node_modules/ag-grid-community/src/styles/ag-grid.scss";
+@import "../../../node_modules/ag-grid-community/src/styles/ag-theme-alpine/sass/ag-theme-alpine-mixin";
+
+.ag-theme-alpine {
+  @include ag-theme-alpine((
+      borders: false,
+      grid-size: 4px    
+  ));
+}
+
+.template-excel-card {
+  margin-top: 1rem;
+
+  .card-body {
+    border-radius: 0 0.41712rem 0.41712rem 0;
+  } 
+
+  .card-title {
+    font-size: 19px;
+    padding-bottom: 1rem;
+  }
+
+  .template-excel-action-button {
+    padding: 0.2rem;
+    font-size: 12px;
+    margin-bottom: 1rem;
+    margin-right: 0.3rem;
+  }
+
+  .template-excel-add-button {
+    padding: 0.2rem;
+    font-size: 12px;
+    margin-left: 0.3rem;
+  }
+
+  
+}
+
+

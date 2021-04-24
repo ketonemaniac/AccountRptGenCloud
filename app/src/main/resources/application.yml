@@ -1,6 +1,10 @@
 spring:
   jmx:
     enabled: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 mail:
   enabled: true
@@ -34,4 +38,6 @@ parse:
       company-name: true
       underline: after_last
 
-
+server:
+  error:
+    include-message: always

@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import Routing from './Routing';
-import * as serviceWorker from './serviceWorker';
+import './styles/index.css';
+import Routing from './components/Routing';
+import * as serviceWorker from './utils/serviceWorker';
 
 ReactDOM.render(<Routing />, document.getElementById('root'));
 

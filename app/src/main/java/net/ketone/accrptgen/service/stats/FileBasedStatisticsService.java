@@ -128,7 +128,7 @@ public class FileBasedStatisticsService implements StatisticsService {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    return new AccountJob();
+                    return AccountJob.builder().build();
                 })
                 .collect(Collectors.toCollection(ArrayDeque::new));
         is.close();

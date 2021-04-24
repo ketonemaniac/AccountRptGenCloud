@@ -4,10 +4,11 @@ import com.google.common.collect.Streams;
 import io.vavr.Tuple;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.exception.GenerationException;
-import net.ketone.accrptgen.service.credentials.CredentialsService;
+import net.ketone.accrptgen.service.credentials.SettingsService;
 import net.ketone.accrptgen.service.gen.FileProcessor;
 import net.ketone.accrptgen.service.gen.merge.types.CellTypeProcessor;
 import net.ketone.accrptgen.service.store.StorageService;
+import net.ketone.accrptgen.util.ExcelUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -24,9 +25,11 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static net.ketone.accrptgen.util.ExcelUtils.openExcelWorkbook;
+
 @Component
 @Slf4j
-public class TemplateMergeProcessor implements FileProcessor<byte[]> {
+public class TemplateMergeProcessor {
 
     private static final List<String> COPY_COLORS = Arrays.asList("4F81BD", "8064A2");
 
@@ -34,7 +37,7 @@ public class TemplateMergeProcessor implements FileProcessor<byte[]> {
             Arrays.asList("Control", "Dir info", "Section3", "Section4", "Section6");
 
     @Autowired
-    private CredentialsService credentialsService;
+    private SettingsService configurationService;
 
     @Autowired
     private StorageService persistentStorage;
@@ -50,12 +53,12 @@ public class TemplateMergeProcessor implements FileProcessor<byte[]> {
                 CellTypeProcessor::getCellType, Function.identity()));
     }
 
-    @Override
     public byte[] process(byte[] input) throws IOException {
         XSSFWorkbook workbook = openExcelWorkbook(input);
-        String templateName = credentialsService.getCredentials().getProperty(CredentialsService.PREPARSE_TEMPLATE_PROP);
+        String templateName = configurationService.getSettings().getProperty(SettingsService.PREPARSE_TEMPLATE_PROP);
         log.info("starting pre-parse to template " + templateName);
-        XSSFWorkbook templateWb = Optional.ofNullable(openExcelWorkbook(persistentStorage.loadAsInputStream(templateName)))
+        XSSFWorkbook templateWb = Optional.ofNullable(openExcelWorkbook(persistentStorage.loadAsInputStream(
+                StorageService.ALLDOCS_PATH + templateName)))
                 .orElseThrow(() -> new IOException("Unable to get File " + templateName));
         Map<String, Sheet> templateSheetMap = initSheetMap(templateWb);
         Map<String, Sheet> inputSheetMap = initSheetMap(workbook);
@@ -64,7 +67,7 @@ public class TemplateMergeProcessor implements FileProcessor<byte[]> {
                 .filter(entry -> preParseSheets.contains(entry.getKey()))
                 .doOnNext(entry -> log.info("parsing sheet={}", entry.getKey()))
                 .map(Map.Entry::getValue)
-                .flatMap(this::cells)
+                .flatMap(ExcelUtils::cells)
                 .filter(tuple2 -> {
                     XSSFColor color = XSSFColor.toXSSFColor(tuple2._2.getCellStyle().getFillForegroundColorColor());
                     return color != null && COPY_COLORS.contains(color.getARGBHex().substring(2));
@@ -92,7 +95,7 @@ public class TemplateMergeProcessor implements FileProcessor<byte[]> {
 
         // refresh everything
         log.debug("start refreshing template");
-        evaluateAll(templateWb, templateSheetMap);
+        ExcelUtils.evaluateAll(templateWb, new ArrayList<>(templateSheetMap.values()));
         log.info("template refreshed. Writing to stream");
         ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
         log.debug("writing template. os.size()=" + os.size());
@@ -104,52 +107,6 @@ public class TemplateMergeProcessor implements FileProcessor<byte[]> {
         templateWb.close();
         return result;
     }
-
-    /**
-     * Gets all cells associated to a sheet
-     * @param s
-     * @return
-     */
-    private Flux<Tuple2<Sheet, Cell>> cells(final Sheet s) {
-        return Mono.just(s)
-                .flatMapMany(sheet -> Flux.range(0, sheet.getLastRowNum())
-                        .filter(r -> Optional.ofNullable(sheet.getRow(r)).isPresent())
-                        .map(sheet::getRow)
-                )
-                .flatMap(row -> Flux.fromIterable(row::cellIterator))
-                .map(cell -> Tuple.of(s, cell));
-    }
-
-    /**
-     * Same as evaluator.evaluateAll();, but evaluates Cell By Cell making debugging easy.
-     * @param templateWb
-     * @param templateSheetMap
-     */
-    private void evaluateAll(XSSFWorkbook templateWb, Map<String, Sheet> templateSheetMap) {
-        FormulaEvaluator evaluator = templateWb.getCreationHelper().createFormulaEvaluator();
-        evaluator.clearAllCachedResultValues();
-//        evaluator.evaluateAll();
-        Flux.fromIterable(templateSheetMap.values())
-                .doOnNext(sheet -> log.info("refreshing sheet={}", sheet.getSheetName()))
-                .flatMap(this::cells)
-                .map(Tuple2::_2)
-                .flatMap(cell -> Mono.just(cell)
-                        .map(evaluator::evaluateFormulaCellEnum)
-                        .doOnError(err -> {
-                            log.error("cannot evaluate cell " + cell.getAddress().formatAsString() +
-                                    " with formula: " + cell.getCellFormula() +
-                                    " cellType=" + cell.getCellTypeEnum().name(), err);
-                        })
-                        .onErrorMap(err -> new GenerationException(cell.getSheet().getSheetName(),
-                                cell.getAddress().formatAsString(),
-                                "TemplateMerge",
-                                String.format("Cannot evaluate formula: %s", cell.getCellFormula()),
-                                err.getMessage(),
-                                err))
-                )
-                .blockLast();
-    }
-
 
     private Map<String, Sheet> initSheetMap(Workbook wb) throws IOException {
         return Streams.stream(wb.sheetIterator())

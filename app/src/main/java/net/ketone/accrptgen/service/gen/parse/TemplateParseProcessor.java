@@ -25,9 +25,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static net.ketone.accrptgen.util.ExcelUtils.openExcelWorkbook;
+
 @Component
 @Slf4j
-public class TemplateParseProcessor implements FileProcessor<AccountData> {
+public class TemplateParseProcessor {
 
     @Autowired
     private List<ControlCommand> controlCommands;
@@ -47,7 +49,6 @@ public class TemplateParseProcessor implements FileProcessor<AccountData> {
         return controlSheet.getRow(1).getCell(3).getStringCellValue();
     }
 
-    @Override
     public AccountData process(byte[] preParseOutput) throws IOException {
 
         AccountData data = new AccountData();

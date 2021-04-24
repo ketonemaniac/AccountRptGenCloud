@@ -88,9 +88,10 @@ public class AccrptgenApplicationITCase {
 
 		ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
-		AccountJob accountJob = new AccountJob();
-		accountJob.setGenerationTime(genTime);
-		accountJob.setFilename(PLAIN_FILENAME);
+		AccountJob accountJob = AccountJob.builder()
+				.generationTime(genTime)
+				.filename(PLAIN_FILENAME)
+				.build();
 		Pipeline pipeline = ctx.getBean(Pipeline.class, accountJob);
 		pipeline.run();
 		Mockito.verify(emailService).sendEmail(any(), argumentCaptor.capture());

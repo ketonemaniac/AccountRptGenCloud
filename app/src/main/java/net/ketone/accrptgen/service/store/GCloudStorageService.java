@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.service.store;
 
+import com.google.api.client.util.Lists;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
 import com.google.common.base.Stopwatch;
@@ -11,7 +12,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static java.util.function.Predicate.not;
 
 @Slf4j
 public class GCloudStorageService implements StorageService {
@@ -72,17 +78,13 @@ public class GCloudStorageService implements StorageService {
 
     @Override
     public List<String> list() {
-
-        List<String> filenames = new ArrayList<>();
-
-        Bucket bucket = storage.get(bucketName);
-        if (bucket == null) {
-            System.out.println("No such bucket");
-            return new ArrayList<>();
-        }
-        Page<Blob> blobs = bucket.list();
-        blobs.iterateAll().forEach(b -> filenames.add(b.getName()));
-        return filenames;
+        return Optional.ofNullable(storage.get(bucketName))
+                .map(Bucket::list)
+                .map(blobs -> StreamSupport.stream(blobs.iterateAll().spliterator(), false)
+                        .map(Blob::getName)
+                        .filter(blob -> !blob.endsWith("/"))
+                        .collect(Collectors.toList()))
+                .orElse(Lists.newArrayList());
     }
 
     @Override

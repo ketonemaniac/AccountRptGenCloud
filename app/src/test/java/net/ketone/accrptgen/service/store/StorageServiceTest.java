@@ -45,10 +45,11 @@ public class StorageServiceTest {
     }
 
     private AccountJob doSave() throws IOException {
-        AccountJob dto = new AccountJob();
-        dto.setGenerationTime(LocalDateTime.now());
-        dto.setCompany("ABC Company Limited");
-        dto.setStatus(Constants.Status.EMAIL_SENT.name());
+        AccountJob dto = AccountJob.builder()
+                .generationTime(LocalDateTime.now())
+                .company("ABC Company Limited")
+                .status(Constants.Status.EMAIL_SENT.name())
+                .build();
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
         dto.setFilename("ABC-"+ df.format(dto.getGenerationTime()) + ".docx");
         return dto;

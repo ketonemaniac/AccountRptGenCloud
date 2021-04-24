@@ -39,6 +39,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RestController
+@RequestMapping("/api/accrptgen")
 @Slf4j
 public class AccRptGenController {
 
@@ -55,24 +56,7 @@ public class AccRptGenController {
     @Autowired
     private TasksService tasksService;
 
-    @Value("${build.version}")
-    private String buildVersion;
-
-    @Value("${build.timestamp}")
-    private String buildTimestamp;
-
-    @GetMapping("/version")
-    public Map<String, String> getVersion() {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        LocalDateTime localDateTime = LocalDateTime.parse(buildTimestamp, df);
-        String timestamp = df.format(localDateTime.toInstant(ZoneOffset.UTC).atOffset(ZoneOffset.of("+8")));
-        Map<String, String> verMap = new HashMap<>();
-        verMap.put("version", buildVersion);
-        verMap.put("timestamp" , timestamp);
-        return verMap;
-    }
-
-    @PostMapping("/uploadFile")
+    @PostMapping("/file")
     public AccountJob handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
         if(file.getOriginalFilename().lastIndexOf(".") == -1) {
             throw new ValidationException("sadfa");
@@ -82,37 +66,34 @@ public class AccRptGenController {
         final Date generationTime = new Date();
         tempStorage.store(fileBytes, generationTime.getTime()+".xlsm");
 
-        AccountJob dto = new AccountJob();
         XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
-        dto.setId(UUID.randomUUID());
-        dto.setCompany(parsingService.extractCompanyName(workbook));
-        dto.setFilename(String.valueOf(generationTime.getTime()));
-        dto.setStatus(Constants.Status.PRELOADED.name());
-        dto.setSubmittedBy(UserUtils.getAuthenticatedUser());
+        AccountJob dto = AccountJob.builder()
+                .id(UUID.randomUUID())
+                .company(parsingService.extractCompanyName(workbook))
+                .period(parsingService.extractPeriodEnding(workbook))
+                .filename(String.valueOf(generationTime.getTime()))
+                .status(Constants.Status.PRELOADED.name())
+                .submittedBy(UserUtils.getAuthenticatedUser())
+                .build();
         statisticsService.updateTask(dto);
         return dto;
     }
 
     @PostMapping("/startGeneration")
-    public AccountJob startGeneration(AccountJob requestDto) throws IOException {
+    public AccountJob startGeneration(final AccountJob requestDto) throws IOException {
         log.info("cacheFilename=" + requestDto.getFilename() + "; referredBy=" + requestDto.getReferredBy());
-        AccountJob dto = new AccountJob();
+        AccountJob dto = requestDto.toBuilder()
+                .status(Constants.Status.PENDING.name())
+                .submittedBy(UserUtils.getAuthenticatedUser())
+                .generationTime(LocalDateTime.now())
+                .build();
         try {
-            dto.setId(requestDto.getId());
-            dto.setCompany(requestDto.getCompany());
-            dto.setFilename(requestDto.getFilename());
-            dto.setStatus(Constants.Status.PENDING.name());
-            dto.setReferredBy(requestDto.getReferredBy());
-            dto.setSubmittedBy(UserUtils.getAuthenticatedUser());
-            dto.setGenerationTime(LocalDateTime.now());
-
             String inputFileName = dto.getFilename() + ".xlsm";
             if(!tempStorage.hasFile(inputFileName)) {
                 log.warn("File not present: " + inputFileName);
                 dto.setStatus(Constants.Status.FAILED.name());
                 return dto;
             }
-
             tasksService.submitTask(dto);
             statisticsService.updateTask(dto);
         } catch (Exception e) {
@@ -125,9 +106,9 @@ public class AccRptGenController {
     }
 
 
-    @PostMapping("/downloadFile")
-    public ResponseEntity<Resource> downloadFile(@RequestBody DownloadFileDto dto) throws IOException {
-        String fileName = dto.getFilename() + ".zip";
+    @GetMapping("/file")
+    public ResponseEntity<Resource> downloadFile(@RequestParam("file") String file) throws IOException {
+        String fileName = file + ".zip";
         log.info("filename is " + fileName);
         InputStream is = tempStorage.loadAsInputStream(fileName);
         Resource resource = new InputStreamResource(is);
@@ -137,7 +118,7 @@ public class AccRptGenController {
                 "attachment; filename=\"" + fileName + "\"").body(resource);
     }
 
-    @GetMapping("/listFiles")
+    @GetMapping("/taskList")
     public List<AccountJob> listFiles() {
         return statisticsService.getRecentTasks(UserUtils.getAuthenticatedUser());
     }

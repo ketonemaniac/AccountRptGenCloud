@@ -56,11 +56,12 @@ public class FileBasedStatisticsServiceTest {
 
 
     private AccountJob doSave() throws IOException {
-        AccountJob dto = new AccountJob();
-        dto.setGenerationTime(LocalDateTime.now());
-        dto.setCompany("ABC Company Limited");
-        dto.setStatus(Constants.Status.EMAIL_SENT.name());
-        dto.setSubmittedBy("user");
+        AccountJob dto = AccountJob.builder()
+                .generationTime(LocalDateTime.now())
+                .company("ABC Company Limited")
+                .status(Constants.Status.EMAIL_SENT.name())
+                .submittedBy("user")
+                .build();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         dto.setFilename("ABC-"+ sdf.format(dto.getGenerationTime()) + ".docx");
         svc.updateTask(dto);
