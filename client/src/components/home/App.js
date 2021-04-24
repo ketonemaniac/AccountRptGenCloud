@@ -73,7 +73,8 @@ class App extends Component {
               company: resData.company,
               filename: resData.filename,
               status: "PRELOADED",
-              id: resData.id
+              id: resData.id,
+              period: resData.period
             }, ...state.companies];
             return {
               companies: companies,
@@ -183,6 +184,7 @@ class App extends Component {
                                 <Input key={c.id + "-filename"} type="hidden" name="filename" value={c.filename} />
                                 <Input key={c.id + "-company"} type="hidden" name="company" value={c.company} />
                                 <Input key={c.id + "-submittedBy"} type="hidden" name="submittedBy" value={c.submittedBy} />
+                                <Input key={c.id + "-period"} type="hidden" name="period" value={c.period} />
                                 <FormGroup row>
                                   <Label sm={3} for="referredBy">Referrer
                           <span style={{ "display": c.status == "PRELOADED" ? "block" : "none" }} className="text-muted">(Optional)</span></Label>

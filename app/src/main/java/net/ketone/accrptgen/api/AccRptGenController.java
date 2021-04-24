@@ -66,37 +66,34 @@ public class AccRptGenController {
         final Date generationTime = new Date();
         tempStorage.store(fileBytes, generationTime.getTime()+".xlsm");
 
-        AccountJob dto = new AccountJob();
         XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
-        dto.setId(UUID.randomUUID());
-        dto.setCompany(parsingService.extractCompanyName(workbook));
-        dto.setFilename(String.valueOf(generationTime.getTime()));
-        dto.setStatus(Constants.Status.PRELOADED.name());
-        dto.setSubmittedBy(UserUtils.getAuthenticatedUser());
+        AccountJob dto = AccountJob.builder()
+                .id(UUID.randomUUID())
+                .company(parsingService.extractCompanyName(workbook))
+                .period(parsingService.extractPeriodEnding(workbook))
+                .filename(String.valueOf(generationTime.getTime()))
+                .status(Constants.Status.PRELOADED.name())
+                .submittedBy(UserUtils.getAuthenticatedUser())
+                .build();
         statisticsService.updateTask(dto);
         return dto;
     }
 
     @PostMapping("/startGeneration")
-    public AccountJob startGeneration(AccountJob requestDto) throws IOException {
+    public AccountJob startGeneration(final AccountJob requestDto) throws IOException {
         log.info("cacheFilename=" + requestDto.getFilename() + "; referredBy=" + requestDto.getReferredBy());
-        AccountJob dto = new AccountJob();
+        AccountJob dto = requestDto.toBuilder()
+                .status(Constants.Status.PENDING.name())
+                .submittedBy(UserUtils.getAuthenticatedUser())
+                .generationTime(LocalDateTime.now())
+                .build();
         try {
-            dto.setId(requestDto.getId());
-            dto.setCompany(requestDto.getCompany());
-            dto.setFilename(requestDto.getFilename());
-            dto.setStatus(Constants.Status.PENDING.name());
-            dto.setReferredBy(requestDto.getReferredBy());
-            dto.setSubmittedBy(UserUtils.getAuthenticatedUser());
-            dto.setGenerationTime(LocalDateTime.now());
-
             String inputFileName = dto.getFilename() + ".xlsm";
             if(!tempStorage.hasFile(inputFileName)) {
                 log.warn("File not present: " + inputFileName);
                 dto.setStatus(Constants.Status.FAILED.name());
                 return dto;
             }
-
             tasksService.submitTask(dto);
             statisticsService.updateTask(dto);
         } catch (Exception e) {

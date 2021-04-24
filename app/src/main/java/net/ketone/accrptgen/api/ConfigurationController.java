@@ -64,9 +64,9 @@ public class ConfigurationController {
         configurationService.saveSetting(
                 fileType.equals("allDocs") ? SettingsService.PREPARSE_TEMPLATE_PROP :
                         SettingsService.PREPARSE_AUIDTPRG_TEMPLATE_PROP, filename);
-        AccountJob accountJob = new AccountJob();
-        accountJob.setFilename(filename);
-        return accountJob;
+        return AccountJob.builder()
+                .filename(filename)
+                .build();
     }
 
     @GetMapping("file")

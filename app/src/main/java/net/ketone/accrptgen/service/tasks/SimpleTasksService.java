@@ -31,7 +31,7 @@ public class SimpleTasksService implements TasksService {
 
 
     @Override
-    public AccountJob submitTask(AccountJob dto) throws IOException {
+    public AccountJob submitTask(final AccountJob dto) throws IOException {
         dto.setStatus(Constants.Status.GENERATING.name());
         statisticsService.updateTask(dto);
         Pipeline pipeline = ctx.getBean(Pipeline.class, dto);

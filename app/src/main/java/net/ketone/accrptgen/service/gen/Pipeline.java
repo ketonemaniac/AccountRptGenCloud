@@ -64,7 +64,7 @@ public class Pipeline implements Runnable {
     private String cacheFilename;
     private AccountJob dto;
 
-    public Pipeline(AccountJob dto) {
+    public Pipeline(final AccountJob dto) {
         this.cacheFilename = String.valueOf(dto.getFilename());
         this.dto = dto;
     }
