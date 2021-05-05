@@ -10,7 +10,7 @@ class Routing extends Component {
     render() {
         return (
             <Router>
-                <Route path="/">
+                <Route exact path="/">
                     <Redirect to='/app/main' />
                 </Route>
                 <Route path="/app" component={Frame} />
