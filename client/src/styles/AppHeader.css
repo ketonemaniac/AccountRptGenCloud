@@ -6,6 +6,11 @@
   background-color: #fbfbfb;
 }
 
+.logo {
+  font-family: 'Orbitron', sans-serif;
+}
+
+
 .navbar-brand, .nav-item {
   color: #000000;
 }
