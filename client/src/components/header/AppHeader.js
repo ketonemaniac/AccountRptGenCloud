@@ -25,7 +25,8 @@ class AppHeader extends Component {
             <NavbarToggler onClick={this.props.toggleSidebar} className="mr-2"/>
           ) : ""}
         <NavbarBrand href="/">
-          Account Report Generator <span><small className="text-sm font-weight-light">{this.state.info.version}</small></span>
+          <span className="logo">Account Report Generator</span>
+          <span><small className="text-sm font-weight-light">{this.state.info.version}</small></span>
         </NavbarBrand>
         </Nav>
         <Nav>

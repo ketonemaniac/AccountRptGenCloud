@@ -51,11 +51,19 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
         if(!enableSecurity) {
             secu.anyRequest().permitAll();
         } else {
-            secu.antMatchers("/api/admin/user/**").hasAuthority("Admin") // .authenticated()
+            secu.antMatchers("/api/admin/user/**").hasAuthority("Admin")
                     .antMatchers("/api/settings/**").hasAuthority("Admin")
-                    .anyRequest().hasAuthority("User")  //.authenticated()
+                    // for login page
+                    .antMatchers("/static/js/**").permitAll()
+                    .antMatchers("/static/css/**").permitAll()
+                    .antMatchers("/static/media/**").permitAll()
+                    // default
+                    .anyRequest().hasAuthority("User")
                     .and()
                     .formLogin()
+                    .loginPage("/login")
+                    .loginProcessingUrl("/perform_login")
+                    .failureUrl("/login?error=true")
                     .defaultSuccessUrl("/", true)
                     .and()
                     .logout()

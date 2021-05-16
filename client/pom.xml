@@ -9,16 +9,12 @@
 	<parent>
 		<artifactId>accrptgen</artifactId>
 		<groupId>net.ketone</groupId>
-		<version>2.5.1</version>
+		<version>2.6.0</version>
 	</parent>
 
 	<packaging>jar</packaging>
 
-
-
-	<name>accrptgen client</name>
-	<description>Accounting Report Generator React Client</description>
-
+	<name>Account Report Generator :: Client</name>
 	<build>
 
 		<resources>
@@ -28,8 +24,9 @@
 		</resources>
 
 		<plugins>
+			<!-- Build the front end -->
+			<!-- This will be executed separately in cloudbuild.yaml -->
 			<plugin>
-				<!-- Build the front end -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.4.0</version>

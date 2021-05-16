@@ -1,0 +1,15 @@
+steps:
+- name: 'gcr.io/cloud-builders/npm:node-12.18.3'
+  dir: 'client'
+  args: ['install']
+- name: 'gcr.io/cloud-builders/npm:node-12.18.3'
+  dir: 'client'
+  args: ['run','build']
+- name: 'maven:3.8.1-jdk-11'
+  entrypoint: 'mvn'
+  args: ['package', '-Dmaven.test.skip=true', '-Dexec.skip']
+- name: 'maven:3.8.1-jdk-11'
+  entrypoint: 'mvn'
+  args: ['validate', 'appengine:deploy', '-Dapp.stage.appEngineDirectory=src/main/appengine/staging']
+  dir: 'app'
+timeout: '1600s'
