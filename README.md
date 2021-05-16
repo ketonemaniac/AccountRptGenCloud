@@ -22,6 +22,10 @@ Submitting locally but running the task in App Engine
 ## Deploy ##
 * set project: `gcloud config set project accountrptgen-hk-test`
 * Run `mvn validate appengine:deploy -Dapp.stage.appEngineDirectory=src/main/appengine/staging` in app folder
+
+This is equivalent to running the following in the /app/target/appengine-staging folder
+`gcloud app deploy --version 2-6-0-1 --project accountrptgen-hk-test`
+
 ### Prod ###
 * set project: `gcloud config set project accountrptgen-hk`
 * Run `mvn validate appengine:deploy -Dapp.stage.appEngineDirectory=src/main/appengine/prod` in app folder
@@ -40,6 +44,9 @@ Reference:
 https://cloud.google.com/appengine/docs/standard/python/config/queueref
 
 ## CI/CD ##
+
+
+
 
 ### Version Upgrade ###
     versions:set -DnewVersion=<new_version> -DprocessAllModules -DgenerateBackupPoms=false
