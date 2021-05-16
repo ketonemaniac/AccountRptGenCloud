@@ -26,7 +26,7 @@
 		<plugins>
 			<!-- Build the front end -->
 			<!-- This will be executed separately in cloudbuild.yaml -->
-			<!--plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.4.0</version>
@@ -46,7 +46,7 @@
 					</arguments>
 					<workingDirectory>.</workingDirectory>
 				</configuration>
-			</plugin -->
+			</plugin>
 
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
