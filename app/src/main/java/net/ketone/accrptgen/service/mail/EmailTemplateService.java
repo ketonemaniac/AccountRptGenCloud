@@ -23,7 +23,7 @@ public class EmailTemplateService {
     public String populateTemplate(final AccountJob job) {
         Context context = new Context();
         Map<String, Object> model = new HashMap<String, Object>();
-        model.put("authentication", UserUtils.getAuthenticatedUser());
+        model.put("authentication", job.getSubmittedBy());
         model.put("job", job);
         context.setVariables(model);
         return templateEngine.process("job-template", context);
