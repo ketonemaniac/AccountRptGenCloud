@@ -89,6 +89,7 @@ public class Pipeline implements Runnable {
             AccountData data = templateParseProcessor.process(preParseOutput);
 
             data.setGenerationTime(dto.getGenerationTime());
+            dto.setProfessionalFees(data.getProcessionalFees());
             log.info("template finished parsing, sections=" + data.getSections().size());
 
             // remove sheets and stringify contents

@@ -15,6 +15,9 @@ target/
 *.iml
 *.ipr
 
+## Google Cloud ###
+.run
+
 ### NetBeans ###
 nbproject/private/
 build/

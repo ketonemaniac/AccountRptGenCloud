@@ -18,12 +18,12 @@ package net.ketone.accrptgen.service.mail;
 
 import com.sendgrid.SendGrid;
 import lombok.extern.slf4j.Slf4j;
-import net.ketone.accrptgen.service.credentials.SettingsService;
 import net.ketone.accrptgen.domain.auth.User;
 import net.ketone.accrptgen.domain.dto.AccountJob;
+import net.ketone.accrptgen.service.credentials.SettingsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-@Profile("!local")
+@ConditionalOnProperty(prefix="mail", name="enabled", havingValue = "true")
 public class SendgridEmailService extends AbstractEmailService {
 
     private String SENDGRID_API_KEY;
@@ -51,6 +51,9 @@ public class SendgridEmailService extends AbstractEmailService {
 
     @Autowired
     protected SettingsService credentialsService;
+
+    @Autowired
+    private EmailTemplateService emailTemplateService;
 
     @PostConstruct
     public void init() {
@@ -70,7 +73,7 @@ public class SendgridEmailService extends AbstractEmailService {
         email.setFromName("Accounting Report Generator");
         email.setBcc(recipients.get("bcc"));
         email.setSubject("Accounting Report For " + dto.getCompany());
-        email.setText("Please find the accounting report for " + dto.getCompany() + " as attached. Referred by " + dto.getReferredBy());
+        email.setHtml(emailTemplateService.populateTemplate(dto));
 
         for(Attachment attachment : attachments) {
             InputStream data = new ByteArrayInputStream(attachment.getData());

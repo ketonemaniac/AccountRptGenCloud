@@ -18,6 +18,7 @@ import reactor.core.publisher.SynchronousSink;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,10 +43,18 @@ public class TemplateParseProcessor {
                 ControlCommand::getControlType, Function.identity()));
     }
 
+    public BigDecimal extractProcessionalFees(Workbook workbook) {
+        return Optional.ofNullable(workbook.getSheet("Section6"))
+                .map(sheet -> sheet.getRow(266))
+                .map(row -> row.getCell(2))
+                .map(Cell::getNumericCellValue)
+                .map(BigDecimal::valueOf)
+                .orElse(BigDecimal.ZERO);
+    }
 
     public String extractCompanyName(Workbook workbook) throws IOException {
         Sheet controlSheet = workbook.getSheet("Control");
-        // this is D5, put as Row 5 Column D (0 = A1)
+        // this is D2, put as Row 1 ( 0 = Row 1) Column 3 (0 = Column A)
         return controlSheet.getRow(1).getCell(3).getStringCellValue();
     }
 
@@ -55,6 +64,7 @@ public class TemplateParseProcessor {
         XSSFWorkbook workbook = openExcelWorkbook(preParseOutput);
 
         data.setCompanyName(extractCompanyName(workbook));
+        data.setProcessionalFees(extractProcessionalFees(workbook));
         Sheet metadataSheet = workbook.getSheet("Metadata");
 
         int secIdx = 1;
