@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -41,5 +42,7 @@ public class AccountJob implements Serializable {
     private String handleName;      // For GCloudStandard, ID in queue
 
     private GenerationException error;
+
+    private BigDecimal professionalFees;
 
 }

@@ -2,6 +2,7 @@ package net.ketone.accrptgen.domain.gen;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ public class AccountData {
     private String companyName;
     private LocalDateTime generationTime;
     private List<Section> sections;
+    private BigDecimal processionalFees;
 
     public void addSection(Section s) {
         if(sections == null) {

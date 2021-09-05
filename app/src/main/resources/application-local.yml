@@ -6,6 +6,10 @@ storage:
     retention:
       days: 1
 
+mail:
+  enabled: false
+  sender: ketonemaniac@gmail.com
+
 mongo:
   database:
     name: testing
