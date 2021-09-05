@@ -44,9 +44,9 @@ public class TemplateParseProcessor {
     }
 
     public BigDecimal extractProcessionalFees(Workbook workbook) {
-        return Optional.ofNullable(workbook.getSheet("Section6"))
-                .map(sheet -> sheet.getRow(266))
-                .map(row -> row.getCell(2))
+        return Optional.ofNullable(workbook.getSheet("Control"))
+                .map(sheet -> sheet.getRow(0))
+                .map(row -> row.getCell(3))
                 .map(Cell::getNumericCellValue)
                 .map(BigDecimal::valueOf)
                 .orElse(BigDecimal.ZERO);
