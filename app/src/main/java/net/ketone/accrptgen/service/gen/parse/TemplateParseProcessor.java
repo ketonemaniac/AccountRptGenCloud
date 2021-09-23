@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -43,28 +44,28 @@ public class TemplateParseProcessor {
                 ControlCommand::getControlType, Function.identity()));
     }
 
-    public BigDecimal extractProcessionalFees(Workbook workbook) {
-        return Optional.ofNullable(workbook.getSheet("Control"))
-                .map(sheet -> sheet.getRow(0))
-                .map(row -> row.getCell(3))
-                .map(Cell::getNumericCellValue)
-                .map(BigDecimal::valueOf)
-                .orElse(BigDecimal.ZERO);
-    }
-
-    public String extractCompanyName(Workbook workbook) throws IOException {
-        Sheet controlSheet = workbook.getSheet("Control");
-        // this is D2, put as Row 1 ( 0 = Row 1) Column 3 (0 = Column A)
-        return controlSheet.getRow(1).getCell(3).getStringCellValue();
+    public <T> void extract(Consumer<T> setterFunction, Function<Cell, Optional<T>> castingFunction,
+                            Workbook workbook, String sheet,
+                            int row, int col, T defaultValue) {
+        setterFunction.accept(Optional.ofNullable(workbook.getSheet(sheet))
+                .map(s -> s.getRow(row))
+                .map(r -> r.getCell(col))
+                .flatMap(castingFunction)
+                .orElse(defaultValue));
     }
 
     public AccountData process(byte[] preParseOutput) throws IOException {
 
         AccountData data = new AccountData();
         XSSFWorkbook workbook = openExcelWorkbook(preParseOutput);
-
-        data.setCompanyName(extractCompanyName(workbook));
-        data.setProcessionalFees(extractProcessionalFees(workbook));
+        extract(data::setCompanyName, cell -> Optional.ofNullable(cell.getStringCellValue()),
+                workbook, "Control", 1, 3, "N/A");
+        extract(data::setProcessionalFees,
+                cell -> Optional.ofNullable(cell.getNumericCellValue()).map(BigDecimal::valueOf),
+                workbook, "Control", 0, 3, BigDecimal.ZERO);
+        extract(data::setPrevProfessionalFees,
+                cell -> Optional.ofNullable(cell.getNumericCellValue()).map(BigDecimal::valueOf),
+                workbook, "Control", 0, 4, BigDecimal.ZERO);
         Sheet metadataSheet = workbook.getSheet("Metadata");
 
         int secIdx = 1;

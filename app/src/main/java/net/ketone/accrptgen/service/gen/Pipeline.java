@@ -90,6 +90,7 @@ public class Pipeline implements Runnable {
 
             data.setGenerationTime(dto.getGenerationTime());
             dto.setProfessionalFees(data.getProcessionalFees());
+            dto.setPrevProfessionalFees(data.getPrevProfessionalFees());
             log.info("template finished parsing, sections=" + data.getSections().size());
 
             // remove sheets and stringify contents
