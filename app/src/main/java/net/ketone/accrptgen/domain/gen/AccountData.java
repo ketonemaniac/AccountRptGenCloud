@@ -19,6 +19,7 @@ public class AccountData {
     private LocalDateTime generationTime;
     private List<Section> sections;
     private BigDecimal processionalFees;
+    private BigDecimal prevProfessionalFees;
 
     public void addSection(Section s) {
         if(sections == null) {

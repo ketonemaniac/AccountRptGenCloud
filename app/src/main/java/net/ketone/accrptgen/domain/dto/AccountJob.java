@@ -45,4 +45,6 @@ public class AccountJob implements Serializable {
 
     private BigDecimal professionalFees;
 
+    private BigDecimal prevProfessionalFees;
+
 }
