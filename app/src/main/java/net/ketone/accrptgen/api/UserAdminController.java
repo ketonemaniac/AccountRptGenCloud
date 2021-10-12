@@ -5,6 +5,8 @@ import net.ketone.accrptgen.service.auth.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -19,27 +21,23 @@ public class UserAdminController {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @PostMapping("password/reset")
-    public User resetPassword(@RequestBody User user) throws Exception {
-        return userService.resetPassword(user)
-                .block();
+    public Mono<User> resetPassword(@RequestBody User user) throws Exception {
+        return userService.resetPassword(user);
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User updatedUser) {
-        return userService.updateUser(updatedUser)
-                .block();
+    public Mono<User> updateUser(@RequestBody User updatedUser) {
+        return userService.updateUser(updatedUser);
     }
 
     @PostMapping
-    public User createUser(@RequestBody User newUser) {
-        return userService.createUser(newUser, false)
-                .block();
+    public Mono<User> createUser(@RequestBody User newUser) {
+        return userService.createUser(newUser, false);
     }
 
     @DeleteMapping("{username}")
-    public User deleteUser(@PathVariable String username) {
-        return userService.deleteUser(username)
-                .block();
+    public Mono<User> deleteUser(@PathVariable String username) {
+        return userService.deleteUser(username);
     }
 
 
@@ -48,9 +46,8 @@ public class UserAdminController {
      * @return
      */
     @GetMapping("all")
-    public List<User> listUsers() {
-        return userService.findAllUsers()
-                .collectList().block();
+    public Flux<User> listUsers() {
+        return userService.findAllUsers();
     }
 
 
