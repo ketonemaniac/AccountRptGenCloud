@@ -1,11 +1,11 @@
 package net.ketone.accrptgen.it;
 
-import net.ketone.accrptgen.domain.dto.AccountJob;
-import net.ketone.accrptgen.service.gen.Pipeline;
-import net.ketone.accrptgen.service.mail.Attachment;
-import net.ketone.accrptgen.service.mail.EmailService;
-import net.ketone.accrptgen.service.store.FileStorageService;
-import net.ketone.accrptgen.service.store.StorageService;
+import net.ketone.accrptgen.common.model.AccountJob;
+import net.ketone.accrptgen.app.service.gen.Pipeline;
+import net.ketone.accrptgen.common.mail.Attachment;
+import net.ketone.accrptgen.common.mail.EmailService;
+import net.ketone.accrptgen.common.store.FileStorageService;
+import net.ketone.accrptgen.common.store.StorageService;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.util.IOUtils;
 import org.junit.Test;
@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;

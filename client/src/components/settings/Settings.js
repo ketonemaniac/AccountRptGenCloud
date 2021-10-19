@@ -10,6 +10,7 @@ const Settings = (props) => {
     const [mailString, setMailString] = useState("default");
     const [allDocsData, setAllDocsData] = useState([]);
     const [auditPrgData, setAuditPrgData] = useState([]);
+    const [dBizFundingData, setDBizFundingData] = useState([]);
 
     async function init() {
         const resp = await Endpoints.getFileList()
@@ -17,6 +18,7 @@ const Settings = (props) => {
 
         setAllDocsData(resp.allDocs.map(filename => ({"filename" : filename, "inUse" : filename == configs.allDocs})))
         setAuditPrgData(resp.auditPrg.map(filename => ({"filename" : filename, "inUse" : filename == configs.auditPrg})))
+        setDBizFundingData(resp?.dBizFunding?.map(filename => ({"filename" : filename, "inUse" : filename == configs?.dBizFunding})))
         setMailString(configs.sendTo)
     }
 
@@ -55,6 +57,7 @@ const Settings = (props) => {
                 </Form>             
                 <TemplateList rowData={allDocsData} init={init} fileType={"allDocs"} title={"Template Excel"}/>
                 <TemplateList rowData={auditPrgData} init={init} fileType={"auditPrg"} title={"Audit Programme Excel"}/>
+                <TemplateList rowData={dBizFundingData} init={init} fileType={"dBizFunding"} title={"D-Biz Funding Excel"}/>
             </Container>
         </React.Fragment>
     );

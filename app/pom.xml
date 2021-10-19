@@ -3,7 +3,6 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>net.ketone</groupId>
 	<artifactId>accrptgen-app</artifactId>
 	<packaging>jar</packaging> <!-- for local and flexible env -->
 
@@ -12,19 +11,33 @@
 	<parent>
 		<artifactId>accrptgen</artifactId>
 		<groupId>net.ketone</groupId>
-		<version>2.7.3</version>
+		<version>2.8.0</version>
 	</parent>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<!-- spring-starter-gcp.version>1.0.0.M1</spring-starter-gcp.version -->
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<kotlin.version>1.4.30</kotlin.version>
 	</properties>
 
 	<dependencies>
+		<!-- project -->
+		<dependency>
+			<groupId>net.ketone</groupId>
+			<artifactId>accrptgen-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.ketone</groupId>
+			<artifactId>accrptgen-app-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.ketone</groupId>
+			<artifactId>accrptgen-app-excel-extract</artifactId>
+		</dependency>
+
+		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -32,16 +45,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<!-- exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion>
-			</exclusions -->
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -51,17 +54,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-core</artifactId>
+		</dependency>
 
-		<!-- Database-related -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-mongodb</artifactId>
-		</dependency>
-		<!-- end database-related -->
 
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -81,15 +78,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- dependency>
-			<groupId>net.ketone</groupId>
-			<artifactId>accrptgen-web</artifactId>
-			<version>${project.version}</version>
-		</dependency -->
-		<dependency>
-			<groupId>net.ketone</groupId>
-			<artifactId>accrptgen-client</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -102,27 +90,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- gcloud dependencies -->
-		<!-- dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-gcp-starter-sql</artifactId>
-			<version>${spring-starter-gcp.version}</version>
-		</dependency -->
-		<!-- dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-gcp-starter-storage</artifactId>
-			<version>${spring-starter-gcp.version}</version>
-		</dependency -->
-		<!-- dependency>
-			<groupId>com.google.cloud</groupId>
-			<artifactId>google-cloud</artifactId>
-			<version>0.44.0-alpha</version>
-		</dependency -->
 		<!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-storage -->
-		<dependency>
-			<groupId>com.google.cloud</groupId>
-			<artifactId>google-cloud-storage</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-tasks</artifactId>
@@ -146,23 +114,6 @@
 			<artifactId>jul-to-slf4j</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.18.8</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-		</dependency>
-
-		<!-- mail client -->
-		<dependency>
-			<groupId>com.sendgrid</groupId>
-			<artifactId>sendgrid-java</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
@@ -191,9 +142,12 @@
 			<artifactId>kotlin-stdlib</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-kotlin</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.reactivestreams</groupId>
 			<artifactId>reactive-streams</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 		<!-- email template -->
 		<dependency>

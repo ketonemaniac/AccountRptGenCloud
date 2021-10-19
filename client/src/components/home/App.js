@@ -72,7 +72,7 @@ class App extends Component {
             const companies = [{
               company: resData.company,
               filename: resData.filename,
-              status: "PRELOADED",
+              status: resData.status,
               id: resData.id,
               period: resData.period
             }, ...state.companies];

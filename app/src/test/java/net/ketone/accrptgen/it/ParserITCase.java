@@ -1,15 +1,14 @@
 package net.ketone.accrptgen.it;
 
-import net.ketone.accrptgen.AccrptgenApplication;
-import net.ketone.accrptgen.domain.gen.AccountData;
-import net.ketone.accrptgen.domain.gen.Section;
-import net.ketone.accrptgen.domain.gen.SectionElement;
-import net.ketone.accrptgen.domain.gen.Table;
-import net.ketone.accrptgen.service.gen.GenerationService;
-import net.ketone.accrptgen.service.gen.ParsingService;
-import net.ketone.accrptgen.service.mail.EmailService;
-import net.ketone.accrptgen.service.stats.StatisticsService;
-import net.ketone.accrptgen.service.store.StorageService;
+import net.ketone.accrptgen.app.AccrptgenApplication;
+import net.ketone.accrptgen.app.domain.gen.Section;
+import net.ketone.accrptgen.app.domain.gen.SectionElement;
+import net.ketone.accrptgen.app.domain.gen.Table;
+import net.ketone.accrptgen.app.service.gen.GenerationService;
+import net.ketone.accrptgen.app.service.gen.ParsingService;
+import net.ketone.accrptgen.common.mail.EmailService;
+import net.ketone.accrptgen.common.domain.stats.StatisticsService;
+import net.ketone.accrptgen.common.store.StorageService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -25,7 +24,6 @@ import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
