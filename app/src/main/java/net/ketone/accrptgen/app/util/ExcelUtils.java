@@ -26,62 +26,6 @@ import java.util.Optional;
 @Slf4j
 public class ExcelUtils {
 
-    public static XSSFWorkbook openExcelWorkbook(final byte[] workbookArr) throws IOException {
-        return new XSSFWorkbook(new ByteArrayInputStream(workbookArr));
-    }
-
-    public static XSSFWorkbook openExcelWorkbook(final InputStream workbookStream) throws IOException {
-        try(workbookStream) {
-            return new XSSFWorkbook(workbookStream);
-        } finally {
-            workbookStream.close();
-        }
-    }
-
-    /**
-     * Same as evaluator.evaluateAll();, but evaluates Cell By Cell making debugging easy.
-     * @param templateWb
-     * @param sheets
-     */
-    public static void evaluateAll(XSSFWorkbook templateWb, List<Sheet> sheets) {
-        FormulaEvaluator evaluator = templateWb.getCreationHelper().createFormulaEvaluator();
-        evaluator.clearAllCachedResultValues();
-//        evaluator.evaluateAll();
-        Flux.fromIterable(sheets)
-                .doOnNext(sheet -> log.info("refreshing sheet={}", sheet.getSheetName()))
-                .flatMap(ExcelUtils::cells)
-                .map(Tuple2::_2)
-                .flatMap(cell -> Mono.just(cell)
-                        .map(evaluator::evaluateFormulaCellEnum)
-                        .onErrorMap(err -> new GenerationException(cell.getSheet().getSheetName(),
-                                cell.getAddress().formatAsString(),
-                                "TemplateMerge",
-                                String.format("Cannot evaluate Sheet: %s Cell: %s with formula: %s cellType: %s",
-                                        cell.getSheet().getSheetName(),
-                                        cell.getAddress().formatAsString(),
-                                         cell.getCellFormula(),
-                                        cell.getCellTypeEnum().name()),
-                                err.getMessage(),
-                                err))
-                )
-                .blockLast();
-    }
-
-    /**
-     * Gets all cells associated to a sheet
-     * @param s
-     * @return
-     */
-    public static Flux<Tuple2<Sheet, Cell>> cells(final Sheet s) {
-        return Mono.just(s)
-                .flatMapMany(sheet -> Flux.range(0, sheet.getLastRowNum())
-                        .filter(r -> Optional.ofNullable(sheet.getRow(r)).isPresent())
-                        .map(sheet::getRow)
-                )
-                .flatMap(row -> Flux.fromIterable(row::cellIterator))
-                .map(cell -> Tuple.of(s, (Cell) cell));
-    }
-
     public static String extractCompanyName(final XSSFWorkbook workbook, final String sheetName,
                                             final String cellRef) throws IOException {
         CellReference cr = new CellReference(cellRef);

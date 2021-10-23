@@ -1,16 +1,16 @@
 package net.ketone.accrptgen.common.credentials;
 
 import net.ketone.accrptgen.common.store.StorageService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,7 +21,7 @@ import static net.ketone.accrptgen.common.constants.Constants.CREDENTIALS_FILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {FileBasedSettingsServiceTest.ContextCfg.class})
 public class FileBasedSettingsServiceTest {
 
@@ -43,7 +43,7 @@ public class FileBasedSettingsServiceTest {
 
     private Properties prop = new Properties();
 
-    @Before
+    @BeforeEach
     public void init() throws IOException {
         Mockito.when(persistentStorage.loadAsInputStream(CREDENTIALS_FILE)).thenAnswer(invocationOnMock -> {
             ByteArrayOutputStream os = new ByteArrayOutputStream();

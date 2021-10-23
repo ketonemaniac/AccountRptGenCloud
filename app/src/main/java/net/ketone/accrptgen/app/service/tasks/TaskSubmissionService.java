@@ -5,11 +5,8 @@ import net.ketone.accrptgen.app.util.ExcelUtils;
 import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.store.StorageService;
-import net.ketone.accrptgen.app.service.gen.ParsingService;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.app.util.UserUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +22,6 @@ import java.util.UUID;
 @Component
 public class TaskSubmissionService {
 
-    @Autowired
-    private ParsingService parsingService;
     @Autowired
     private StatisticsService statisticsService;
     @Autowired

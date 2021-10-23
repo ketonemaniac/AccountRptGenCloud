@@ -1,15 +1,15 @@
 package net.ketone.accrptgen.it;
 
 import net.ketone.accrptgen.common.model.AccountJob;
-import net.ketone.accrptgen.app.service.gen.Pipeline;
+import net.ketone.accrptgen.task.gen.Pipeline;
 import net.ketone.accrptgen.common.mail.Attachment;
 import net.ketone.accrptgen.common.mail.EmailService;
 import net.ketone.accrptgen.common.store.FileStorageService;
 import net.ketone.accrptgen.common.store.StorageService;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.util.IOUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
@@ -43,7 +44,7 @@ import static org.mockito.Matchers.eq;
  * output is in target/test-output folder
  */
 @IfProfileValue(name = "spring.profiles.active", values = {"itcase"})
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles("local")
 @SpringBootTest
 public class AccrptgenApplicationITCase {

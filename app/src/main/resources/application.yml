@@ -14,30 +14,50 @@ build:
   version: @project.version@
   timestamp: @timestamp@
 
-parse:
-  headers:
-    Section1:
-      company-name: true
-      underline: no_underline
-    Section2:
-      company-name: false
-      underline: after_last
-    Section3:
-      company-name: true
-      underline: before_last
-    Section4:
-      company-name: true
-      underline: before_last
-    Section5:
-      company-name: true
-      underline: before_last
-    Section6:
-      company-name: true
-      underline: before_last
-    Contents:
-      company-name: true
-      underline: after_last
-
+accountrpt:
+  parse:
+    headers:
+      Section1:
+        company-name: true
+        underline: no_underline
+      Section2:
+        company-name: false
+        underline: after_last
+      Section3:
+        company-name: true
+        underline: before_last
+      Section4:
+        company-name: true
+        underline: before_last
+      Section5:
+        company-name: true
+        underline: before_last
+      Section6:
+        company-name: true
+        underline: before_last
+      Contents:
+        company-name: true
+        underline: after_last
+  merge:
+    pre-parse-sheets:
+      - Control
+      - "Dir info"
+      - Section3
+      - Section4
+      - Section6
+    template-path: allDocs
+    template-file-property: xlsx.template.name
+    merge-cell-colors:
+      - 4F81BD
+      - 8064A2
+excel-extract:
+  merge:
+    pre-parse-sheets:
+      - Control
+    template-path: dBizFunding
+    template-file-property: xlsx.template.dBizFunding.name
+    merge-cell-colors:
+      - 5B9BD5
 server:
   error:
     include-message: always

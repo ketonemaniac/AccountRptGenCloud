@@ -7,7 +7,6 @@ import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.app.exception.ValidationException;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.common.model.AccountJob;
-import net.ketone.accrptgen.app.service.gen.ParsingService;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.app.service.tasks.TaskSubmissionService;
 import net.ketone.accrptgen.app.service.tasks.TasksService;
@@ -30,8 +29,6 @@ import java.util.*;
 @Slf4j
 public class AccRptGenController {
 
-    @Autowired
-    private ParsingService parsingService;
     @Autowired
     private StorageService tempStorage;
     @Autowired
