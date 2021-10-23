@@ -1,7 +1,7 @@
 package net.ketone.accrptgen.it;
 
 import net.ketone.accrptgen.common.model.AccountJob;
-import net.ketone.accrptgen.task.gen.Pipeline;
+import net.ketone.accrptgen.task.AccountRptTask;
 import net.ketone.accrptgen.common.mail.Attachment;
 import net.ketone.accrptgen.common.mail.EmailService;
 import net.ketone.accrptgen.common.store.FileStorageService;
@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,8 +91,8 @@ public class AccrptgenApplicationITCase {
 				.generationTime(genTime)
 				.filename(PLAIN_FILENAME)
 				.build();
-		Pipeline pipeline = ctx.getBean(Pipeline.class, accountJob);
-		pipeline.run();
+		AccountRptTask accountRptTask = ctx.getBean(AccountRptTask.class, accountJob);
+		accountRptTask.run();
 		Mockito.verify(emailService).sendEmail(any(), argumentCaptor.capture());
 		List<Attachment> attachments = argumentCaptor.getValue();
 		assertThat(attachments).hasSize(3);

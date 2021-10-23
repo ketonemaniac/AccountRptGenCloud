@@ -5,14 +5,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.ketone.accrptgen.common.mail.EnableEmail;
 import net.ketone.accrptgen.common.mongo.EnableMongoDomain;
-import net.ketone.accrptgen.task.config.EnableExcelExtract;
+import net.ketone.accrptgen.task.config.EnableTasks;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableMongoDomain
 @EnableEmail
-@EnableExcelExtract
+@EnableTasks
 public class ApplicationConfig {
 
     @Bean

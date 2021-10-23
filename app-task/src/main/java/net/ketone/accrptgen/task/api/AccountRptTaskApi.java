@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.common.model.AccountJob;
-import net.ketone.accrptgen.task.gen.Pipeline;
+import net.ketone.accrptgen.task.AccountRptTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.*;
@@ -40,8 +40,8 @@ public class AccountRptTaskApi {
             log.warn("History file write failed (GENERATING)", e);
             return "NOT OK";
         }
-        Pipeline pipeline = ctx.getBean(Pipeline.class, dto);
-        pipeline.run();
+        AccountRptTask accountRptTask = ctx.getBean(AccountRptTask.class, dto);
+        accountRptTask.run();
         return "OK";
     }
 

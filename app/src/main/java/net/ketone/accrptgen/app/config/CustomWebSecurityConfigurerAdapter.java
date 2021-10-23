@@ -46,7 +46,7 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
                 .antMatchers("/_ah/**").permitAll()
                 .antMatchers(GEN_QUEUE_ENDPOINT).permitAll()
                 .antMatchers(STATUS_QUEUE_ENDPOINT).permitAll()
-                .antMatchers("task/**").permitAll()
+                .antMatchers("/task/**").permitAll()
                 .antMatchers("/login").permitAll()
                 .antMatchers("/api/user/encode/**").permitAll();
         if(!enableSecurity) {
