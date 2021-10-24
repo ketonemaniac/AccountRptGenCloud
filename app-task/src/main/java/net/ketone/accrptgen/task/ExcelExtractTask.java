@@ -6,7 +6,9 @@ import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.common.mail.Attachment;
 import net.ketone.accrptgen.common.mail.EmailService;
 import net.ketone.accrptgen.common.model.AccountJob;
+import net.ketone.accrptgen.common.model.GenerationException;
 import net.ketone.accrptgen.common.store.StorageService;
+import net.ketone.accrptgen.common.util.FileUtils;
 import net.ketone.accrptgen.task.config.properties.ExcelExtractProperties;
 import net.ketone.accrptgen.task.gen.ParsingService;
 import net.ketone.accrptgen.task.gen.merge.TemplateMergeProcessor;
@@ -45,6 +47,7 @@ public class ExcelExtractTask {
     public void doExcelExtract(final AccountJob job) {
         String inputFileName = job.getFilename();
         log.info("Opening file: " + inputFileName);
+        String outputFilename = FileUtils.uniqueFilename(job.getCompany(), job.getGenerationTime());
         try {
             String fileExtension = inputFileName.substring(inputFileName.lastIndexOf("."));
             byte[] workbookArr = tempStorage.load(inputFileName);
@@ -61,11 +64,10 @@ public class ExcelExtractTask {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             finalFinal.write(os);
 
-            Attachment template = new Attachment(job.getCompany() +
-                    job.getGenerationTime().toString() +
+            Attachment template = new Attachment( outputFilename +
                     fileExtension, os.toByteArray());
             List<Attachment> attachments = Arrays.asList(template);
-            emailService.sendEmail(job, attachments);
+            emailService.sendEmail(job, attachments, properties.getMail());
 
             // no need to use the template anymore, delete it.
             tempStorage.delete(inputFileName);
@@ -75,7 +77,19 @@ public class ExcelExtractTask {
             log.info("Operation complete");
 
         } catch (Exception e) {
-            log.error("DIE", e);
+            log.warn("Generation failed", e);
+            job.setFilename(outputFilename);
+            job.setStatus(Constants.Status.FAILED.name());
+            try {
+                if(e instanceof GenerationException) {
+                    job.setError((GenerationException) e);
+                } else {
+                    job.setError(new GenerationException(e));
+                }
+                statisticsService.updateTask(job);
+            } catch (Throwable e1) {
+                log.warn("History file write failed", e1);
+            }
         }
     }
 

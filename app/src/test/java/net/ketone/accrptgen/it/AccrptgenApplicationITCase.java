@@ -93,7 +93,7 @@ public class AccrptgenApplicationITCase {
 				.build();
 		AccountRptTask accountRptTask = ctx.getBean(AccountRptTask.class, accountJob);
 		accountRptTask.run();
-		Mockito.verify(emailService).sendEmail(any(), argumentCaptor.capture());
+		Mockito.verify(emailService).sendEmail(any(), argumentCaptor.capture(), any());
 		List<Attachment> attachments = argumentCaptor.getValue();
 		assertThat(attachments).hasSize(3);
 

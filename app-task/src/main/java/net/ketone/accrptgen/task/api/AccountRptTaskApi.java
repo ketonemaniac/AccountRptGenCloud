@@ -30,9 +30,8 @@ public class AccountRptTaskApi {
     private ApplicationContext ctx;
 
     @PostMapping(GEN_QUEUE_ENDPOINT)
-    // public String doWork(@RequestParam("accountFileDto") AccountFileDto dto) {
     public String doWork(@RequestBody AccountJob dto) {
-        log.info("inside doWork() " + dto.toString());
+        log.info("inside " + GEN_QUEUE_ENDPOINT + " " + dto.toString());
         dto.setStatus(Constants.Status.GENERATING.name());
         try {
             statisticsService.updateTask(dto);

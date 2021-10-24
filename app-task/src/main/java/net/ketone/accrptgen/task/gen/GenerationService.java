@@ -10,11 +10,6 @@ import java.time.format.DateTimeFormatter;
 
 public interface GenerationService {
 
-    static String getFileName(String companyName, LocalDateTime generationTime) {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        return companyName + "-" + df.format(generationTime);
-    }
-
     byte[] generate(AccountData data) throws IOException;
 
     void write(String sectionName, Paragraph paragraph);

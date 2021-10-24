@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.task.gen.mail;
 
+import net.ketone.accrptgen.common.config.properties.MailProperties;
 import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.task.config.ThymeleafConfig;
 import org.assertj.core.api.Assertions;
@@ -28,7 +29,7 @@ public class AccRptGenEmailTemplateServiceITCase {
                 .company("ABC Company")
                 .referredBy("Eric")
                 .professionalFees(BigDecimal.valueOf(12000))
-                .build());
+                .build(), MailProperties.builder().template("job-template.html").build());
         System.out.println(html);
         PrintWriter pw = new PrintWriter("target/out.html");
         pw.print(html);

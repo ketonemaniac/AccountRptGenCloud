@@ -8,6 +8,7 @@ import net.ketone.accrptgen.common.mail.EmailService;
 import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.model.GenerationException;
 import net.ketone.accrptgen.common.store.StorageService;
+import net.ketone.accrptgen.common.util.FileUtils;
 import net.ketone.accrptgen.task.config.properties.AccountRptProperties;
 import net.ketone.accrptgen.task.gen.GenerationService;
 import net.ketone.accrptgen.task.gen.ParsingService;
@@ -76,7 +77,7 @@ public class AccountRptTask implements Runnable {
         String inputFileName = cacheFilename;
         log.info("Opening file: " + inputFileName);
         try {
-            filename = GenerationService.getFileName(dto.getCompany(), dto.getGenerationTime());
+            filename = FileUtils.uniqueFilename(dto.getCompany(), dto.getGenerationTime());
 
             byte[] workbookArr = tempStorage.load(inputFileName);
             byte[] preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
@@ -115,7 +116,7 @@ public class AccountRptTask implements Runnable {
                     generatedAuditProgramme);
             Attachment template = new Attachment(filename + "-allDocs.xlsm", os.toByteArray());
             List<Attachment> attachments = Arrays.asList(doc, template, inputXlsx, auditPrgAttachment);
-            emailService.sendEmail(dto, attachments);
+            emailService.sendEmail(dto, attachments, properties.getMail());
 
             // zip files and store them just in case needed
             Map<String, byte[]> zipInput = attachments.stream()

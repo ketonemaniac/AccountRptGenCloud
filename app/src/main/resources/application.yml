@@ -50,7 +50,11 @@ accountrpt:
     merge-cell-colors:
       - 4F81BD
       - 8064A2
+  mail:
+    template: 'job-template.html'
 excel-extract:
+  mail:
+    template: 'excel-extract-template.html'
   merge:
     pre-parse-sheets:
       - Control

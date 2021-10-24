@@ -18,6 +18,7 @@ package net.ketone.accrptgen.common.mail;
 
 import com.sendgrid.SendGrid;
 import lombok.extern.slf4j.Slf4j;
+import net.ketone.accrptgen.common.config.properties.MailProperties;
 import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.model.auth.User;
@@ -62,7 +63,8 @@ public class SendgridEmailService extends AbstractEmailService {
     }
 
     @Override
-    public void sendEmail(AccountJob dto, List<Attachment> attachments) throws Exception {
+    public void sendEmail(AccountJob dto, List<Attachment> attachments,
+                          final MailProperties properties) throws Exception {
         if(!SENDGRID_ENABLE) return;
         SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
         SendGrid.Email email = new SendGrid.Email();
@@ -73,7 +75,7 @@ public class SendgridEmailService extends AbstractEmailService {
         email.setFromName("Accounting Report Generator");
         email.setBcc(recipients.get("bcc"));
         email.setSubject("Accounting Report For " + dto.getCompany());
-        email.setHtml(emailTemplateService.populateTemplate(dto));
+        email.setHtml(emailTemplateService.populateTemplate(dto, properties));
 
         for(Attachment attachment : attachments) {
             InputStream data = new ByteArrayInputStream(attachment.getData());
