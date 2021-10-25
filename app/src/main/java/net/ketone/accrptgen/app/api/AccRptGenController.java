@@ -57,8 +57,7 @@ public class AccRptGenController {
 
 
     @GetMapping("/file")
-    public ResponseEntity<Resource> downloadFile(@RequestParam("file") String file) throws IOException {
-        String fileName = file + ".zip";
+    public ResponseEntity<Resource> downloadFile(@RequestParam("file") String fileName) throws IOException {
         log.info("filename is " + fileName);
         InputStream is = tempStorage.loadAsInputStream(fileName);
         Resource resource = new InputStreamResource(is);

@@ -123,7 +123,7 @@ public class AccountRptTask implements Runnable {
                     .collect(Collectors.toMap(Attachment::getAttachmentName, Attachment::getData));
             tempStorage.store(ZipUtils.zipFiles(zipInput), filename + ".zip");
 
-            dto.setFilename(filename);
+            dto.setFilename(filename + ".zip");
             dto.setStatus(Constants.Status.EMAIL_SENT.name());
             log.info("Updating statistics for " + filename);
             statisticsService.updateTask(dto);
@@ -131,7 +131,7 @@ public class AccountRptTask implements Runnable {
 
         } catch (Throwable e) {
             log.warn("Generation failed", e);
-            dto.setFilename(filename);
+            dto.setFilename(filename + ".zip");
             dto.setStatus(Constants.Status.FAILED.name());
             try {
                 if(e instanceof GenerationException) {

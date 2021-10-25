@@ -27,4 +27,7 @@ public class Constants {
     @Deprecated
     public static final String HISTORY_FILE = "history.txt";
 
+    // DocType
+    public static final String DOCTYPE_EXCEL_EXTRACT = "ExcelExtract";
+    public static final String DOCTYPE_ACCOUNT_RPT = "AccountRpt";
 }

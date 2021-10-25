@@ -43,10 +43,12 @@ public class TaskSubmissionService {
             .map(meta -> meta.getRow(0))
             .map(row -> row.getCell(1))
             .map(XSSFCell::getStringCellValue)
-                .filter(str -> str.equalsIgnoreCase("ExcelExtract"))
+                .filter(str -> str.equalsIgnoreCase(Constants.DOCTYPE_EXCEL_EXTRACT))
                 .isPresent()) {
+            jobBuilder.docType(Constants.DOCTYPE_EXCEL_EXTRACT);
             return submitExcelExtractTask(workbook, jobBuilder);
         } else {
+            jobBuilder.docType(Constants.DOCTYPE_ACCOUNT_RPT);
             return preloadAccountRpt(workbook, jobBuilder);
         }
     }

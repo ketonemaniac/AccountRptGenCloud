@@ -48,8 +48,8 @@ public class ExcelExtractTask {
         String inputFileName = job.getFilename();
         log.info("Opening file: " + inputFileName);
         String outputFilename = FileUtils.uniqueFilename(job.getCompany(), job.getGenerationTime());
+        String fileExtension = inputFileName.substring(inputFileName.lastIndexOf("."));
         try {
-            String fileExtension = inputFileName.substring(inputFileName.lastIndexOf("."));
             byte[] workbookArr = tempStorage.load(inputFileName);
             byte[] preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
 
@@ -73,12 +73,13 @@ public class ExcelExtractTask {
             tempStorage.delete(inputFileName);
 
             job.setStatus(Constants.Status.EMAIL_SENT.name());
+            job.setFilename(outputFilename + fileExtension);
             statisticsService.updateTask(job);
             log.info("Operation complete");
 
         } catch (Exception e) {
             log.warn("Generation failed", e);
-            job.setFilename(outputFilename);
+            job.setFilename(outputFilename + fileExtension);
             job.setStatus(Constants.Status.FAILED.name());
             try {
                 if(e instanceof GenerationException) {
