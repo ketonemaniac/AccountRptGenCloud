@@ -16,7 +16,6 @@ import net.ketone.accrptgen.task.util.ExcelUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -71,6 +70,9 @@ public class ExcelExtractTask {
 
             // no need to use the template anymore, delete it.
             tempStorage.delete(inputFileName);
+
+            // store them in temp storage
+            tempStorage.store(os.toByteArray(), outputFilename + fileExtension);
 
             job.setStatus(Constants.Status.EMAIL_SENT.name());
             job.setFilename(outputFilename + fileExtension);
