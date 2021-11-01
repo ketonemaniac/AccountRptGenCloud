@@ -53,7 +53,7 @@ public class ExcelExtractTask {
             byte[] preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
 
             Workbook stringifiedWorkbook = parsingService.postProcess(
-                    ExcelUtils.openExcelWorkbook(preParseOutput));
+                    ExcelUtils.openExcelWorkbook(preParseOutput), properties.getParse());
             Map<String, String> cutColumnsMap = extractCutColumns(stringifiedWorkbook);
 
             Workbook finalOutput = parsingService.deleteSheets(

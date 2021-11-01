@@ -22,6 +22,7 @@ public class AccRptGenEmailTemplateService implements EmailTemplateService {
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("authentication", job.getSubmittedBy());
         model.put("job", job);
+        model.put("subjectPrefix", properties.getSubjectPrefix());
         context.setVariables(model);
         return templateEngine.process(properties.getTemplate(), context);
     }

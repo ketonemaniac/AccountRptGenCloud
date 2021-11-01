@@ -99,7 +99,7 @@ public class AccountRptTask implements Runnable {
             // remove sheets and stringify contents
             XSSFWorkbook allDocs = new XSSFWorkbook(new ByteArrayInputStream(preParseOutput));
             Workbook allDocsFinal = parsingService.deleteSheets(
-                parsingService.postProcess(allDocs), Arrays.asList(
+                parsingService.postProcess(allDocs, properties.getParse()), Arrays.asList(
                         "metadata", "Cover", "Contents", "Control", "Dir info", "Doc list",
                         "Section1", "Section2", "Section3", "Section4", "Section5", "Section6",
                             "Accounts (3)"));

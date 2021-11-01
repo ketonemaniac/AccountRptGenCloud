@@ -20,4 +20,6 @@ public class ParseProperties {
 
     }
 
+    private String keepFormulaColor;
+
 }

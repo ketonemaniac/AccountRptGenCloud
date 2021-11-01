@@ -10,6 +10,8 @@ public class ExcelExtractProperties {
 
     private MergeProperties merge;
 
+    private ParseProperties parse;
+
     private MailProperties mail;
 
 }

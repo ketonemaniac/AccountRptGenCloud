@@ -2,10 +2,12 @@ package net.ketone.accrptgen.task.gen;
 
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.store.StorageService;
+import net.ketone.accrptgen.task.config.properties.ParseProperties;
 import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +23,7 @@ public class ParsingService {
     @Autowired
     private StorageService persistentStorage;
 
-    public Workbook postProcess(XSSFWorkbook wb) {
+    public Workbook postProcess(XSSFWorkbook wb, final ParseProperties properties) {
         FormulaEvaluator inputWbEvaluator = wb.getCreationHelper().createFormulaEvaluator();
         Iterator<Sheet> i = wb.sheetIterator();
         while(i.hasNext()) {
@@ -32,7 +34,7 @@ public class ParsingService {
                 Iterator<Cell> c = row.cellIterator();
                 while(c.hasNext()) {
                     Cell cell = c.next();
-                    stringifyContents(cell, inputWbEvaluator);
+                    stringifyContents(cell, inputWbEvaluator, properties.getKeepFormulaColor());
                     removeColors(cell);
                 }
             }
@@ -40,7 +42,18 @@ public class ParsingService {
         return wb;
     }
 
-    private void stringifyContents(Cell cell, FormulaEvaluator inputWbEvaluator) {
+    private void stringifyContents(Cell cell, FormulaEvaluator inputWbEvaluator,
+                                   final String keepFormulaColor) {
+        if(Optional.ofNullable(cell.getCellStyle())
+                .map(CellStyle::getFillForegroundColorColor)
+                .map(XSSFColor::toXSSFColor)
+                .map(ExtendedColor::getARGBHex)
+                .map(hex -> hex.substring(2))
+                .flatMap(color -> Optional.ofNullable(keepFormulaColor)
+                        .map(color::equalsIgnoreCase))
+                .orElse(Boolean.FALSE)) {
+            return;
+        }
         if(cell.getCellTypeEnum() == CellType.FORMULA) {
             CellValue cellValue = inputWbEvaluator.evaluate(cell);
             cell.setCellType(cellValue.getCellTypeEnum());

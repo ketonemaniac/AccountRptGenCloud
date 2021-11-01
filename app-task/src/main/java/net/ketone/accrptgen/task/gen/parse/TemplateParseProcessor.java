@@ -2,7 +2,6 @@ package net.ketone.accrptgen.task.gen.parse;
 
 import io.vavr.Tuple;
 import lombok.extern.slf4j.Slf4j;
-import net.ketone.accrptgen.task.config.properties.AccountRptProperties;
 import net.ketone.accrptgen.task.config.properties.ParseProperties;
 import net.ketone.accrptgen.task.gen.model.AccountData;
 import net.ketone.accrptgen.task.gen.model.Paragraph;

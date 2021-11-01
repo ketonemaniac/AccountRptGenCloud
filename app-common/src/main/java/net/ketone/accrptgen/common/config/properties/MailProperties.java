@@ -13,4 +13,6 @@ public class MailProperties {
 
     private String template;
 
+    private String subjectPrefix;
+
 }

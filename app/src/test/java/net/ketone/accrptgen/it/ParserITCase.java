@@ -1,6 +1,7 @@
 package net.ketone.accrptgen.it;
 
 import net.ketone.accrptgen.app.AccrptgenApplication;
+import net.ketone.accrptgen.task.config.properties.ParseProperties;
 import net.ketone.accrptgen.task.gen.model.Section;
 import net.ketone.accrptgen.task.gen.model.SectionElement;
 import net.ketone.accrptgen.task.gen.model.Table;
@@ -156,7 +157,7 @@ public class ParserITCase {
     public void testStringifyContents() throws IOException {
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("formulaToText.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(in);
-        Workbook outputWb = svc.postProcess(workbook);
+        Workbook outputWb = svc.postProcess(workbook, new ParseProperties());
         // number
         Cell c = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
         assertThat(c.getCellTypeEnum()).isEqualTo(CellType.NUMERIC);
@@ -178,7 +179,7 @@ public class ParserITCase {
     public void testRemoveColors() throws IOException {
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("removeColors.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(in);
-        Workbook outputWb = svc.postProcess(workbook);
+        Workbook outputWb = svc.postProcess(workbook, new ParseProperties());
         Cell cell = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
         XSSFColor color = XSSFColor.toXSSFColor(cell.getCellStyle().getFillForegroundColorColor());
         assertThat(color.getIndex()).isEqualTo(IndexedColors.AUTOMATIC.index);

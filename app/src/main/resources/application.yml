@@ -52,9 +52,11 @@ accountrpt:
       - 8064A2
   mail:
     template: 'job-template.html'
+    subject-prefix: 'Accounting Report For '
 excel-extract:
   mail:
     template: 'excel-extract-template.html'
+    subject-prefix: 'D-biz Report For '
   merge:
     pre-parse-sheets:
       - Control
@@ -62,6 +64,8 @@ excel-extract:
     template-file-property: xlsx.template.dBizFunding.name
     merge-cell-colors:
       - 5B9BD5
+  parse:
+    keep-formula-color: 92D050
 server:
   error:
     include-message: always
