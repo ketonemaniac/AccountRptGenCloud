@@ -5,16 +5,16 @@ import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.task.config.properties.ParseProperties;
 import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellAddress;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 @Slf4j
 @Component
@@ -25,6 +25,13 @@ public class ParsingService {
 
     public Workbook postProcess(XSSFWorkbook wb, final ParseProperties properties) {
         FormulaEvaluator inputWbEvaluator = wb.getCreationHelper().createFormulaEvaluator();
+        doPostProcess(wb, cell -> stringifyContents(cell, inputWbEvaluator,
+                properties.getKeepFormulaColor()));
+        doPostProcess(wb, cell -> removeColors(cell));
+        return wb;
+    }
+
+    private void doPostProcess(XSSFWorkbook wb, Consumer<Cell> f) {
         Iterator<Sheet> i = wb.sheetIterator();
         while(i.hasNext()) {
             Sheet sheet = i.next();
@@ -34,12 +41,11 @@ public class ParsingService {
                 Iterator<Cell> c = row.cellIterator();
                 while(c.hasNext()) {
                     Cell cell = c.next();
-                    stringifyContents(cell, inputWbEvaluator, properties.getKeepFormulaColor());
+                    ;
                     removeColors(cell);
                 }
             }
         }
-        return wb;
     }
 
     private void stringifyContents(Cell cell, FormulaEvaluator inputWbEvaluator,
