@@ -1,4 +1,4 @@
-package net.ketone.accrptgen.task.gen.auditprg;
+package net.ketone.accrptgen.common.model;
 
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.util.Date;
 @Builder
 public class CellValueHolder {
 
-  enum CellType {
+  public enum CellType {
         STRING, NUMERIC, DATE
   }
 

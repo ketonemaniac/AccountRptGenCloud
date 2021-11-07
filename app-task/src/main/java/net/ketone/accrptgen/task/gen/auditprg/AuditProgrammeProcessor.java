@@ -2,13 +2,12 @@ package net.ketone.accrptgen.task.gen.auditprg;
 
 import com.google.common.collect.Streams;
 import io.vavr.Tuple;
-import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.store.StorageService;
+import net.ketone.accrptgen.common.util.ExcelUtils;
 import net.ketone.accrptgen.task.gen.model.AuditProgrammeMapping;
-import net.ketone.accrptgen.task.util.ExcelUtils;
-import org.apache.commons.lang3.StringUtils;
+import net.ketone.accrptgen.task.util.ExcelTaskUtils;
 import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -41,7 +40,7 @@ public class AuditProgrammeProcessor {
                 SettingsService.PREPARSE_AUIDTPRG_TEMPLATE_PROP);
         log.info("starting fetch audit programme template " + auditPrgTemplateName);
         XSSFWorkbook auditPrgTemplateWb =
-                ExcelUtils.openExcelWorkbook(persistentStorage.loadAsInputStream(StorageService.AUDIT_PRG_PATH +
+                ExcelTaskUtils.openExcelWorkbook(persistentStorage.loadAsInputStream(StorageService.AUDIT_PRG_PATH +
                         auditPrgTemplateName));
 
         Flux.fromIterable(mappingList)
@@ -50,7 +49,7 @@ public class AuditProgrammeProcessor {
                             CellReference cr = new CellReference(mappingCell.getCell());
                             Cell c = allDocs.getSheet(mappingCell.getSheet()).getRow(cr.getRow())
                                     .getCell(cr.getCol());
-                            return getCellValue(c);
+                            return ExcelUtils.getCellValue(c);
                         }).get(), mapping.getDestCell()))
                 .doOnNext(tuple2 -> {
                     CellReference cr = new CellReference(tuple2._2.getCell());
@@ -67,7 +66,7 @@ public class AuditProgrammeProcessor {
                 }).blockLast();
 
         log.debug("start refreshing auditPrgTemplateWb");
-        ExcelUtils.evaluateAll(auditPrgTemplateWb, Streams.stream(auditPrgTemplateWb.sheetIterator())
+        ExcelTaskUtils.evaluateAll(auditPrgTemplateWb, Streams.stream(auditPrgTemplateWb.sheetIterator())
                 .collect(Collectors.toList()));
         log.info("auditPrgTemplateWb refreshed. Writing to stream");
         ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
@@ -80,28 +79,4 @@ public class AuditProgrammeProcessor {
         return result;
     }
 
-    public CellValueHolder getCellValue(Cell c) {
-        String dataFormatStr = Optional.ofNullable(c.getCellStyle()).map(CellStyle::getDataFormatString)
-                .orElse(StringUtils.EMPTY);
-        if(CellType.NUMERIC.equals(c.getCellTypeEnum()) &&
-                dataFormatStr.contains("y") && dataFormatStr.contains("m") && dataFormatStr.contains("d")) {
-            // this should be a date type
-            return CellValueHolder.builder()
-                    .cellType(CellValueHolder.CellType.DATE)
-                    .dateVal(c.getDateCellValue())
-                    .build();
-        }
-        // numeric or String
-        return Try.of(() -> c.getNumericCellValue()).map(val ->
-                CellValueHolder.builder()
-                        .cellType(CellValueHolder.CellType.NUMERIC)
-                        .numVal(val)
-                .build())
-                .getOrElse(() ->
-                        CellValueHolder.builder()
-                                .cellType(CellValueHolder.CellType.STRING)
-                                .strVal(c.getStringCellValue())
-                                .build()
-                );
-    }
 }

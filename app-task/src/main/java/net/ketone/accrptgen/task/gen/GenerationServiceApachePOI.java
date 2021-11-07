@@ -4,6 +4,7 @@ import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.store.StorageService;
+import net.ketone.accrptgen.task.gen.generate.BannerService;
 import net.ketone.accrptgen.task.gen.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.formula.eval.FunctionEval;
@@ -46,8 +47,7 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     private final StorageService persistentStorage;
 
-    private final SettingsService configurationService;
-
+    private final BannerService bannerService;
 
     private Map<String, XWPFParagraph> currPghs = new HashMap<>();
 
@@ -57,40 +57,16 @@ public class GenerationServiceApachePOI implements GenerationService {
 
     private Map<Integer, BigInteger> numberedLists = new HashMap<>();
 
-    private Map<String, String> bannerMap;
-
     public GenerationServiceApachePOI(final StorageService persistentStorage,
-                                      final SettingsService configurationService) {
+                                      final BannerService bannerService) {
         this.persistentStorage = persistentStorage;
-        this.configurationService = configurationService;
+        this.bannerService = bannerService;
         try {
             FunctionEval.registerFunction("DATEDIF", new DateDifFunc());
         } catch (IllegalArgumentException e) {
             // skip error: POI already implememts DATEDIF for duplicate registers in the JVM
         }
-        bannerMap = getCredentialsMap("auditor.");
     }
-
-    private Map<String, String> getCredentialsMap(final String prefix) {
-        return configurationService.getSettings().entrySet().stream()
-                .filter(entry -> entry.getKey().toString().startsWith(prefix))
-                .collect(Collectors.collectingAndThen(
-                        Collectors.groupingBy(entry -> entry.getKey().toString().split("\\.")[1]),
-                        map -> map.entrySet().stream()
-                                .collect(Collectors.toMap(entry -> entry.getValue()
-                                                .stream()
-                                                .filter(e -> e.getKey().toString().contains(".name"))
-                                                .findFirst()
-                                                .get().getValue().toString(),
-                                        entry -> entry.getValue()
-                                                .stream()
-                                                .filter(e -> e.getKey().toString().contains(".banner"))
-                                                .findFirst()
-                                                .get().getValue().toString())
-                                ))
-                );
-    }
-
 
     /**
      * The trick here is to make a template docx with only the words "SectionX" and locate them.
@@ -237,17 +213,10 @@ public class GenerationServiceApachePOI implements GenerationService {
     public void write(String sectionName, Header header, String companyName) {
         XWPFParagraph currPgh = pghHeaders.get("Header" + sectionName);
         if(StringUtils.isNotEmpty(header.getAuditorName())) {
-            String banner = Optional.ofNullable(header.getAuditorName().trim())
-                        .map(s -> s.split(" "))
-                        .map(arr -> arr[0])
-                        .map(bannerMap::get)
-                    .orElseThrow(() -> new RuntimeException("Unable to find banner from Auditor name" +
-                            header.getAuditorName()));
             XWPFParagraph currAuditorPgh = pghHeaders.get("Header" + sectionName + "Auditor");
             doWriteRun(currAuditorPgh, newR -> {
                 Try.run(() -> {
-                    newR.addPicture(persistentStorage.loadAsInputStream(
-                            StorageService.BANNER_PATH + banner),
+                    newR.addPicture(bannerService.getImage(header.getAuditorName().trim()),
                             XWPFDocument.PICTURE_TYPE_PNG,
                             header.getAuditorName().trim(),
                             Units.toEMU(550), Units.toEMU(37));

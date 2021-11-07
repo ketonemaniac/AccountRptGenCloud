@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.task.gen.model.AuditProgrammeMapping;
-import net.ketone.accrptgen.task.util.ExcelUtils;
+import net.ketone.accrptgen.task.util.ExcelTaskUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class AuditProgrammeMappingExtract {
                 SettingsService.PREPARSE_AUIDTPRG_TEMPLATE_PROP);
         log.info("starting fetch audit programme template " + auditPrgTemplateName);
         XSSFWorkbook workbook =
-                ExcelUtils.openExcelWorkbook(persistentStorage.loadAsInputStream(StorageService.AUDIT_PRG_PATH +
+                ExcelTaskUtils.openExcelWorkbook(persistentStorage.loadAsInputStream(StorageService.AUDIT_PRG_PATH +
                         auditPrgTemplateName));
 
         return Mono.just(workbook.getSheet("auditPrg"))

@@ -1,8 +1,13 @@
 package net.ketone.accrptgen.task.gen;
 
+import io.vavr.Tuple;
+import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.task.config.properties.ParseProperties;
+import net.ketone.accrptgen.task.gen.generate.BannerService;
+import net.ketone.accrptgen.task.util.ExcelTaskUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -22,8 +27,10 @@ public class ParsingService {
 
     @Autowired
     private StorageService persistentStorage;
+    @Autowired
+    private BannerService bannerService;
 
-    public Workbook postProcess(XSSFWorkbook wb, final ParseProperties properties) {
+    public XSSFWorkbook postProcess(XSSFWorkbook wb, final ParseProperties properties) {
         FormulaEvaluator inputWbEvaluator = wb.getCreationHelper().createFormulaEvaluator();
         doPostProcess(wb, cell -> stringifyContents(cell, inputWbEvaluator,
                 properties.getKeepFormulaColor()));
@@ -40,9 +47,7 @@ public class ParsingService {
                 Row row = r.next();
                 Iterator<Cell> c = row.cellIterator();
                 while(c.hasNext()) {
-                    Cell cell = c.next();
-                    ;
-                    removeColors(cell);
+                    f.accept(c.next());
                 }
             }
         }
@@ -86,7 +91,7 @@ public class ParsingService {
     }
 
 
-    public Workbook deleteSheets(Workbook wb, List<String> sheetsToDelete) {
+    public XSSFWorkbook deleteSheets(XSSFWorkbook wb, List<String> sheetsToDelete) {
         for(String sheetName : sheetsToDelete) {
             int i = wb.getSheetIndex(sheetName);
             if(i != -1) {   // -1 = not exist
@@ -96,7 +101,7 @@ public class ParsingService {
         return wb;
     }
 
-    public Workbook cutCells(final Workbook wb, Map<String, String> cutCellsMap) {
+    public XSSFWorkbook cutCells(final XSSFWorkbook wb, Map<String, String> cutCellsMap) {
         wb.sheetIterator().forEachRemaining(sheet -> {
             Optional.ofNullable(cutCellsMap.get(sheet.getSheetName()))
                     .ifPresent(cutCell -> {
@@ -113,4 +118,19 @@ public class ParsingService {
         return wb;
     }
 
+    public void insertAuditorBanners(final XSSFWorkbook workbook,
+                                      final String auditorName) {
+        doPostProcess(workbook, cell -> {
+            if("auditorBanner".equals(Try.of(() -> cell.getStringCellValue())
+                    .getOrElse(StringUtils.EMPTY)
+            )) {
+                Optional.ofNullable(bannerService.getImage(auditorName))
+                        .ifPresent(is -> ExcelTaskUtils.insertImage(workbook,
+                                cell.getSheet().getSheetName(),
+                                new org.apache.poi.ss.util.CellReference(cell.getAddress().formatAsString()),
+                                Try.of(() -> is.readAllBytes()).get(), Tuple.of(1.001,2.5)));
+                cell.setCellValue(StringUtils.EMPTY);
+            }
+        });
+    }
 }

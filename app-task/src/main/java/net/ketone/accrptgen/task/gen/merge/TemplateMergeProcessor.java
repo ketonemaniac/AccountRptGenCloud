@@ -7,7 +7,7 @@ import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.task.config.properties.MergeProperties;
 import net.ketone.accrptgen.task.gen.merge.types.CellTypeProcessor;
-import net.ketone.accrptgen.task.util.ExcelUtils;
+import net.ketone.accrptgen.task.util.ExcelTaskUtils;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -48,13 +48,13 @@ public class TemplateMergeProcessor {
     }
 
     public byte[] process(byte[] input, final MergeProperties properties) throws IOException {
-        XSSFWorkbook workbook = ExcelUtils.openExcelWorkbook(input);
+        XSSFWorkbook workbook = ExcelTaskUtils.openExcelWorkbook(input);
         XSSFWorkbook templateWb = Optional.ofNullable(configurationService.getSettings())
                 .flatMap(settings -> Optional.ofNullable(properties.getTemplateFileProperty())
                         .map(templateFile -> settings.getProperty(templateFile)))
                 .flatMap(templateName ->
                         Optional.ofNullable(properties.getTemplatePath())
-                        .map(path -> Try.of(() -> ExcelUtils.openExcelWorkbook(
+                        .map(path -> Try.of(() -> ExcelTaskUtils.openExcelWorkbook(
                                 persistentStorage.loadAsInputStream(
                                         path + File.separator + templateName)))
                         ))
@@ -67,7 +67,7 @@ public class TemplateMergeProcessor {
                 .filter(entry -> properties.getPreParseSheets().contains(entry.getKey()))
                 .doOnNext(entry -> log.info("parsing sheet={}", entry.getKey()))
                 .map(Map.Entry::getValue)
-                .flatMap(ExcelUtils::cells)
+                .flatMap(ExcelTaskUtils::cells)
                 .filter(tuple2 -> {
                     XSSFColor color = XSSFColor.toXSSFColor(tuple2._2.getCellStyle().getFillForegroundColorColor());
                     return color != null && properties.getMergeCellColors().contains(color.getARGBHex().substring(2));
@@ -95,7 +95,7 @@ public class TemplateMergeProcessor {
 
         // refresh everything
         log.debug("start refreshing template");
-        ExcelUtils.evaluateAll(templateWb, new ArrayList<>(templateSheetMap.values()));
+        ExcelTaskUtils.evaluateAll(templateWb, new ArrayList<>(templateSheetMap.values()));
         log.info("template refreshed. Writing to stream");
         ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
         log.debug("writing template. os.size()=" + os.size());

@@ -52,4 +52,6 @@ public class AccountJob implements Serializable {
 
     private String docType;
 
+    private String auditorName;
+
 }

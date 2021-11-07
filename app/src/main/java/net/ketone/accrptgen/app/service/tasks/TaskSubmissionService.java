@@ -1,7 +1,7 @@
 package net.ketone.accrptgen.app.service.tasks;
 
 import lombok.extern.slf4j.Slf4j;
-import net.ketone.accrptgen.app.util.ExcelUtils;
+import net.ketone.accrptgen.common.util.ExcelUtils;
 import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.store.StorageService;
@@ -80,8 +80,9 @@ public class TaskSubmissionService {
     private AccountJob preloadAccountRpt(final XSSFWorkbook workbook,
                                             final AccountJob.AccountJobBuilder jobBuilder) throws IOException {
         AccountJob job = jobBuilder
-                .company(ExcelUtils.extractCompanyName(workbook, "Control", "D2"))
-                .period(ExcelUtils.extractPeriodEnding(workbook, "Control", "D12"))
+                .company(ExcelUtils.extract(workbook, "Control", "D2"))
+                .period(ExcelUtils.extract(workbook, "Control", "D12").substring(0, 6))
+                .auditorName(ExcelUtils.extract(workbook, "Control", "D155"))
                 .build();
         statisticsService.updateTask(job);
         return job;
@@ -91,8 +92,9 @@ public class TaskSubmissionService {
     private AccountJob submitExcelExtractTask(final XSSFWorkbook workbook,
             final AccountJob.AccountJobBuilder jobBuilder) throws IOException {
         AccountJob job = jobBuilder
-                .company(ExcelUtils.extractCompanyName(workbook, "Control", "B1"))
-                .period(ExcelUtils.extractPeriodEnding(workbook, "Control", "B11"))
+                .company(ExcelUtils.extract(workbook, "Control", "B1"))
+                .period(ExcelUtils.extract(workbook, "Control", "B11").substring(0, 6))
+                .auditorName(ExcelUtils.extract(workbook, "Control", "B19"))
                 .status(Constants.Status.PENDING.name())
                 .generationTime(LocalDateTime.now())
                 .build();

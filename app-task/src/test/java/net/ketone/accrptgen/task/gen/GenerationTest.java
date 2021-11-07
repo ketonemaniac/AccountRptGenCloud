@@ -2,6 +2,7 @@ package net.ketone.accrptgen.task.gen;
 
 import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.store.StorageService;
+import net.ketone.accrptgen.task.gen.generate.BannerService;
 import net.ketone.accrptgen.task.gen.model.*;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.assertj.core.api.Assertions;
@@ -37,7 +38,7 @@ public class GenerationTest {
     private StorageService storageService;
 
     @MockBean
-    private SettingsService settingsService;
+    private BannerService bannerService;
 
     private GenerationServiceApachePOI svc;
 
@@ -68,15 +69,7 @@ public class GenerationTest {
         InputStream inputStream = this.getClass().getResourceAsStream("/" + TEMPLATE_FILE);
         Mockito.when(storageService.loadAsInputStream(ArgumentMatchers.eq(TEMPLATE_FILE))).thenReturn(inputStream);
 
-        Mockito.when(settingsService.getSettings()).thenAnswer((invocationOnMock) -> {
-            Properties properties = new Properties();
-            properties.setProperty("auditor.0.name","auditor0");
-            properties.setProperty("auditor.0.banner","banner0");
-            properties.setProperty("auditor.1.name","auditor1");
-            properties.setProperty("auditor.1.banner","banner1");
-            return properties;
-        });
-        svc = new GenerationServiceApachePOI(storageService, settingsService);
+        svc = new GenerationServiceApachePOI(storageService, bannerService);
     }
 
     @Test
@@ -126,23 +119,13 @@ public class GenerationTest {
         byte[] outBytes = svc.generate(data);
         Assertions.assertThat(outBytes.length).isGreaterThan(0);
 
-        // visiualize output
+        // visualize output
         File output= new File(TEST_OUTPUT);
         FileOutputStream out = new FileOutputStream(output);
         out.write(outBytes);
         out.close();
 
         // manual assertion to see if file is valid...
-    }
-
-    @Test
-    public void testLoadCredentialsMap() throws NoSuchFieldException, IllegalAccessException {
-        Field field = GenerationServiceApachePOI.class.getDeclaredField("bannerMap");
-        field.setAccessible(true);
-        Map<String, String> credentialsMap = (Map<String, String>) field.get(svc);
-        Assertions.assertThat(credentialsMap.get("auditor0")).isEqualTo("banner0");
-        Assertions.assertThat(credentialsMap.get("auditor1")).isEqualTo("banner1");
-
     }
 
 }

@@ -12,10 +12,11 @@ import net.ketone.accrptgen.common.util.FileUtils;
 import net.ketone.accrptgen.task.config.properties.ExcelExtractProperties;
 import net.ketone.accrptgen.task.gen.ParsingService;
 import net.ketone.accrptgen.task.gen.merge.TemplateMergeProcessor;
-import net.ketone.accrptgen.task.util.ExcelUtils;
+import net.ketone.accrptgen.task.util.ExcelTaskUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +43,6 @@ public class ExcelExtractTask {
     @Autowired
     private ExcelExtractProperties properties;
 
-
     public void doExcelExtract(final AccountJob job) {
         String inputFileName = job.getFilename();
         log.info("Opening file: " + inputFileName);
@@ -52,13 +52,15 @@ public class ExcelExtractTask {
             byte[] workbookArr = tempStorage.load(inputFileName);
             byte[] preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
 
-            Workbook stringifiedWorkbook = parsingService.postProcess(
-                    ExcelUtils.openExcelWorkbook(preParseOutput), properties.getParse());
+            XSSFWorkbook stringifiedWorkbook = parsingService.postProcess(
+                    ExcelTaskUtils.openExcelWorkbook(preParseOutput), properties.getParse());
             Map<String, String> cutColumnsMap = extractCutColumns(stringifiedWorkbook);
 
-            Workbook finalOutput = parsingService.deleteSheets(
+            XSSFWorkbook finalOutput = parsingService.deleteSheets(
                     stringifiedWorkbook, Arrays.asList("metadata", "Control"));
-            Workbook finalFinal = parsingService.cutCells(finalOutput, cutColumnsMap);
+
+            XSSFWorkbook finalFinal = parsingService.cutCells(finalOutput, cutColumnsMap);
+            parsingService.insertAuditorBanners(finalFinal, job.getAuditorName());
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             finalFinal.write(os);

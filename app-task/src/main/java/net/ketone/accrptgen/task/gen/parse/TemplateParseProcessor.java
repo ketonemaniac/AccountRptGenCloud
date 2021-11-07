@@ -7,7 +7,7 @@ import net.ketone.accrptgen.task.gen.model.AccountData;
 import net.ketone.accrptgen.task.gen.model.Paragraph;
 import net.ketone.accrptgen.task.gen.model.Section;
 import net.ketone.accrptgen.task.gen.parse.control.ControlCommand;
-import net.ketone.accrptgen.task.util.ExcelUtils;
+import net.ketone.accrptgen.task.util.ExcelTaskUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -58,7 +58,7 @@ public class TemplateParseProcessor {
             throws IOException {
 
         AccountData data = new AccountData();
-        XSSFWorkbook workbook = ExcelUtils.openExcelWorkbook(preParseOutput);
+        XSSFWorkbook workbook = ExcelTaskUtils.openExcelWorkbook(preParseOutput);
         extract(data::setCompanyName, cell -> Optional.ofNullable(cell.getStringCellValue()),
                 workbook, "Control", 1, 3, "N/A");
         extract(data::setProcessionalFees,
