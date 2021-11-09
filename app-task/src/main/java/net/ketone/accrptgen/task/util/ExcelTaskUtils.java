@@ -67,7 +67,7 @@ public class ExcelTaskUtils {
      */
     public static Flux<Tuple2<Sheet, Cell>> cells(final Sheet s) {
         return Mono.just(s)
-                .flatMapMany(sheet -> Flux.range(0, sheet.getLastRowNum())
+                .flatMapMany(sheet -> Flux.range(0, sheet.getLastRowNum()+1)
                         .filter(r -> Optional.ofNullable(sheet.getRow(r)).isPresent())
                         .map(sheet::getRow)
                 )

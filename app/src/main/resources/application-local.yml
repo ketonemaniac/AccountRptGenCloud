@@ -16,3 +16,7 @@ mongo:
 
 security:
   enable: false
+
+logging:
+  level:
+    net.ketone.accrptgen.task.gen.merge: DEBUG

@@ -70,13 +70,22 @@ public class TemplateMergeProcessor {
                 .flatMap(ExcelTaskUtils::cells)
                 .filter(tuple2 -> {
                     XSSFColor color = XSSFColor.toXSSFColor(tuple2._2.getCellStyle().getFillForegroundColorColor());
+                    Optional.ofNullable(color)
+                            .map(XSSFColor::getARGBHex)
+                            .ifPresent(hex -> log.debug("Cell={} Color={}", tuple2._2.getAddress().formatAsString(), hex));
                     return color != null && properties.getMergeCellColors().contains(color.getARGBHex().substring(2));
+                })
+                .doOnNext(tuple2 -> {
+                    log.debug("MERGE get source Cell Address={}", tuple2._2.getAddress().formatAsString());
                 })
                 .map(tuple2 -> tuple2.append(Optional.ofNullable(templateSheetMap.get(tuple2._1.getSheetName()))
                                 .map(sheet -> sheet.getRow(tuple2._2.getRowIndex()))
                                 .map(row -> row.getCell(tuple2._2.getColumnIndex()))
                                 .orElse(null)))
                 .filter(tuple3 -> Optional.ofNullable(tuple3._3).isPresent())
+                .doOnNext(tuple2 -> {
+                    log.debug("MERGE copy to target Cell Address={}", tuple2._2.getAddress().formatAsString());
+                })
                 .map(tuple3 -> tuple3.append(Optional.ofNullable(cellTypeProcessorMap.get(tuple3._2.getCellTypeEnum()))
                         .orElse(cellTypeProcessorMap.get(CellType._NONE)))
                 )
