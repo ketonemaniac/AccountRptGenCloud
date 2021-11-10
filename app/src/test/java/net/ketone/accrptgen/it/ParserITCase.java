@@ -1,31 +1,32 @@
 package net.ketone.accrptgen.it;
 
-import net.ketone.accrptgen.AccrptgenApplication;
-import net.ketone.accrptgen.domain.gen.AccountData;
-import net.ketone.accrptgen.domain.gen.Section;
-import net.ketone.accrptgen.domain.gen.SectionElement;
-import net.ketone.accrptgen.domain.gen.Table;
-import net.ketone.accrptgen.service.gen.GenerationService;
-import net.ketone.accrptgen.service.gen.ParsingService;
-import net.ketone.accrptgen.service.mail.EmailService;
-import net.ketone.accrptgen.service.stats.StatisticsService;
-import net.ketone.accrptgen.service.store.StorageService;
+import net.ketone.accrptgen.app.AccrptgenApplication;
+import net.ketone.accrptgen.task.config.properties.ParseProperties;
+import net.ketone.accrptgen.task.gen.model.Section;
+import net.ketone.accrptgen.task.gen.model.SectionElement;
+import net.ketone.accrptgen.task.gen.model.Table;
+import net.ketone.accrptgen.task.gen.GenerationService;
+import net.ketone.accrptgen.task.gen.ParsingService;
+import net.ketone.accrptgen.common.mail.EmailService;
+import net.ketone.accrptgen.common.domain.stats.StatisticsService;
+import net.ketone.accrptgen.common.store.StorageService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +36,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /**
  * You need at least TWO files in the /local/files/ folder
@@ -45,7 +45,7 @@ import static org.junit.Assert.assertTrue;
  * -Dspring.profiles.active=has_template
  */
 @IfProfileValue(name = "spring.profiles.active", values = {"itcase"})
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles("local")
 @SpringBootTest(classes = AccrptgenApplication.class)
 public class ParserITCase {
@@ -97,7 +97,7 @@ public class ParserITCase {
 
     private void testSection6(Section section) {
         List<SectionElement> t = section.getElements().stream().filter(s -> s instanceof Table).collect(Collectors.toList());
-        assertTrue(t.size() >= 4);
+        Assertions.assertThat(t.size()).isGreaterThanOrEqualTo(4);
         Table table = (Table) t.get(3);
         for(List<Table.Cell> row : table.getCells()) {
             // Yes/No column value derived from other sheets
@@ -109,7 +109,7 @@ public class ParserITCase {
 
     private void testSection5(Section section) {
         Optional<SectionElement> t = section.getElements().stream().filter(s -> s instanceof Table).findFirst();
-        assertTrue(t.isPresent());
+        Assertions.assertThat(t).isNotNull();
         Table table = (Table) t.get();
         for(List<Table.Cell> row : table.getCells()) {
             // formula derived from other sheets
@@ -122,7 +122,7 @@ public class ParserITCase {
 
     private void testSection3(Section section) {
         Optional<SectionElement> t = section.getElements().stream().filter(s -> s instanceof Table).findFirst();
-        assertTrue(t.isPresent());
+        Assertions.assertThat(t).isNotNull();
         Table table = (Table) t.get();
         for(List<Table.Cell> row : table.getCells()) {
             // addition formula
@@ -138,7 +138,7 @@ public class ParserITCase {
 
     private void testSection4(Section section) {
         Optional<SectionElement> t = section.getElements().stream().filter(s -> s instanceof Table).findFirst();
-        assertTrue(t.isPresent());
+        Assertions.assertThat(t).isNotNull();
         Table table = (Table) t.get();
         for(List<Table.Cell> row : table.getCells()) {
             // cell formulas on source
@@ -157,7 +157,7 @@ public class ParserITCase {
     public void testStringifyContents() throws IOException {
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("formulaToText.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(in);
-        Workbook outputWb = svc.postProcess(workbook);
+        Workbook outputWb = svc.postProcess(workbook, new ParseProperties());
         // number
         Cell c = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
         assertThat(c.getCellTypeEnum()).isEqualTo(CellType.NUMERIC);
@@ -179,7 +179,7 @@ public class ParserITCase {
     public void testRemoveColors() throws IOException {
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("removeColors.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(in);
-        Workbook outputWb = svc.postProcess(workbook);
+        Workbook outputWb = svc.postProcess(workbook, new ParseProperties());
         Cell cell = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
         XSSFColor color = XSSFColor.toXSSFColor(cell.getCellStyle().getFillForegroundColorColor());
         assertThat(color.getIndex()).isEqualTo(IndexedColors.AUTOMATIC.index);

@@ -1,15 +1,15 @@
 package net.ketone.accrptgen.it;
 
-import net.ketone.accrptgen.domain.dto.AccountJob;
-import net.ketone.accrptgen.service.gen.Pipeline;
-import net.ketone.accrptgen.service.mail.Attachment;
-import net.ketone.accrptgen.service.mail.EmailService;
-import net.ketone.accrptgen.service.store.FileStorageService;
-import net.ketone.accrptgen.service.store.StorageService;
+import net.ketone.accrptgen.common.model.AccountJob;
+import net.ketone.accrptgen.task.AccountRptTask;
+import net.ketone.accrptgen.common.mail.Attachment;
+import net.ketone.accrptgen.common.mail.EmailService;
+import net.ketone.accrptgen.common.store.FileStorageService;
+import net.ketone.accrptgen.common.store.StorageService;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.util.IOUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +22,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +43,7 @@ import static org.mockito.Matchers.eq;
  * output is in target/test-output folder
  */
 @IfProfileValue(name = "spring.profiles.active", values = {"itcase"})
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles("local")
 @SpringBootTest
 public class AccrptgenApplicationITCase {
@@ -92,9 +91,9 @@ public class AccrptgenApplicationITCase {
 				.generationTime(genTime)
 				.filename(PLAIN_FILENAME)
 				.build();
-		Pipeline pipeline = ctx.getBean(Pipeline.class, accountJob);
-		pipeline.run();
-		Mockito.verify(emailService).sendEmail(any(), argumentCaptor.capture());
+		AccountRptTask accountRptTask = ctx.getBean(AccountRptTask.class, accountJob);
+		accountRptTask.run();
+		Mockito.verify(emailService).sendEmail(any(), argumentCaptor.capture(), any());
 		List<Attachment> attachments = argumentCaptor.getValue();
 		assertThat(attachments).hasSize(3);
 

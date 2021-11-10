@@ -28,7 +28,7 @@ function del(path) {
  * ajax doesn't handle file downloads elegantly
  * @param {*} filename 
  */
-function download(url, filename, fileType) {
+function download(url, filename) {
     var req = new XMLHttpRequest();
     var fullUrl = url + "?file=" + encodeURIComponent(filename); 
     req.open("GET", fullUrl, true);
@@ -38,16 +38,16 @@ function download(url, filename, fileType) {
         if (req.readyState === 4 && req.status === 200) {
         // test for IE
         if (typeof window.navigator.msSaveBlob === 'function') {
-            window.navigator.msSaveBlob(req.response, filename + fileType);
+            window.navigator.msSaveBlob(req.response, filename);
         } else {
             var blob = req.response;
             var link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.download = filename + fileType;
+            link.download = filename;
             // append the link to the document body
             document.body.appendChild(link);
             link.click();
-            link.remove();// you need to remove that elelment which is created before
+            link.remove();// you need to remove that element which is created before
         }
         }
     };
@@ -109,9 +109,9 @@ export default {
         return post('/api/accrptgen/startGeneration', accountJob)
     },
     downloadGeneratedZip(filename) {
-        return download('/api/accrptgen/file', filename, ".zip")
+        return download('/api/accrptgen/file', filename)
     },
     downloadTemplate(filename) {
-        return download('/api/settings/file', filename, "")
+        return download('/api/settings/file', filename)
     }
 }

@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <title>Excel Extract Job Output</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'/>
+
+    <!-- use the font -->
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+        }
+        table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        table .field {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<p>
+    Dear <span th:text="${authentication}"></span>,
+</p>
+<p>
+    An excel extract has been successfully generated as attached.
+</p>
+<h1>Generation Details</h1>
+<table th:object="${job}">
+    <tr><td class="field">Company Name:</td><td th:text="*{company}"></td></tr>
+</table>
+
+<hr/>
+    <b><i>Accounting Report Generator</i></b>
+</hr>
+</body>
+</html>

@@ -16,7 +16,7 @@ target/
 *.ipr
 
 ## Google Cloud ###
-.run
+.run/**
 
 ### NetBeans ###
 nbproject/private/

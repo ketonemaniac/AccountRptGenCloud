@@ -72,9 +72,10 @@ class App extends Component {
             const companies = [{
               company: resData.company,
               filename: resData.filename,
-              status: "PRELOADED",
+              status: resData.status,
               id: resData.id,
-              period: resData.period
+              period: resData.period,
+              docType: resData.docType
             }, ...state.companies];
             return {
               companies: companies,
@@ -185,11 +186,13 @@ class App extends Component {
                                 <Input key={c.id + "-company"} type="hidden" name="company" value={c.company} />
                                 <Input key={c.id + "-submittedBy"} type="hidden" name="submittedBy" value={c.submittedBy} />
                                 <Input key={c.id + "-period"} type="hidden" name="period" value={c.period} />
-                                <FormGroup row>
-                                  <Label sm={3} for="referredBy">Referrer
-                          <span style={{ "display": c.status == "PRELOADED" ? "block" : "none" }} className="text-muted">(Optional)</span></Label>
-                                  {this.renderReferredBy(c)}
-                                </FormGroup>
+                                <span style={{"display" : c.docType == "AccountRpt" ? "block" : "none"}}>
+                                      <FormGroup row>
+                                      <Label sm={3} for="referredBy">Referrer
+                                        <span style={{ "display": c.status == "PRELOADED" ? "block" : "none" }} className="text-muted">(Optional)</span></Label>
+                                      {this.renderReferredBy(c)}
+                                    </FormGroup>
+                                </span>
                                 <FormGroup row>
                                   <Label sm={3} for="status">Status</Label>
                                   <Col sm={9}>
