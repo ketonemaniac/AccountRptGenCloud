@@ -109,7 +109,15 @@ public class ParsingService {
                             CellReference cr = new CellReference(cutCell + row.getRowNum());
                             if(row.getCell(cr.getCol()) != null) {
                                 for(int i = cr.getCol(); i <= row.getLastCellNum(); i++) {
-                                    row.removeCell(row.getCell(i));
+                                    final int j = i;
+                                    Optional.ofNullable(row.getCell(i))
+                                        .ifPresentOrElse(cell -> row.removeCell(cell),
+                                                () -> {
+                                            log.warn("Empty cell, cannot cut sheet={} cell={}",
+                                                    sheet.getSheetName(), new CellReference(row.getRowNum(), j)
+                                                            .formatAsString());
+                                                });
+
                                 }
                             }
                         });
