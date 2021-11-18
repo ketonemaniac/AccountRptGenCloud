@@ -21,10 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -50,11 +47,12 @@ public class ExcelExtractTask {
         String fileExtension = inputFileName.substring(inputFileName.lastIndexOf("."));
         try {
             byte[] workbookArr = tempStorage.load(inputFileName);
+            Map<String, String> cutColumnsMap = extractCutColumns(ExcelTaskUtils.openExcelWorkbook(workbookArr));
+            properties.getMerge().setPreParseSheets(new ArrayList(cutColumnsMap.keySet()));
             byte[] preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
 
             XSSFWorkbook stringifiedWorkbook = parsingService.postProcess(
                     ExcelTaskUtils.openExcelWorkbook(preParseOutput), properties.getParse());
-            Map<String, String> cutColumnsMap = extractCutColumns(stringifiedWorkbook);
 
             XSSFWorkbook finalOutput = parsingService.deleteSheets(
                     stringifiedWorkbook, Arrays.asList("metadata", "Control"));
