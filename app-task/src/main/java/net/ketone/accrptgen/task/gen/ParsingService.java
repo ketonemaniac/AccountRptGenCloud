@@ -15,10 +15,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -101,15 +98,34 @@ public class ParsingService {
         return wb;
     }
 
+    public XSSFWorkbook retainSheets(XSSFWorkbook wb, List<String> sheetsToRetain) {
+        List<String> sheetsToDelete = new ArrayList<>();
+        wb.sheetIterator().forEachRemaining(sheet -> {
+            if(!sheetsToRetain.contains(sheet.getSheetName())) {
+                sheetsToDelete.add(sheet.getSheetName());
+            }
+        });
+        return deleteSheets(wb, sheetsToDelete);
+    }
+
     public XSSFWorkbook cutCells(final XSSFWorkbook wb, Map<String, String> cutCellsMap) {
         wb.sheetIterator().forEachRemaining(sheet -> {
             Optional.ofNullable(cutCellsMap.get(sheet.getSheetName()))
+                    .filter(StringUtils::isNotEmpty)
                     .ifPresent(cutCell -> {
                         sheet.rowIterator().forEachRemaining(row -> {
                             CellReference cr = new CellReference(cutCell + row.getRowNum());
                             if(row.getCell(cr.getCol()) != null) {
                                 for(int i = cr.getCol(); i <= row.getLastCellNum(); i++) {
-                                    row.removeCell(row.getCell(i));
+                                    final int j = i;
+                                    Optional.ofNullable(row.getCell(i))
+                                        .ifPresentOrElse(cell -> row.removeCell(cell),
+                                                () -> {
+                                            log.warn("Empty cell, cannot cut sheet={} cell={}",
+                                                    sheet.getSheetName(), new CellReference(row.getRowNum(), j)
+                                                            .formatAsString());
+                                                });
+
                                 }
                             }
                         });

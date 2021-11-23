@@ -94,7 +94,7 @@ public class TaskSubmissionService {
         AccountJob job = jobBuilder
                 .company(ExcelUtils.extract(workbook, "Control", "B1"))
                 .period(ExcelUtils.extract(workbook, "Control", "B11").substring(0, 6))
-                .auditorName(ExcelUtils.extract(workbook, "Control", "B19"))
+                .auditorName(ExcelUtils.extract(workbook, "Control", "B21"))
                 .status(Constants.Status.PENDING.name())
                 .generationTime(LocalDateTime.now())
                 .build();
