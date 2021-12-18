@@ -95,6 +95,7 @@ public class TaskSubmissionService {
                 .company(ExcelUtils.extract(workbook, "Control", "B1"))
                 .period(ExcelUtils.extract(workbook, "Control", "B11").substring(0, 6))
                 .auditorName(ExcelUtils.extract(workbook, "Control", "B21"))
+                .referredBy(ExcelUtils.extract(workbook, "Control", "B30"))
                 .status(Constants.Status.PENDING.name())
                 .generationTime(LocalDateTime.now())
                 .build();
