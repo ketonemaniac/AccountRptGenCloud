@@ -5,3 +5,8 @@ basic_scaling:
 env_variables:
   JAVA_USER_OPTS: "-Djava.util.logging.config.file=WEB-INF/classes/logging.properties"
   SPRING_PROFILES_ACTIVE: "staging,gCloudStandard"
+handlers:
+  - url: /.*
+    secure: always
+    redirect_http_response_code: 301
+    script: auto
