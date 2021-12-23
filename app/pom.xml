@@ -156,6 +156,7 @@
 				<directory>src/main/resources</directory>
 				<excludes>
 					<exclude>**/*.docx</exclude>
+					<exclude>keystore/*</exclude>
 				</excludes>
 				<!-- includes>
 					<include>application.yml</include>
@@ -166,6 +167,7 @@
 				<filtering>false</filtering>
 				<includes>
 					<include>**/*.docx</include>
+					<include>keystore/*</include>
 				</includes>
 			</resource>
 		</resources>

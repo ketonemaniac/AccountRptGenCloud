@@ -40,6 +40,7 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        http.requiresChannel().anyRequest().requiresSecure();
         var secu = http
                 .csrf().disable()
                 .authorizeRequests()
@@ -48,11 +49,14 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
                 .antMatchers(STATUS_QUEUE_ENDPOINT).permitAll()
                 .antMatchers("/task/**").permitAll()
                 .antMatchers("/login").permitAll()
-                .antMatchers("/api/user/encode/**").permitAll();
+                .antMatchers("/api/user/encode/**").permitAll()
+                ;
+
         if(!enableSecurity) {
             secu.anyRequest().permitAll();
         } else {
-            secu.antMatchers("/api/admin/user/**").hasAuthority("Admin")
+            secu
+                    .antMatchers("/api/admin/user/**").hasAuthority("Admin")
                     .antMatchers("/api/settings/**").hasAuthority("Admin")
                     // for login page
                     .antMatchers("/static/js/**").permitAll()

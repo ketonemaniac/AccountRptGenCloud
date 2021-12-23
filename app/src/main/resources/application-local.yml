@@ -20,3 +20,12 @@ security:
 logging:
   level:
     net.ketone.accrptgen.task.gen.merge: DEBUG
+
+# https://web.dev/how-to-use-local-https/
+# https://www.baeldung.com/convert-pem-to-jks
+server:
+  ssl:
+    key-store-type: PKCS12
+    key-store: classpath:keystore/certificate.p12
+    key-alias: certificate
+    enabled: true
