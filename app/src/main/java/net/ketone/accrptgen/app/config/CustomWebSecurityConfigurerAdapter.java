@@ -40,7 +40,6 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.requiresChannel().anyRequest().requiresSecure();
         var secu = http
                 .csrf().disable()
                 .authorizeRequests()
