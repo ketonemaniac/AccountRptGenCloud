@@ -74,7 +74,8 @@ public class SendgridEmailService extends AbstractEmailService {
         email.setFrom(SENDGRID_SENDER);
         email.setFromName("Accounting Report Generator");
         email.setBcc(recipients.get("bcc"));
-        email.setSubject(properties.getSubjectPrefix() + dto.getCompany());
+        email.setSubject(String.format("%s%s %s", dto.getFundingType(),
+                properties.getSubjectPrefix() + dto.getCompany()));
         email.setHtml(emailTemplateService.populateTemplate(dto, properties));
 
         for(Attachment attachment : attachments) {

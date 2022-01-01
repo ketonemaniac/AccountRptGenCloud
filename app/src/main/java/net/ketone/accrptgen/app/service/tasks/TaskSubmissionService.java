@@ -1,6 +1,8 @@
 package net.ketone.accrptgen.app.service.tasks;
 
+import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
+import net.ketone.accrptgen.common.model.GenerationException;
 import net.ketone.accrptgen.common.util.ExcelUtils;
 import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.model.AccountJob;
@@ -10,7 +12,9 @@ import net.ketone.accrptgen.app.util.UserUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -35,67 +39,50 @@ public class TaskSubmissionService {
         AccountJob.AccountJobBuilder jobBuilder = AccountJob.builder()
                 .id(UUID.randomUUID())
                 .filename(curTimeMs + fileExtension)
-                .status(Constants.Status.PRELOADED.name())
                 .submittedBy(UserUtils.getAuthenticatedUser());
-        XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
+        return Try.of(() -> {
+            XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
 
-        if(Optional.ofNullable(workbook.getSheet("metadata"))
-            .map(meta -> meta.getRow(0))
-            .map(row -> row.getCell(1))
-            .map(XSSFCell::getStringCellValue)
-                .filter(str -> str.equalsIgnoreCase(Constants.DOCTYPE_EXCEL_EXTRACT))
-                .isPresent()) {
-            jobBuilder.docType(Constants.DOCTYPE_EXCEL_EXTRACT);
-            return submitExcelExtractTask(workbook, jobBuilder);
-        } else {
-            jobBuilder.docType(Constants.DOCTYPE_ACCOUNT_RPT);
-            return preloadAccountRpt(workbook, jobBuilder);
-        }
+            if(Optional.ofNullable(workbook.getSheet("metadata"))
+                    .map(meta -> meta.getRow(0))
+                    .map(row -> row.getCell(1))
+                    .map(XSSFCell::getStringCellValue)
+                    .filter(str -> str.equalsIgnoreCase(Constants.DOCTYPE_EXCEL_EXTRACT))
+                    .isPresent()) {
+                jobBuilder.docType(Constants.DOCTYPE_EXCEL_EXTRACT);
+                return submitExcelExtractTask(workbook, jobBuilder);
+            } else {
+                jobBuilder.docType(Constants.DOCTYPE_ACCOUNT_RPT);
+                return submitAccountRpt(workbook, jobBuilder);
+            }
+        }).getOrElseThrow(this::handleError);
     }
 
-    public AccountJob submitAccountRpt(final AccountJob job) throws IOException {
-        AccountJob accountJob = job.toBuilder()
+    public AccountJob submitAccountRpt(final XSSFWorkbook workbook,
+                                       final AccountJob.AccountJobBuilder jobBuilder) throws IOException {
+        AccountJob accountJob = jobBuilder
+                .company(ExcelUtils.extractByTitleCellName(workbook, "Control", "Company's name", 3))
+                .period(ExcelUtils.extractByTitleCellName(workbook, "Control", "To", 3).substring(0, 6))
+                .auditorName(ExcelUtils.extractByTitleCellName(workbook, "Control", "Auditor's name", 3))
+                .referredBy(ExcelUtils.extractByTitleCellName(workbook, "Control", "Referrer", 3))
                 .status(Constants.Status.PENDING.name())
                 .submittedBy(UserUtils.getAuthenticatedUser())
                 .generationTime(LocalDateTime.now())
                 .build();
-        try {
-            String inputFileName = accountJob.getFilename();
-            if(!tempStorage.hasFile(inputFileName)) {
-                log.warn("File not present: " + inputFileName);
-                accountJob.setStatus(Constants.Status.FAILED.name());
-                statisticsService.updateTask(accountJob);
-                return accountJob;
-            }
-            statisticsService.updateTask(accountJob);
-            tasksService.submitTask(accountJob, Constants.GEN_QUEUE_ENDPOINT);
-        } catch (Exception e) {
-            log.error("Error in startGeneration", e);
-            accountJob.setStatus(Constants.Status.FAILED.name());
-            statisticsService.updateTask(accountJob);
-        }
+        statisticsService.updateTask(accountJob);
+        tasksService.submitTask(accountJob, Constants.GEN_QUEUE_ENDPOINT);
         return accountJob;
     }
-
-    private AccountJob preloadAccountRpt(final XSSFWorkbook workbook,
-                                            final AccountJob.AccountJobBuilder jobBuilder) throws IOException {
-        AccountJob job = jobBuilder
-                .company(ExcelUtils.extract(workbook, "Control", "D2"))
-                .period(ExcelUtils.extract(workbook, "Control", "D12").substring(0, 6))
-                .auditorName(ExcelUtils.extract(workbook, "Control", "D155"))
-                .build();
-        statisticsService.updateTask(job);
-        return job;
-    }
-
 
     private AccountJob submitExcelExtractTask(final XSSFWorkbook workbook,
             final AccountJob.AccountJobBuilder jobBuilder) throws IOException {
         AccountJob job = jobBuilder
-                .company(ExcelUtils.extract(workbook, "Control", "B1"))
-                .period(ExcelUtils.extract(workbook, "Control", "B11").substring(0, 6))
-                .auditorName(ExcelUtils.extract(workbook, "Control", "B21"))
-                .referredBy(ExcelUtils.extract(workbook, "Control", "B30"))
+                .company(ExcelUtils.extractByTitleCellName(workbook, "Control", "Company name", 1))
+                .period(ExcelUtils.extractByTitleCellName(workbook, "Control", "Period from", 1).substring(0, 6))
+                .auditorName(ExcelUtils.extractByTitleCellName(workbook, "Control", "Auditor's name",1))
+                .referredBy(ExcelUtils.extractByTitleCellName(workbook, "Control", "Referrer", 1))
+                .fundingType(ExcelUtils.extractByTitleCellName(workbook, "Control",
+                        "Funding type (D-biz, TVP, Bud)", 1))
                 .status(Constants.Status.PENDING.name())
                 .generationTime(LocalDateTime.now())
                 .build();
@@ -104,6 +91,9 @@ public class TaskSubmissionService {
         return job;
     }
 
-
+    private RuntimeException handleError(final Throwable e) {
+        log.error("Error in startGeneration", e);
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
 
 }

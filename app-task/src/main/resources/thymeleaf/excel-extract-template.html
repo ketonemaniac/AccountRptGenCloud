@@ -30,7 +30,7 @@
     Dear <span th:text="${authentication}"></span>,
 </p>
 <p>
-    An excel extract has been successfully generated as attached.
+    A <span th:text="${job.fundingType}"/> Funding report has been successfully generated as attached.
 </p>
 <h1>Generation Details</h1>
 <table th:object="${job}">

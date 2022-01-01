@@ -2,6 +2,7 @@ package net.ketone.accrptgen.app.api;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
+import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.app.exception.ValidationException;
@@ -15,10 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,20 +44,12 @@ public class AccRptGenController {
     @PostMapping("/file")
     public AccountJob handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
         if(file.getOriginalFilename().lastIndexOf(".") == -1) {
-            throw new ValidationException("No file extension found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file extension found");
         }
         return taskSubmissionService.triage(
                 file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")),
                 file.getBytes());
     }
-
-    @PostMapping("/startGeneration")
-    public AccountJob startGeneration(final AccountJob job) throws IOException {
-        log.info("cacheFilename=" + job.getFilename() + "; referredBy=" + job.getReferredBy());
-        return taskSubmissionService.submitAccountRpt(job);
-
-    }
-
 
     @GetMapping("/file")
     public ResponseEntity<Resource> downloadFile(@RequestParam("file") String fileName) throws IOException {
@@ -84,7 +79,6 @@ public class AccRptGenController {
         q.purge();
         return true;
     }
-
 
 }
 

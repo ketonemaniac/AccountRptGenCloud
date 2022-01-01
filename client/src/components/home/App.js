@@ -75,7 +75,8 @@ class App extends Component {
               status: resData.status,
               id: resData.id,
               period: resData.period,
-              docType: resData.docType
+              docType: resData.docType,
+              referredBy: resData.referredBy 
             }, ...state.companies];
             return {
               companies: companies,
@@ -85,9 +86,9 @@ class App extends Component {
         })
         .catch(e => {
           this.setState({
-            uploadError: e.response.status + " " + JSON.stringify(e.response.data),
+            uploadError: e?.response?.data?.message,
             fileUploadBlock: false,
-            isModalOpen: true
+            isUploadErrorModalOpen: true
           }
           )
         }
@@ -105,7 +106,7 @@ class App extends Component {
           <ModalHeader toggle={this.toggleUploadErrorModal.bind(this)}>Error uploading file</ModalHeader>
           <ModalBody>
             Some of your inputs may not be correct. Please check the file format before uploading again.
-            <p /><span className="text-muted">Error = {error}</span>
+            <p /><span className="text-muted">Error: {error}</span>
           </ModalBody>
         </Modal>
       </div>
@@ -114,7 +115,7 @@ class App extends Component {
 
   toggleUploadErrorModal() {
     this.setState((oldState) => {
-      return { isModalOpen: !oldState.isUploadErrorModalOpen }
+      return { isUploadErrorModalOpen: !oldState.isUploadErrorModalOpen }
     });
   }
 
@@ -186,13 +187,16 @@ class App extends Component {
                                 <Input key={c.id + "-company"} type="hidden" name="company" value={c.company} />
                                 <Input key={c.id + "-submittedBy"} type="hidden" name="submittedBy" value={c.submittedBy} />
                                 <Input key={c.id + "-period"} type="hidden" name="period" value={c.period} />
-                                <span style={{"display" : c.docType == "AccountRpt" ? "block" : "none"}}>
-                                      <FormGroup row>
-                                      <Label sm={3} for="referredBy">Referrer
-                                        <span style={{ "display": c.status == "PRELOADED" ? "block" : "none" }} className="text-muted">(Optional)</span></Label>
-                                      {this.renderReferredBy(c)}
-                                    </FormGroup>
-                                </span>
+                                
+                                <FormGroup row>
+                                      <Label sm={3} for="referredBy">Referrer</Label>
+                                        <Col sm={9}>
+                                          <Input key={c.company.id + "-referredBy"} className="input-text-borderless"
+                                            disabled="disabled"
+                                            type="text" name="referredBy" id="referredBy"
+                                            value={c.referredBy} />
+                                        </Col>
+                                </FormGroup>
                                 <FormGroup row>
                                   <Label sm={3} for="status">Status</Label>
                                   <Col sm={9}>
@@ -250,27 +254,6 @@ class App extends Component {
     return <span />;
   }
 
-  renderReferredBy(company) {
-    switch (company.status) {
-      case "PRELOADED":
-        return (
-          <Col sm={9}>
-            <Input key={company.id + "-referredBy"}
-              type="text" name="referredBy" id="referredBy" placeholder="The referrer's name to appear in email" />
-          </Col>
-        )
-      default:
-        return (
-          <Col sm={9}>
-            <Input key={company.id + "-referredBy"} className="input-text-borderless"
-              disabled="disabled"
-              type="text" name="referredBy" id="referredBy"
-              value={company.referredBy} />
-          </Col>
-        )
-    }
-  }
-
   renderGenerationTime(company) {
     switch (company.status) {
       case "PENDING":
@@ -296,11 +279,6 @@ class App extends Component {
 
   renderButton(company) {
     switch (company.status) {
-      case "PRELOADED":
-        return (
-          <Button
-            type="submit" color="success" className="generate-button mr-2">Generate</Button>
-        )
       case "EMAIL_SENT":
         return (
           <Button onClick={this.handleDownload.bind(this, company)}

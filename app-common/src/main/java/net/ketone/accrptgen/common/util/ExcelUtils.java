@@ -8,15 +8,42 @@ import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.text.SimpleDateFormat;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Function;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 public class ExcelUtils {
 
-    public static String extract(final XSSFWorkbook workbook, final String sheetName,
+    private static final String MISSING_INFO = "Please provide data(Col %s) with title(Col A) '%s' of sheet '%s'";
+
+    private static final String colStrMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    public static String extractByTitleCellName(final XSSFWorkbook workbook, final String sheetName,
+                                                    final String titleCellName, final int dataColumn) {
+       return Optional.ofNullable(workbook.getSheet(sheetName))
+                .map(sheet -> sheet.rowIterator())
+                .map(iterator -> StreamSupport.stream(
+                        Spliterators.spliteratorUnknownSize(
+                                iterator, Spliterator.ORDERED), false)
+                        .filter(row -> row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)
+                            .getStringCellValue().trim().startsWith(titleCellName))
+                        .findFirst())
+                .flatMap(Function.identity())
+                .map(row -> row.getCell(dataColumn))
+                .map(cell -> cell.getAddress().formatAsString())
+                .flatMap(cellRef -> extract(workbook, sheetName, cellRef))
+                .orElseThrow(() -> new RuntimeException(String.format(MISSING_INFO, colStrMap.charAt(dataColumn),
+                        titleCellName, sheetName)));
+    }
+
+    public static Optional<String> extract(final XSSFWorkbook workbook, final String sheetName,
                                              final String cellRef) {
         CellReference cr = new CellReference(cellRef);
         return Optional.ofNullable(workbook.getSheet(sheetName))
@@ -35,8 +62,7 @@ public class ExcelUtils {
                         default:
                             return StringUtils.EMPTY;
                     }
-                })
-                .orElse(StringUtils.EMPTY);
+                });
     }
 
     public static CellValueHolder getCellValue(Cell c) {
