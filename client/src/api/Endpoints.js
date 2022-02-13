@@ -7,8 +7,16 @@ function get(path) {
 }
 
 function post(path, data) {
-    return axios.post(path, data)
-            .then(res => res.data);
+    return axios.get("/csrf")
+            .then(tokenResp => {
+                let config = {
+                    headers: {
+                        'X-CSRF-TOKEN': tokenResp.data.token,
+                    }
+                  }
+                return axios.post(path, data, config);
+            })
+            .then(res => res.data)
 }
 
 function put(path, data) {
