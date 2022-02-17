@@ -19,4 +19,5 @@ mongo:
 
 logging:
   level:
+#    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
     net.ketone.accrptgen.task.gen.merge: DEBUG

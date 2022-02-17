@@ -20,13 +20,29 @@ function post(path, data) {
 }
 
 function put(path, data) {
-    return axios.put(path, data)
+    return axios.get("/csrf")
+            .then(tokenResp => {
+                let config = {
+                    headers: {
+                        'X-CSRF-TOKEN': tokenResp.data.token,
+                    }
+                }
+                return axios.put(path, data, config);
+            })
             .catch(error => { console.log(error); throw Error(error) })
             .then(res => res.data);
 }
 
 function del(path) {
-    return axios.delete(path)
+    return axios.get("/csrf")
+            .then(tokenResp => {
+                let config = {
+                    headers: {
+                        'X-CSRF-TOKEN': tokenResp.data.token,
+                    }
+                }
+                return axios.delete(path, config);
+            })
             .catch(error => { console.log(error); throw Error(error) })
             .then(res => res.data);
 }
