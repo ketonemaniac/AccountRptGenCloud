@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -53,5 +54,7 @@ public class AccountJob implements Serializable {
     private String docType;
 
     private String auditorName;
+
+    private String fundingType = StringUtils.EMPTY;
 
 }

@@ -56,7 +56,7 @@ accountrpt:
 excel-extract:
   mail:
     template: 'excel-extract-template.html'
-    subject-prefix: 'D-biz Report For '
+    subject-prefix: ' Funding Report For '
   merge:
     template-path: dBizFunding
     template-file-property: xlsx.template.dBizFunding.name

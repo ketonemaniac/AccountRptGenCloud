@@ -57,7 +57,7 @@ const Settings = (props) => {
                 </Form>             
                 <TemplateList rowData={allDocsData} init={init} fileType={"allDocs"} title={"Template Excel"}/>
                 <TemplateList rowData={auditPrgData} init={init} fileType={"auditPrg"} title={"Audit Programme Excel"}/>
-                <TemplateList rowData={dBizFundingData} init={init} fileType={"dBizFunding"} title={"D-Biz Funding Excel"}/>
+                <TemplateList rowData={dBizFundingData} init={init} fileType={"dBizFunding"} title={"Funding Excel"}/>
             </Container>
         </React.Fragment>
     );

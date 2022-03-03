@@ -1,6 +1,6 @@
 package net.ketone.accrptgen.task;
 
-import com.google.api.client.util.Lists;
+import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
@@ -14,7 +14,6 @@ import net.ketone.accrptgen.task.config.properties.ExcelExtractProperties;
 import net.ketone.accrptgen.task.gen.ParsingService;
 import net.ketone.accrptgen.task.gen.merge.TemplateMergeProcessor;
 import net.ketone.accrptgen.task.util.ExcelTaskUtils;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -26,6 +25,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Component
@@ -53,17 +54,20 @@ public class ExcelExtractTask {
         String fileExtension = inputFileName.substring(inputFileName.lastIndexOf("."));
         try {
             byte[] workbookArr = tempStorage.load(inputFileName);
-            Map<String, String> cutColumnsMap = extractCutColumns(ExcelTaskUtils.openExcelWorkbook(workbookArr));
-            properties.getMerge().setPreParseSheets(
-                    ListUtils.union(new ArrayList<>(cutColumnsMap.keySet()), CONTROL_SHEETS));
+            properties.getMerge().setPreParseSheets(sheets(workbookArr));
             byte[] preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
 
+            // parse and stringify contents
             XSSFWorkbook stringifiedWorkbook = parsingService.postProcess(
                     ExcelTaskUtils.openExcelWorkbook(preParseOutput), properties.getParse());
 
+            Map<String, String> cutColumnsMap = extractCutColumns(stringifiedWorkbook);
+
+            // remove sheets according to cutColumnsMap
             XSSFWorkbook finalOutput = parsingService.retainSheets(stringifiedWorkbook,
                                                     new ArrayList<>(cutColumnsMap.keySet()));
 
+            // cut cells according to cutColumnsMap
             XSSFWorkbook finalFinal = parsingService.cutCells(finalOutput, cutColumnsMap);
             parsingService.insertAuditorBanners(finalFinal, job.getAuditorName());
 
@@ -132,4 +136,14 @@ public class ExcelExtractTask {
         );
         return cutRowsMap;
     }
+
+    private static List<String> sheets(final byte[] workbookArr) {
+        return Try.of(() ->
+                StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                        ExcelTaskUtils.openExcelWorkbook(workbookArr).sheetIterator(), Spliterator.ORDERED), false)
+                .map(Sheet::getSheetName)
+                .collect(Collectors.toList()))
+        .getOrElse(List.of());
+    }
+
 }

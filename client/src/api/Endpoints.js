@@ -8,7 +8,6 @@ function get(path) {
 
 function post(path, data) {
     return axios.post(path, data)
-            .catch(error => { console.log(error); throw Error(error) })
             .then(res => res.data);
 }
 

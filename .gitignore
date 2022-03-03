@@ -33,5 +33,6 @@ nbdist/
 /web
 /local/files/**
 /local/temp/**
+/local/keystore/**
 **/accountrptgen.log*
 client/out

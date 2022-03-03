@@ -1,0 +1,14 @@
+# https://web.dev/how-to-use-local-https/
+# brew install mkcert
+# mkcert localhost
+
+# https://www.baeldung.com/convert-pem-to-jks
+# openssl pkcs12 -export -in localhost.pem -inkey localhost-key.pem -out certificate.p12 -name "certificate"
+
+# delete in Mac's keychain access --> System --> Certificates
+server:
+  ssl:
+    key-store-type: PKCS12
+    key-store: ../local/keystore/certificate.p12
+    key-alias: certificate
+    enabled: true

@@ -22,6 +22,7 @@ import net.ketone.accrptgen.common.config.properties.MailProperties;
 import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.model.auth.User;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -74,7 +75,8 @@ public class SendgridEmailService extends AbstractEmailService {
         email.setFrom(SENDGRID_SENDER);
         email.setFromName("Accounting Report Generator");
         email.setBcc(recipients.get("bcc"));
-        email.setSubject(properties.getSubjectPrefix() + dto.getCompany());
+        email.setSubject(String.format("%s%s %s", Optional.ofNullable(dto.getFundingType()).orElse(
+                StringUtils.EMPTY), properties.getSubjectPrefix(), dto.getCompany()));
         email.setHtml(emailTemplateService.populateTemplate(dto, properties));
 
         for(Attachment attachment : attachments) {
