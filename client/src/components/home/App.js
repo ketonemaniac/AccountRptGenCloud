@@ -143,7 +143,7 @@ class App extends Component {
           <Dropzone ref={dropzoneRef} onDrop={this.onDrop.bind(this)}>
             {({ getRootProps, getInputProps, isDragActive }) => {
               return (
-                <Jumbotron style={{
+                <div className="jumbotron" style={{
                   paddingTop: showAddDetail ? "5%" : "15%",
                   paddingBottom: showAddDetail ? "5%" : "15%"
                 }}
@@ -163,7 +163,7 @@ class App extends Component {
                       </span>
                     </div>
                   </Container>
-                </Jumbotron>
+                </div>
               )
             }}
           </Dropzone>
