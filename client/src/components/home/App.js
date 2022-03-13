@@ -231,7 +231,7 @@ class App extends Component {
           </CardDeck>
         </div>
         <Container className="footer text-center">
-          <span className="text-muted"> © Ketone Maniac @ 2021</span>          
+          <span className="text-muted"> © Ketone Maniac @ 2022</span>          
         </Container>
 
 
