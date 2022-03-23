@@ -65,6 +65,7 @@ public class TaskSubmissionService {
                 .period(ExcelUtils.extractByTitleCellName(workbook, "Control", "To", 3).substring(0, 6))
                 .auditorName(ExcelUtils.extractByTitleCellName(workbook, "Control", "Auditor's name", 3))
                 .referredBy(ExcelUtils.extractByTitleCellName(workbook, "Control", "Referrer", 3))
+                .inCharge(ExcelUtils.extractByTitleCellName(workbook, "Control", "In-Charge", 3))
                 .status(Constants.Status.PENDING.name())
                 .submittedBy(UserUtils.getAuthenticatedUser())
                 .generationTime(LocalDateTime.now())
@@ -83,6 +84,7 @@ public class TaskSubmissionService {
                 .referredBy(ExcelUtils.extractByTitleCellName(workbook, "Control", "Referrer", 1))
                 .fundingType(ExcelUtils.extractByTitleCellName(workbook, "Control",
                         "Funding type (D-biz, TVP, Bud)", 1))
+                .inCharge(ExcelUtils.extractByTitleCellName(workbook, "Control", "In-Charge", 1))
                 .status(Constants.Status.PENDING.name())
                 .generationTime(LocalDateTime.now())
                 .build();

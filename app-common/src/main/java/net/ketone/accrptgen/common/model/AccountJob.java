@@ -57,4 +57,6 @@ public class AccountJob implements Serializable {
 
     private String fundingType = StringUtils.EMPTY;
 
+    private String inCharge;
+
 }
