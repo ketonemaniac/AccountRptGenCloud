@@ -18,7 +18,7 @@ class UserAdmin extends Component {
     }
 
     toggleUserEditModal(user) {
-        const userExist = user != null && user != undefined && user.username != undefined;
+        const userExist = user?.username != undefined;
         this.setState((oldState) => {
             if(!oldState.isUserEditModalOpen) {
                 // "New User" or "Edit User" OnPress
@@ -56,7 +56,7 @@ class UserAdmin extends Component {
     }
 
     toggleUserDeleteModal(user) {
-        const userExist = user != null && user != undefined && user.username != undefined;
+        const userExist = user?.username != undefined;
         this.setState((oldState) => {
             var newUsers = oldState.users;
             if(oldState.isUserDeleteModalOpen && userExist) {
@@ -88,11 +88,11 @@ class UserAdmin extends Component {
         return (
             <React.Fragment>
                 <Container className="user-admin">
-                    <Row className="py-3">
-                        <Col><h1>User Maintenance</h1></Col>
-                        <Col><Button outline className="float-right" color="primary"
-                        onClick={this.toggleUserEditModal.bind(this)}>Add User</Button></Col>
-                    </Row>
+                    <div className="py-3 d-flex">
+                        <div className="flex-grow-1"><h1>User Maintenance</h1></div>
+                        <div><Button outline className="float-right" color="primary"
+                        onClick={this.toggleUserEditModal.bind(this)}>Add User</Button></div>
+                    </div>
                     <Row className="py-3"><Col>
                         <Table className="user-admin-table">
                             <thead>
@@ -100,6 +100,7 @@ class UserAdmin extends Component {
                                     <th>Username</th>
                                     <th>Email</th>
                                     <th>Roles</th>
+                                    <th>cc</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -112,6 +113,7 @@ class UserAdmin extends Component {
                                             <td>{user.roles.map(
                                                 role => {return role.name + " ";}
                                             )}</td>
+                                            <td dangerouslySetInnerHTML={{ __html: user?.cc?.join("<br/>")}} />
                                             <td>
                                             <Button outline color="primary" size="sm"
                                             onClick={this.toggleUserEditModal.bind(this,user)}>Edit</Button>&nbsp;

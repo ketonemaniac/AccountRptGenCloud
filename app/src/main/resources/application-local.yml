@@ -7,16 +7,17 @@ storage:
       days: 1
 
 mail:
-  enabled: false
+  enabled: true
   sender: ketonemaniac@gmail.com
 
 mongo:
   database:
     name: testing
 
-security:
-  enable: false
+#security:
+#  enable: false
 
 logging:
   level:
     net.ketone.accrptgen.task.gen.merge: DEBUG
+    org.springframework.web: DEBUG

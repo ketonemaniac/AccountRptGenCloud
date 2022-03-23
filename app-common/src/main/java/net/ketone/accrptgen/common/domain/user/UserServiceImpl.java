@@ -77,6 +77,7 @@ public class UserServiceImpl implements UserService {
                                 .map(Role::getName)
                                 .map(roles::get)
                                 .collect(Collectors.toSet()))
+                        .cc(updatedUser.getCc())
                         .build())
                 .flatMap(this::saveWithEncryptedPassword)
                 .map(this::ripPassword);
@@ -94,6 +95,7 @@ public class UserServiceImpl implements UserService {
                                 .collect(Collectors.toSet()))
                         .password(isInit ? user.getPassword() :
                                 bCryptPasswordEncoder.encode(user.getPassword()))
+                        .cc(user.getCc())
                         .build(), isInit)
                 );
     }
