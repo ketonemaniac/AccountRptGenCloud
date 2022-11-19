@@ -17,20 +17,15 @@ public class GenerationException extends RuntimeException {
 
     private String stage;
 
-    private String reason;
-
-    public GenerationException(final String sheet, final String cell, final String stage, final String reason,
-                               final String message, final Throwable cause) {
-        super(message, cause);
+    public GenerationException(final String sheet, final String cell, final String stage, final String msg) {
+        super(msg);
         this.sheet = sheet;
         this.cell = cell;
         this.stage = stage;
-        this.reason = reason;
     }
 
     public GenerationException(Throwable cause) {
-        super(cause);
-        this.reason = cause.getMessage();
+        super(String.format("%s:%s", cause.getClass().getName(), cause.getMessage()));
     }
 
 }

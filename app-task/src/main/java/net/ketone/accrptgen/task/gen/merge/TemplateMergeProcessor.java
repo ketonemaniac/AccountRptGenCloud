@@ -47,6 +47,14 @@ public class TemplateMergeProcessor {
                 CellTypeProcessor::getCellType, Function.identity()));
     }
 
+    /**
+     * Merges the input Excel with the template Excel specified in properties
+     * Any formula in source cell would be evaluated first before merge, then the merged workbook will be reevaluated
+     * @param input input Excel
+     * @param properties properties marking location of template Excel, and configurations
+     * @return merged Excel
+     * @throws IOException
+     */
     public byte[] process(byte[] input, final MergeProperties properties) throws IOException {
         XSSFWorkbook workbook = ExcelTaskUtils.openExcelWorkbook(input);
         XSSFWorkbook templateWb = Optional.ofNullable(configurationService.getSettings())
@@ -83,8 +91,8 @@ public class TemplateMergeProcessor {
                                 .map(row -> row.getCell(tuple2._2.getColumnIndex()))
                                 .orElse(null)))
                 .filter(tuple3 -> Optional.ofNullable(tuple3._3).isPresent())
-                .doOnNext(tuple2 -> {
-                    log.debug("MERGE copy to target Cell Address={}", tuple2._2.getAddress().formatAsString());
+                .doOnNext(tuple3 -> {
+                    log.debug("MERGE copy to target Cell Address={}", tuple3._2.getAddress().formatAsString());
                 })
                 .map(tuple3 -> tuple3.append(Optional.ofNullable(cellTypeProcessorMap.get(tuple3._2.getCellTypeEnum()))
                         .orElse(cellTypeProcessorMap.get(CellType._NONE)))
@@ -104,7 +112,7 @@ public class TemplateMergeProcessor {
 
         // refresh everything
         log.debug("start refreshing template");
-        ExcelTaskUtils.evaluateAll(templateWb, new ArrayList<>(templateSheetMap.values()));
+        ExcelTaskUtils.evaluateAll("TemplateMergeProcessor", templateWb, properties.getKeepFormulaColor());
         log.info("template refreshed. Writing to stream");
         ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
         log.debug("writing template. os.size()=" + os.size());

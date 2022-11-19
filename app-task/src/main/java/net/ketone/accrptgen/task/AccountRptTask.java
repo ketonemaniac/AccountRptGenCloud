@@ -72,6 +72,10 @@ public class AccountRptTask implements Runnable {
         this.dto = dto;
     }
 
+    /**
+     * templateParseProcessor (copy cell contents to AccountData, check if ContentCommand is populating contents correctly)
+     * parsingService (remove colors and stuff) TODO: remove evaluation
+     */
     @Override
     public void run() {
         String inputFileName = cacheFilename;

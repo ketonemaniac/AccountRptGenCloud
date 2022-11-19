@@ -66,8 +66,7 @@ public class AuditProgrammeProcessor {
                 }).blockLast();
 
         log.debug("start refreshing auditPrgTemplateWb");
-        ExcelTaskUtils.evaluateAll(auditPrgTemplateWb, Streams.stream(auditPrgTemplateWb.sheetIterator())
-                .collect(Collectors.toList()));
+        ExcelTaskUtils.evaluateAll("AuditProgrammeProcessor", auditPrgTemplateWb);
         log.info("auditPrgTemplateWb refreshed. Writing to stream");
         ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
         log.debug("writing template. os.size()=" + os.size());

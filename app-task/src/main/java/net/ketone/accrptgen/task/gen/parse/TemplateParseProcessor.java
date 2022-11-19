@@ -54,6 +54,13 @@ public class TemplateParseProcessor {
                 .orElse(defaultValue));
     }
 
+    /**
+     * translates Excel data to structured AccountData objects for final report generation
+     * @param preParseOutput
+     * @param properties
+     * @return
+     * @throws IOException
+     */
     public AccountData process(byte[] preParseOutput, final ParseProperties properties)
             throws IOException {
 

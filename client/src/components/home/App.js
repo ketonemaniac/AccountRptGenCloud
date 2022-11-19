@@ -204,7 +204,6 @@ class App extends Component {
                                       className="input-text-borderless" type="text" disabled name="status" id="status" value={c.status} />
                                       {c?.error?.message ? 
                                       (<Alert color="danger">
-                                      <Label>{c?.error?.reason}</Label>
                                       <Label>{c?.error?.message}</Label>
                                       </Alert>
                                       )

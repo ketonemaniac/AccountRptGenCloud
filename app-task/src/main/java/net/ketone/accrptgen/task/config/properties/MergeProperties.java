@@ -15,4 +15,6 @@ public class MergeProperties {
 
     private List<String> mergeCellColors;
 
+    private String keepFormulaColor;
+
 }
