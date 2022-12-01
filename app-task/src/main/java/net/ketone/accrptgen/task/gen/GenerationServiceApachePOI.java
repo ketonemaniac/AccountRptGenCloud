@@ -2,7 +2,6 @@ package net.ketone.accrptgen.task.gen;
 
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
-import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.task.gen.generate.BannerService;
 import net.ketone.accrptgen.task.gen.model.*;
@@ -22,7 +21,6 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -61,11 +59,6 @@ public class GenerationServiceApachePOI implements GenerationService {
                                       final BannerService bannerService) {
         this.persistentStorage = persistentStorage;
         this.bannerService = bannerService;
-        try {
-            FunctionEval.registerFunction("DATEDIF", new DateDifFunc());
-        } catch (IllegalArgumentException e) {
-            // skip error: POI already implememts DATEDIF for duplicate registers in the JVM
-        }
     }
 
     /**

@@ -2,7 +2,6 @@ package net.ketone.accrptgen.app.service.tasks;
 
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
-import net.ketone.accrptgen.common.model.GenerationException;
 import net.ketone.accrptgen.common.util.ExcelUtils;
 import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.model.AccountJob;

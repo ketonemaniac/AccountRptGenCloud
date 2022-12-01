@@ -13,7 +13,7 @@ function post(path, data) {
 
 function put(path, data) {
     return axios.put(path, data)
-            .catch(error => { console.log(error); throw Error(error) })
+            // .catch(error => { console.log(error); throw Error(error) })
             .then(res => res.data);
 }
 

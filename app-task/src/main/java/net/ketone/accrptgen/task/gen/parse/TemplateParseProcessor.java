@@ -7,7 +7,7 @@ import net.ketone.accrptgen.task.gen.model.AccountData;
 import net.ketone.accrptgen.task.gen.model.Paragraph;
 import net.ketone.accrptgen.task.gen.model.Section;
 import net.ketone.accrptgen.task.gen.parse.control.ControlCommand;
-import net.ketone.accrptgen.task.util.ExcelTaskUtils;
+import net.ketone.accrptgen.common.util.ExcelTaskUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -54,6 +54,13 @@ public class TemplateParseProcessor {
                 .orElse(defaultValue));
     }
 
+    /**
+     * translates Excel data to structured AccountData objects for final report generation
+     * @param preParseOutput
+     * @param properties
+     * @return
+     * @throws IOException
+     */
     public AccountData process(byte[] preParseOutput, final ParseProperties properties)
             throws IOException {
 

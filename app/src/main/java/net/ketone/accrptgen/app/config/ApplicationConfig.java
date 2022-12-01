@@ -6,6 +6,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.ketone.accrptgen.common.mail.EnableEmail;
 import net.ketone.accrptgen.common.mongo.EnableMongoDomain;
 import net.ketone.accrptgen.task.config.EnableTasks;
+import org.apache.poi.ss.formula.eval.FunctionEval;
+import org.apache.poi.ss.formula.functions.DateDifFunc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +16,14 @@ import org.springframework.context.annotation.Configuration;
 @EnableEmail
 @EnableTasks
 public class ApplicationConfig {
+
+    static {
+        try {
+            FunctionEval.registerFunction("DATEDIF", new DateDifFunc());
+        } catch (IllegalArgumentException e) {
+            // skip error: POI already implememts DATEDIF for duplicate registers in the JVM
+        }
+    }
 
     @Bean
     public ObjectMapper objectMapper() {

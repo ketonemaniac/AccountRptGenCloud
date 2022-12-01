@@ -49,17 +49,7 @@ class Frame extends Component {
                     ) : ""}
                 <User user={this.state.user}
                     toggleUserModal={this.toggleUserModal.bind(this)} isUserModalOpen={this.state.isUserModalOpen}></User>
-                <ToastContainer
-                    position="top-right"
-                    autoClose={5000}
-                    hideProgressBar
-                    newestOnTop={false}
-                    closeOnClick
-                    rtl={false}
-                    pauseOnVisibilityChange
-                    draggable
-                    pauseOnHover
-                />
+                <ToastContainer className="myToast" />
 
             </div>
         );

@@ -62,7 +62,6 @@ excel-extract:
     template-file-property: xlsx.template.dBizFunding.name
     merge-cell-colors:
       - 5B9BD5
-  parse:
     keep-formula-color: 92D050
 server:
   error:
