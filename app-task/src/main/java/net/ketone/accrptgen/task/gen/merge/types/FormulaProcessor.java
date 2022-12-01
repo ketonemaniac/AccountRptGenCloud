@@ -2,7 +2,7 @@ package net.ketone.accrptgen.task.gen.merge.types;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.ketone.accrptgen.common.model.GenerationException;
+import net.ketone.accrptgen.common.model.EvaluationException;
 import net.ketone.accrptgen.task.gen.merge.CellInfo;
 import net.ketone.accrptgen.task.gen.merge.MergeUtils;
 import org.apache.poi.ss.usermodel.*;
@@ -48,15 +48,11 @@ public class FormulaProcessor implements CellTypeProcessor {
                         targetCell.getCell().setCellFormula(null);
                 break;
             }
+            if(CellType.ERROR.equals(cellValue.getCellTypeEnum())) {
+                throw new RuntimeException();
+            }
         } catch (Exception err) {
-            throw new GenerationException(sourceCell.getSheet().getSheetName(),
-                    sourceCell.getCell().getAddress().formatAsString(),
-                    "FormulaProcessor",
-                    String.format("FormulaProcessor: Cannot evaluate source Sheet: %s Cell: %s with formula: %s cellType: %s",
-                            sourceCell.getSheet().getSheetName(),
-                            sourceCell.getCell().getAddress().formatAsString(),
-                            sourceCell.getCell().getCellFormula(),
-                            sourceCell.getCell().getCellTypeEnum().name()));
+            throw new EvaluationException("FormulaProcessor",sourceCell.getCell());
         }
     }
 

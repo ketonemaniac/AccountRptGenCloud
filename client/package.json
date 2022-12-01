@@ -19,17 +19,17 @@
     "react-moment": "^0.8.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^3.3.0",
-    "react-toastify": "^5.5.0",
+    "react-toastify": "^9.1.1",
     "react-transition-group": "^4.4.1",
     "reactjs-percentage-circle": "^1.0.0",
     "reactstrap": "^9.0.1",
     "reactstrap-button-loader": "^1.0.15"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build && rm -rf ./out/static && mkdir -p ./out/static && mv build/* ./out/static",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build && rm -rf ./out/static && mkdir -p ./out/static && mv build/* ./out/static",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -42,6 +42,7 @@
   ],
   "proxy": "http://localhost:8080",
   "devDependencies": {
+    "react-app-rewired": "^2.2.1",
     "sass": "^1.49.9"
   }
 }

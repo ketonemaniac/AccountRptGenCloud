@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Id;
@@ -45,7 +44,7 @@ public class AccountJob implements Serializable {
 
     private String handleName;      // For GCloudStandard, ID in queue
 
-    private GenerationException error;
+    private String errorMsg;
 
     private BigDecimal professionalFees;
 

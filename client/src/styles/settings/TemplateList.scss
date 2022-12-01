@@ -1,6 +1,10 @@
 @import "../../../node_modules/ag-grid-community/src/styles/ag-grid.scss";
 @import "../../../node_modules/ag-grid-community/src/styles/ag-theme-alpine/sass/ag-theme-alpine-mixin";
 
+.myToast:has(.Toastify__toast--warning) {
+    --toastify-toast-width: 80%;
+}
+
 .ag-theme-alpine {
   @include ag-theme-alpine((
       borders: false,
@@ -32,8 +36,6 @@
     font-size: 12px;
     margin-left: 0.3rem;
   }
-
-  
 }
 
 

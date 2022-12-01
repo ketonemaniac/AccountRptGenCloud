@@ -6,7 +6,6 @@ import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.common.mail.Attachment;
 import net.ketone.accrptgen.common.mail.EmailService;
 import net.ketone.accrptgen.common.model.AccountJob;
-import net.ketone.accrptgen.common.model.GenerationException;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.common.util.FileUtils;
 import net.ketone.accrptgen.task.config.properties.AccountRptProperties;
@@ -138,11 +137,7 @@ public class AccountRptTask implements Runnable {
             dto.setFilename(filename + ".zip");
             dto.setStatus(Constants.Status.FAILED.name());
             try {
-                if(e instanceof GenerationException) {
-                    dto.setError((GenerationException) e);
-                } else {
-                    dto.setError(new GenerationException(e));
-                }
+                dto.setErrorMsg(e.getMessage());
                 statisticsService.updateTask(dto);
             } catch (Throwable e1) {
                 log.warn("History file write failed", e1);

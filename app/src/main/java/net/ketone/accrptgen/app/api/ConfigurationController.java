@@ -1,19 +1,24 @@
 package net.ketone.accrptgen.app.api;
 
+import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.app.domain.dto.ConfigurationDto;
 import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.store.StorageService;
+import net.ketone.accrptgen.common.util.ExcelTaskUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,15 +35,23 @@ public class ConfigurationController {
     @Autowired
     private SettingsService configurationService;
 
+    private static final String ALLDOCS = "allDocs";
+    private static final String AUDITPRG = "auditPrg";
+    private static final String DBIZFUNDING = "dBizFunding";
+    private static final String BANNER = "banner";
+
+
+
+
     private String getFileTypePath(final String fileType) {
         switch(fileType) {
-            case "allDocs":
+            case ALLDOCS:
                 return StorageService.ALLDOCS_PATH;
-            case "auditPrg":
+            case AUDITPRG:
                 return StorageService.AUDIT_PRG_PATH;
-            case "dBizFunding":
+            case DBIZFUNDING:
                 return StorageService.DBIZ_FUNDING_PATH;
-            case "banner":
+            case BANNER:
                 return StorageService.BANNER_PATH;
             default:
                 return StringUtils.EMPTY;
@@ -47,11 +60,11 @@ public class ConfigurationController {
 
     private String getConfigurationName(final String fileType) {
         switch(fileType) {
-            case "allDocs":
+            case ALLDOCS:
                 return SettingsService.PREPARSE_TEMPLATE_PROP;
-            case "auditPrg":
+            case AUDITPRG:
                 return SettingsService.PREPARSE_AUIDTPRG_TEMPLATE_PROP;
-            case "dBizFunding":
+            case DBIZFUNDING:
                 return SettingsService.PREPARSE_DBIZ_FUNDING_TEMPLATE_PROP;
             default:
                 return StringUtils.EMPTY;
@@ -61,6 +74,14 @@ public class ConfigurationController {
     @PutMapping("/template/{fileType}")
     public AccountJob handleTemplateFileUpload(@PathVariable final String fileType,
                                                @RequestParam("file") MultipartFile file) throws IOException {
+        byte[] fileBytes = file.getBytes();
+        if(ALLDOCS.equalsIgnoreCase(fileType)) {
+            Try.run(() -> ExcelTaskUtils.evaluateAll("templateFileUpload", ExcelTaskUtils.openExcelWorkbook(fileBytes)))
+            .getOrElseThrow(ex -> {
+                log.error("Error uploading template file", ex);
+                return new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+            });
+        }
         persistentStorage.store(file.getBytes(),
                 getFileTypePath(fileType) + file.getOriginalFilename());
         return setActiveTemplate(fileType, file.getOriginalFilename());

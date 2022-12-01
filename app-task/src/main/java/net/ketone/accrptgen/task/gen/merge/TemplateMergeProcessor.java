@@ -7,7 +7,7 @@ import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.task.config.properties.MergeProperties;
 import net.ketone.accrptgen.task.gen.merge.types.CellTypeProcessor;
-import net.ketone.accrptgen.task.util.ExcelTaskUtils;
+import net.ketone.accrptgen.common.util.ExcelTaskUtils;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Sheet;

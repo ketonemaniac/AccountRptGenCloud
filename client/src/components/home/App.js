@@ -202,9 +202,9 @@ class App extends Component {
                                   <Col sm={9}>
                                     <Input key={c.generationTime + "-status"}
                                       className="input-text-borderless" type="text" disabled name="status" id="status" value={c.status} />
-                                      {c?.error?.message ? 
+                                      {c?.errorMsg ?
                                       (<Alert color="danger">
-                                      <Label>{c?.error?.message}</Label>
+                                      <Label>{c?.errorMsg}</Label>
                                       </Alert>
                                       )
                                       : (<span/>)}

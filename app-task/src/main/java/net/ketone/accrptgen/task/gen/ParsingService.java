@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.task.config.properties.ParseProperties;
 import net.ketone.accrptgen.task.gen.generate.BannerService;
-import net.ketone.accrptgen.task.util.ExcelTaskUtils;
+import net.ketone.accrptgen.common.util.ExcelTaskUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.Cell;

@@ -57,7 +57,11 @@ const TemplateList = (props) => {
                 .then(resData => {
                     toast.info("File updated: " + resData.filename);
                     props.init();
-            });
+                })
+                .catch(err => toast.warn(err?.response?.data?.message, {
+                    autoClose : false,
+                    position: "top-center"
+                }));
     };
 
     return (
