@@ -50,18 +50,15 @@ public class BannerService {
     /**
      * Gets image from the FIRST word of the auditorName
      * @param auditorName
-     * @return
+     * @return null if
      */
-    public InputStream getImage(final String auditorName) {
-        String banner = Optional.ofNullable(auditorName)
+    public Optional<InputStream> getImage(final String auditorName) {
+        return Optional.ofNullable(auditorName)
                 .map(s -> s.split(" "))
                 .map(arr -> arr[0])
                 .map(bannerMap::get)
-                .orElseThrow(() -> new RuntimeException("Unable to find banner from Auditor name" +
-                        auditorName));
-        return Try.of(() -> persistentStorage.loadAsInputStream(
-                StorageService.BANNER_PATH + banner))
-                .getOrElseThrow(e -> new RuntimeException("Unable to load Image", e));
+                .map(banner -> Try.of(() -> persistentStorage.loadAsInputStream(
+                StorageService.BANNER_PATH + banner)).getOrNull());
     }
 
 }
