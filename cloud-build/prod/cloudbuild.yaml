@@ -1,8 +1,8 @@
 steps:
-- name: 'gcr.io/cloud-builders/npm:node-12.18.3'
+- name: 'gcr.io/cloud-builders/npm:node-14.10.1'
   dir: 'client'
   args: ['install']
-- name: 'gcr.io/cloud-builders/npm:node-12.18.3'
+- name: 'gcr.io/cloud-builders/npm:node-14.10.1'
   dir: 'client'
   args: ['run','build']
 - name: 'maven:3.8.1-jdk-11'
