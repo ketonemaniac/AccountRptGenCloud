@@ -95,7 +95,7 @@ public class ParsingService {
             if("auditorBanner".equals(Try.of(() -> cell.getStringCellValue())
                     .getOrElse(StringUtils.EMPTY)
             )) {
-                Optional.ofNullable(bannerService.getImage(auditorName))
+                bannerService.getImage(auditorName)
                         .ifPresent(is -> ExcelTaskUtils.insertImage(workbook,
                                 cell.getSheet().getSheetName(),
                                 new org.apache.poi.ss.util.CellReference(cell.getAddress().formatAsString()),

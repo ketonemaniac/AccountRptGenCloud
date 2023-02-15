@@ -208,14 +208,15 @@ public class GenerationServiceApachePOI implements GenerationService {
         if(StringUtils.isNotEmpty(header.getAuditorName())) {
             XWPFParagraph currAuditorPgh = pghHeaders.get("Header" + sectionName + "Auditor");
             doWriteRun(currAuditorPgh, newR -> {
-                Try.run(() -> {
-                    newR.addPicture(bannerService.getImage(header.getAuditorName().trim()),
-                            XWPFDocument.PICTURE_TYPE_PNG,
-                            header.getAuditorName().trim(),
-                            Units.toEMU(550), Units.toEMU(37));
-                    CTInd indent = newR.getParagraph().getCTP().getPPr().addNewInd();
-                    indent.setLeft(BigInteger.valueOf(-3 * twipsPerIndent));
-                }).get();
+                bannerService.getImage(header.getAuditorName().trim())
+                            .ifPresentOrElse(is -> Try.run(() -> {
+                                newR.addPicture(is,
+                                    XWPFDocument.PICTURE_TYPE_PNG,
+                                    header.getAuditorName().trim(),
+                                    Units.toEMU(550), Units.toEMU(37));
+                                CTInd indent = newR.getParagraph().getCTP().getPPr().addNewInd();
+                                indent.setLeft(BigInteger.valueOf(-3 * twipsPerIndent));
+                                }).get(), () -> {});
             });
             // one more empty line
             Paragraph p = new Paragraph();
