@@ -8,8 +8,12 @@ steps:
 - name: 'maven:3.8.1-jdk-11'
   entrypoint: 'mvn'
   args: ['package', '-Dmaven.test.skip=true', '-Dexec.skip']
-- name: 'maven:3.8.1-jdk-11'
-  entrypoint: 'mvn'
-  args: ['validate', 'appengine:deploy', '-Dapp.stage.appEngineDirectory=src/main/appengine/staging']
-  dir: 'app'
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-test/app', '.' ]
+  images:
+  - '$australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-test/app'
+#- name: 'maven:3.8.1-jdk-11'
+#  entrypoint: 'mvn'
+#  args: ['validate', 'appengine:deploy', '-Dapp.stage.appEngineDirectory=src/main/appengine/staging']
+#  dir: 'app'
 timeout: '1600s'

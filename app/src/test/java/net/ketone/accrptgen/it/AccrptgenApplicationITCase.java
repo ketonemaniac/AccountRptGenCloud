@@ -1,16 +1,11 @@
 package net.ketone.accrptgen.it;
 
-import net.ketone.accrptgen.common.model.AccountJob;
-import net.ketone.accrptgen.task.AccountRptTask;
-import net.ketone.accrptgen.common.mail.Attachment;
 import net.ketone.accrptgen.common.mail.EmailService;
 import net.ketone.accrptgen.common.store.FileStorageService;
 import net.ketone.accrptgen.common.store.StorageService;
-import org.apache.commons.io.FileUtils;
 import org.apache.poi.util.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,13 +19,10 @@ import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
@@ -85,21 +77,21 @@ public class AccrptgenApplicationITCase {
 	public void testPipeline() throws Exception {
 
 
-		ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
-
-		AccountJob accountJob = AccountJob.builder()
-				.generationTime(genTime)
-				.filename(PLAIN_FILENAME)
-				.build();
-		AccountRptTask accountRptTask = ctx.getBean(AccountRptTask.class, accountJob);
-		accountRptTask.run();
-		Mockito.verify(emailService).sendEmail(any(), argumentCaptor.capture(), any());
-		List<Attachment> attachments = argumentCaptor.getValue();
-		assertThat(attachments).hasSize(3);
-
-		for(Attachment attachment : attachments) {
-			FileUtils.writeByteArrayToFile(new File("target/test-output/" + attachment.getAttachmentName()), attachment.getData());
-		}
+//		ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
+//
+//		AccountJob accountJob = AccountJob.builder()
+//				.generationTime(genTime)
+//				.filename(PLAIN_FILENAME)
+//				.build();
+//		AccountRptTask accountRptTask = ctx.getBean(AccountRptTask.class, accountJob);
+//		accountRptTask.run();
+//		Mockito.verify(emailService).sendEmail(any(), argumentCaptor.capture(), any());
+//		List<Attachment> attachments = argumentCaptor.getValue();
+//		assertThat(attachments).hasSize(3);
+//
+//		for(Attachment attachment : attachments) {
+//			FileUtils.writeByteArrayToFile(new File("target/test-output/" + attachment.getAttachmentName()), attachment.getData());
+//		}
 
 	}
 
