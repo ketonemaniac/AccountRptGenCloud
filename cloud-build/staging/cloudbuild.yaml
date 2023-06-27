@@ -9,9 +9,9 @@ steps:
   entrypoint: 'mvn'
   args: ['package', '-Dmaven.test.skip=true', '-Dexec.skip']
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/app', '.' ]
+  args: [ 'build', '-t', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image', '.' ]
 images:
-- 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/app'
+- 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image'
 #- name: 'maven:3.8.1-jdk-11'
 #  entrypoint: 'mvn'
 #  args: ['validate', 'appengine:deploy', '-Dapp.stage.appEngineDirectory=src/main/appengine/staging']
