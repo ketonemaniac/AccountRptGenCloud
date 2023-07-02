@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
-@Profile("gCloudStandard")
+@Profile("gCloudStandard & !cloudRun")
 @Slf4j
 public class TaskQueueService implements TasksService {
 

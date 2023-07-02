@@ -18,16 +18,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 @Component
-@Profile({"local"})
+@Profile({"local","cloudRun"})
 public class LocalTaskService implements TasksService {
-
-    ExecutorService executor = Executors.newFixedThreadPool(1);
-    List<Future> tasks = new ArrayList<>();
-
-    @Autowired
-    private ApplicationContext ctx;
-    @Autowired
-    private StatisticsService statisticsService;
 
     private WebClient webClient;
 
