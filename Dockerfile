@@ -20,6 +20,8 @@ RUN mvn -e -X -Dexec.skip clean package
 FROM amazoncorretto:11.0.18
 COPY --from=build app/target/accrptgen.jar accrptgen.jar
 EXPOSE 8080
+# $0, or ${0}, is the name of the script being executed
+# The variable $@ is the array of all the input parameters. Using this variable within a for loop, we can iterate over the input and process all the arguments passed.
 ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar accrptgen.jar ${0} ${@}"]
 
 # map local volumes (directory), environment and run

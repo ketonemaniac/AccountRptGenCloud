@@ -53,4 +53,19 @@ https://cloud.google.com/appengine/docs/standard/python/config/queueref
 
 2.1.1: new React UI
 
-1.0.0: initial version 
+1.0.0: initial version
+
+## Docker
+
+gcloud config set run/region australia-southeast1
+gcloud config set run/platform managed
+
+image location
+australia-southeast1-docker.pkg.dev/accountrptgen-hk-test/accountrptgen-app/test-image
+
+Cloud run UI
+https://console.cloud.google.com/run?project=accountrptgen-hk-test&supportedpurview=project
+
+deploy service/IAM
+gcloud run services replace cloud-run/staging/service.yaml
+gcloud run services set-iam-policy test-service cloud-run/staging/policy.yaml

@@ -1,0 +1,14 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: test-service
+spec:
+  template:
+    spec:
+      containers:
+        - image: australia-southeast1-docker.pkg.dev/accountrptgen-hk-test/accountrptgen-app/test-image:latest
+          env:
+            - name: JAVA_USER_OPTS
+              value: -Djava.util.logging.config.file=WEB-INF/classes/logging.properties
+            - name: SPRING_PROFILES_ACTIVE
+              value: staging,gCloudStandard

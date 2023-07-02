@@ -11,6 +11,8 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image', '.' ]
 images:
+# this must correspond to a folder in the artifact registry
+# https://console.cloud.google.com/artifacts?project=accountrptgen-hk-test&supportedpurview=project
 - 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image'
 #- name: 'maven:3.8.1-jdk-11'
 #  entrypoint: 'mvn'
