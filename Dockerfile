@@ -13,7 +13,7 @@ COPY app-task/ /app-task/
 COPY --from=npmBuild client/out/static/ /client/out/static/
 COPY --from=npmBuild client/pom.xml /client/pom.xml
 COPY --from=npmBuild client/assembly.xml /client/assembly.xml
-RUN mvn dependency:go-offline
+# RUN mvn dependency:go-offline
 # skip exec stage -- do not call npm build again in client since node is not available here.
 RUN mvn -e -X -Dexec.skip clean package
 
