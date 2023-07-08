@@ -58,4 +58,6 @@ public class AccountJob implements Serializable {
 
     private String inCharge;
 
+    private Boolean firstYear;
+
 }

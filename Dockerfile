@@ -22,7 +22,7 @@ COPY --from=build app/target/accrptgen.jar accrptgen.jar
 EXPOSE 8080
 # $0, or ${0}, is the name of the script being executed
 # The variable $@ is the array of all the input parameters. Using this variable within a for loop, we can iterate over the input and process all the arguments passed.
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar accrptgen.jar ${0} ${@}"]
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -Xlog:gc*:file=gc.log -Xmx256M -Xms256M -XX:MaxRAMPercentage=50 -jar accrptgen.jar ${0} ${@}"]
 
 # map local volumes (directory), environment and run
 # docker run -p 8080:8080 -it -v ${PWD}/local/:/local/ -e JAVA_OPTS=-Dspring.profiles.active=local accrptgen --storage.persistent.folder=/local/files/ --storage.temp.folder=/local/temp/

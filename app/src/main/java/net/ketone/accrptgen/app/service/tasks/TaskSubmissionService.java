@@ -68,6 +68,9 @@ public class TaskSubmissionService {
                 .status(Constants.Status.PENDING.name())
                 .submittedBy(UserUtils.getAuthenticatedUser())
                 .generationTime(LocalDateTime.now())
+                .firstYear(Double.parseDouble(
+                        ExcelUtils.extractByTitleCellName(workbook, "Control", "First audit?", 3))
+                        == 1.0)
                 .build();
         statisticsService.updateTask(accountJob);
         tasksService.submitTask(accountJob, Constants.GEN_QUEUE_ENDPOINT);
