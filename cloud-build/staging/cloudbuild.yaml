@@ -9,7 +9,7 @@ steps:
   entrypoint: 'mvn'
   args: ['package', '-Dmaven.test.skip=true', '-Dexec.skip']
 # For App Engine
-- name: 'maven:3.8.1-jdk-11'
+- name: 'maven:3.8.3-jdk-11'
   entrypoint: 'mvn'
   args: ['validate', 'appengine:deploy', '-Dapp.stage.appEngineDirectory=src/main/appengine/staging']
   dir: 'app'
