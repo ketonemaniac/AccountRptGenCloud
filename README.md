@@ -69,3 +69,12 @@ https://console.cloud.google.com/run?project=accountrptgen-hk-test&supportedpurv
 deploy service/IAM
 gcloud run services replace cloud-run/staging/service.yaml
 gcloud run services set-iam-policy test-service cloud-run/staging/policy.yaml
+
+#### docker desktop login
+docker build . -t my-image
+
+gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://australia-southeast1-docker.pkg.dev
+
+docker tag my-image australia-southeast1-docker.pkg.dev/accountrptgen-hk-test/accountrptgen-app/test-image
+
+docker push australia-southeast1-docker.pkg.dev/accountrptgen-hk-test/accountrptgen-app/test-image
