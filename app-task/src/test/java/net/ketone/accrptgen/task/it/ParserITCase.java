@@ -1,15 +1,14 @@
-package net.ketone.accrptgen.it;
+package net.ketone.accrptgen.task.it;
 
-import net.ketone.accrptgen.app.AccrptgenApplication;
+import net.ketone.accrptgen.common.domain.stats.StatisticsService;
+import net.ketone.accrptgen.common.mail.EmailService;
+import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.task.config.properties.ParseProperties;
+import net.ketone.accrptgen.task.gen.GenerationService;
+import net.ketone.accrptgen.task.gen.ParsingService;
 import net.ketone.accrptgen.task.gen.model.Section;
 import net.ketone.accrptgen.task.gen.model.SectionElement;
 import net.ketone.accrptgen.task.gen.model.Table;
-import net.ketone.accrptgen.task.gen.GenerationService;
-import net.ketone.accrptgen.task.gen.ParsingService;
-import net.ketone.accrptgen.common.mail.EmailService;
-import net.ketone.accrptgen.common.domain.stats.StatisticsService;
-import net.ketone.accrptgen.common.store.StorageService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -25,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -47,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @IfProfileValue(name = "spring.profiles.active", values = {"itcase"})
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("local")
-@SpringBootTest(classes = AccrptgenApplication.class)
+@SpringBootTest
 public class ParserITCase {
 
     @Autowired

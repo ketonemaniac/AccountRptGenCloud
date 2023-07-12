@@ -7,7 +7,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -16,7 +15,6 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 
 @ExtendWith(SpringExtension.class)
-@WithMockUser(username = "admin")
 @ContextConfiguration(classes = {AccRptGenEmailTemplateService.class, ThymeleafConfig.class})
 public class AccRptGenEmailTemplateServiceITCase {
 

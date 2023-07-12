@@ -1,6 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns:th="https://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<html xmlns:th="https://www.thymeleaf.org">
 <head>
     <title>Account Reporting Job Output</title>
 
@@ -37,8 +36,9 @@
     <tr><td class="field">Company Name:</td><td th:text="*{company}"></td></tr>
     <tr><td class="field">Referred By:</td><td th:text="*{referredBy}"></td></tr>
     <tr><td class="field">In-Charge:</td><td th:text="*{inCharge}"></td></tr>
-    <tr><td class="field">Professional Fees (Current Period):</td><td th:text="*{professionalFees}"></td></tr>
-    <tr><td class="field">Professional Fees (Prev Period):</td><td th:text="*{prevProfessionalFees}"></td></tr>
+    <tr th:if="*{firstYear}"><td class="field">Professional Fees (This Year):</td><td th:text="*{prevProfessionalFees}"></td></tr>
+    <tr th:unless="*{firstYear}"><td class="field">Professional Fees (Current Period):</td><td th:text="*{professionalFees}"></td></tr>
+    <tr th:unless="*{firstYear}"><td class="field">Professional Fees (Prev Period):</td><td th:text="*{prevProfessionalFees}"></td></tr>
 </table>
 
 <hr/>

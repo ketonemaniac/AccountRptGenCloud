@@ -8,8 +8,18 @@ steps:
 - name: 'maven:3.8.1-jdk-11'
   entrypoint: 'mvn'
   args: ['package', '-Dmaven.test.skip=true', '-Dexec.skip']
-- name: 'maven:3.8.1-jdk-11'
+# For App Engine
+- name: 'maven:3.8.3-jdk-11'
   entrypoint: 'mvn'
   args: ['validate', 'appengine:deploy', '-Dapp.stage.appEngineDirectory=src/main/appengine/staging']
   dir: 'app'
+#
+# For Cloud Run
+#- name: 'gcr.io/cloud-builders/docker'
+#  args: [ 'build', '-t', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image', '.' ]
+#images:
+#  # this must correspond to a folder in the artifact registry
+#  # https://console.cloud.google.com/artifacts?project=accountrptgen-hk-test&supportedpurview=project
+#  - 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image'
+
 timeout: '1600s'

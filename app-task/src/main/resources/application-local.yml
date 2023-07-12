@@ -7,7 +7,7 @@ storage:
       days: 1
 
 mail:
-  enabled: true
+  enabled: false
   sender: ketonemaniac@gmail.com
 
 mongo:
