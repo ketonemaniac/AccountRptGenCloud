@@ -56,7 +56,7 @@ public class AccRptGenController {
                 "attachment; filename=\"" + fileName + "\"").body(resource);
     }
 
-    @CrossOrigin
+//    @CrossOrigin
     @PostMapping(path = "/file", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
         if(file.getOriginalFilename().lastIndexOf(".") == -1) {
