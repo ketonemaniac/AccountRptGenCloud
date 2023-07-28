@@ -22,10 +22,10 @@ steps:
 # Push the container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image']
-# Deploy container image to Cloud Run
+# Deploy container image to Cloud RunTasks
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
-  args: ['run', 'deploy', 'SERVICE-NAME', '--image', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image', '--region', 'australia-southeast1']
+  args: ['run', 'deploy', 'test-service', '--image', 'australia-southeast1-docker.pkg.dev/accountrptgen-hk-test/accountrptgen-app/test-image', '--region', 'australia-southeast1']
 
 #images:
 #  # this must correspond to a folder in the artifact registry
