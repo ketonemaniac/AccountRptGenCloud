@@ -17,6 +17,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * for AppEngine only.
+ */
+@Deprecated
 public class LocalTaskService implements TasksService {
 
     private WebClient webClient;
