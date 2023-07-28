@@ -59,7 +59,7 @@ class App extends Component {
       data.append('file', file, file.name)
       var that = this;
       const fetchData = async () => {
-      await fetchEventSource(`http://localhost:8080/api/accrptgen/file`, {
+      await fetchEventSource(`/api/accrptgen/file`, {
         method: "POST",
         headers: {
           Accept: "text/event-stream",
