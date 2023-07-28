@@ -19,13 +19,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Function;
 
 @RestController
 @RequestMapping("/api/accrptgen")
@@ -41,16 +45,6 @@ public class AccRptGenController {
     @Autowired
     private TaskSubmissionService taskSubmissionService;
 
-    @PostMapping("/file")
-    public AccountJob handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
-        if(file.getOriginalFilename().lastIndexOf(".") == -1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file extension found");
-        }
-        return taskSubmissionService.triage(
-                file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")),
-                file.getBytes());
-    }
-
     @GetMapping("/file")
     public ResponseEntity<Resource> downloadFile(@RequestParam("file") String fileName) throws IOException {
         log.info("filename is " + fileName);
@@ -60,6 +54,22 @@ public class AccRptGenController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + fileName + "\"").body(resource);
+    }
+
+    @CrossOrigin
+    @PostMapping(path = "/file", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
+        if(file.getOriginalFilename().lastIndexOf(".") == -1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file extension found");
+        }
+        final Sinks.Many<ServerSentEvent<AccountJob>> sink = Sinks.many().unicast().onBackpressureError();
+        new Thread(() ->
+            Try.run(() -> taskSubmissionService.triage(sink,
+                    file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")),
+                    file.getBytes()))
+                    .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new)
+        ).start();
+        return sink.asFlux();
     }
 
     @GetMapping("/taskList")

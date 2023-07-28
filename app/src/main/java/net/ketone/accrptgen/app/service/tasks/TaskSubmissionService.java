@@ -8,18 +8,25 @@ import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.app.util.UserUtils;
+import net.ketone.accrptgen.task.AccountRptTask;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+
+import static net.ketone.accrptgen.common.util.SSEUtils.toSSE;
 
 @Slf4j
 @Component
@@ -31,15 +38,18 @@ public class TaskSubmissionService {
     private StorageService tempStorage;
     @Autowired
     private TasksService tasksService;
+    @Autowired
+    private ApplicationContext ctx;
 
-    public AccountJob triage(final String fileExtension, final byte[] fileBytes) throws IOException {
+    public void triage(Sinks.Many<ServerSentEvent<AccountJob>> sink, final String fileExtension, final byte[] fileBytes) throws IOException {
         long curTimeMs = System.currentTimeMillis();
         tempStorage.store(fileBytes, curTimeMs + fileExtension);
         AccountJob.AccountJobBuilder jobBuilder = AccountJob.builder()
                 .id(UUID.randomUUID())
                 .filename(curTimeMs + fileExtension)
                 .submittedBy(UserUtils.getAuthenticatedUser());
-        return Try.of(() -> {
+        sink.tryEmitNext(toSSE(jobBuilder.status(Constants.Status.PRELOADED.name()).build()));
+        Try.run(() -> {
             XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
 
             if(Optional.ofNullable(workbook.getSheet("metadata"))
@@ -49,15 +59,16 @@ public class TaskSubmissionService {
                     .filter(str -> str.equalsIgnoreCase(Constants.DOCTYPE_EXCEL_EXTRACT))
                     .isPresent()) {
                 jobBuilder.docType(Constants.DOCTYPE_EXCEL_EXTRACT);
-                return submitExcelExtractTask(workbook, jobBuilder);
+                submitExcelExtractTask(sink, workbook, jobBuilder);
             } else {
                 jobBuilder.docType(Constants.DOCTYPE_ACCOUNT_RPT);
-                return submitAccountRpt(workbook, jobBuilder);
+                submitAccountRpt(sink, workbook, jobBuilder);
             }
         }).getOrElseThrow(this::handleError);
     }
 
-    public AccountJob submitAccountRpt(final XSSFWorkbook workbook,
+    public void submitAccountRpt(final Sinks.Many<ServerSentEvent<AccountJob>> sink,
+                                       final XSSFWorkbook workbook,
                                        final AccountJob.AccountJobBuilder jobBuilder) throws IOException {
         AccountJob accountJob = jobBuilder
                 .company(ExcelUtils.extractByTitleCellName(workbook, "Control", "Company's name", 3))
@@ -72,12 +83,15 @@ public class TaskSubmissionService {
                         ExcelUtils.extractByTitleCellName(workbook, "Control", "First audit?", 3))
                         == 1.0)
                 .build();
+        sink.tryEmitNext(toSSE(accountJob));
         statisticsService.updateTask(accountJob);
-        tasksService.submitTask(accountJob, Constants.GEN_QUEUE_ENDPOINT);
-        return accountJob;
+//        tasksService.submitTask(accountJob, Constants.GEN_QUEUE_ENDPOINT);
+        AccountRptTask accountRptTask = ctx.getBean(AccountRptTask.class, accountJob, sink);
+        accountRptTask.run();
     }
 
-    private AccountJob submitExcelExtractTask(final XSSFWorkbook workbook,
+    private AccountJob submitExcelExtractTask(final Sinks.Many<ServerSentEvent<AccountJob>> sink,
+            final XSSFWorkbook workbook,
             final AccountJob.AccountJobBuilder jobBuilder) throws IOException {
         AccountJob job = jobBuilder
                 .company(ExcelUtils.extractByTitleCellName(workbook, "Control", "Company name", 1))

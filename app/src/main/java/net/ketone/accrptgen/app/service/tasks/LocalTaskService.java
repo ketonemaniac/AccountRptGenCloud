@@ -17,8 +17,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-@Component
-@Profile({"local","cloudRun"})
 public class LocalTaskService implements TasksService {
 
     private WebClient webClient;

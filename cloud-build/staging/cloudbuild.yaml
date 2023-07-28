@@ -1,25 +1,37 @@
 steps:
-- name: 'gcr.io/cloud-builders/npm:node-14.10.1'
-  dir: 'client'
-  args: ['install']
-- name: 'gcr.io/cloud-builders/npm:node-14.10.1'
-  dir: 'client'
-  args: ['run','build']
-- name: 'maven:3.8.1-jdk-11'
-  entrypoint: 'mvn'
-  args: ['package', '-Dmaven.test.skip=true', '-Dexec.skip']
 # For App Engine
-- name: 'maven:3.8.3-jdk-11'
-  entrypoint: 'mvn'
-  args: ['validate', 'appengine:deploy', '-Dapp.stage.appEngineDirectory=src/main/appengine/staging']
-  dir: 'app'
+#- name: 'gcr.io/cloud-builders/npm:node-14.10.1'
+#  dir: 'client'
+#  args: ['install']
+#- name: 'gcr.io/cloud-builders/npm:node-14.10.1'
+#  dir: 'client'
+#  args: ['run','build']
+#- name: 'maven:3.8.1-jdk-11'
+#  entrypoint: 'mvn'
+#  args: ['package', '-Dmaven.test.skip=true', '-Dexec.skip']
+#- name: 'maven:3.8.3-jdk-11'
+#  entrypoint: 'mvn'
+#  args: ['validate', 'appengine:deploy', '-Dapp.stage.appEngineDirectory=src/main/appengine/staging']
+#  dir: 'app'
 #
 # For Cloud Run
-#- name: 'gcr.io/cloud-builders/docker'
-#  args: [ 'build', '-t', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image', '.' ]
+# https://cloud.google.com/build/docs/deploying-builds/deploy-cloud-run
+# Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image', '.' ]
+# Push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image']
+# Deploy container image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['run', 'deploy', 'SERVICE-NAME', '--image', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image', '--region', 'australia-southeast1']
+
 #images:
 #  # this must correspond to a folder in the artifact registry
 #  # https://console.cloud.google.com/artifacts?project=accountrptgen-hk-test&supportedpurview=project
 #  - 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/accountrptgen-app/test-image'
+
+
 
 timeout: '1600s'
