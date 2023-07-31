@@ -59,17 +59,13 @@ public class AccRptGenController {
 //    @CrossOrigin
     @PostMapping(path = "/file", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
+        log.info("USER IS " + UserUtils.getAuthenticatedUser());
         if(file.getOriginalFilename().lastIndexOf(".") == -1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file extension found");
         }
-        final Sinks.Many<ServerSentEvent<AccountJob>> sink = Sinks.many().unicast().onBackpressureError();
-        new Thread(() ->
-            Try.run(() -> taskSubmissionService.triage(sink,
+        return taskSubmissionService.triage(
                     file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")),
-                    file.getBytes()))
-                    .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new)
-        ).start();
-        return sink.asFlux();
+                    file.getBytes());
     }
 
     @GetMapping("/taskList")

@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Sinks;
 
@@ -41,7 +42,8 @@ public class TaskSubmissionService {
     @Autowired
     private ApplicationContext ctx;
 
-    public void triage(Sinks.Many<ServerSentEvent<AccountJob>> sink, final String fileExtension, final byte[] fileBytes) throws IOException {
+    public Flux<ServerSentEvent<AccountJob>> triage(final String fileExtension, final byte[] fileBytes) throws IOException {
+        final Sinks.Many<ServerSentEvent<AccountJob>> sink = Sinks.many().unicast().onBackpressureError();
         long curTimeMs = System.currentTimeMillis();
         tempStorage.store(fileBytes, curTimeMs + fileExtension);
         AccountJob.AccountJobBuilder jobBuilder = AccountJob.builder()
@@ -49,7 +51,7 @@ public class TaskSubmissionService {
                 .filename(curTimeMs + fileExtension)
                 .submittedBy(UserUtils.getAuthenticatedUser());
         sink.tryEmitNext(toSSE(jobBuilder.status(Constants.Status.PRELOADED.name()).build()));
-        Try.run(() -> {
+        new Thread(() -> Try.run(() -> {
             XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
 
             if(Optional.ofNullable(workbook.getSheet("metadata"))
@@ -64,7 +66,8 @@ public class TaskSubmissionService {
                 jobBuilder.docType(Constants.DOCTYPE_ACCOUNT_RPT);
                 submitAccountRpt(sink, workbook, jobBuilder);
             }
-        }).getOrElseThrow(this::handleError);
+        }).getOrElseThrow(this::handleError)).start();
+        return sink.asFlux();
     }
 
     public void submitAccountRpt(final Sinks.Many<ServerSentEvent<AccountJob>> sink,
@@ -77,7 +80,6 @@ public class TaskSubmissionService {
                 .referredBy(ExcelUtils.extractByTitleCellName(workbook, "Control", "Referrer", 3))
                 .inCharge(ExcelUtils.extractByTitleCellName(workbook, "Control", "In-Charge", 3))
                 .status(Constants.Status.PENDING.name())
-                .submittedBy(UserUtils.getAuthenticatedUser())
                 .generationTime(LocalDateTime.now())
                 .firstYear(Double.parseDouble(
                         ExcelUtils.extractByTitleCellName(workbook, "Control", "First audit?", 3))
