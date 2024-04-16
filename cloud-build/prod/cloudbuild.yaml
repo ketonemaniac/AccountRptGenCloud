@@ -1,15 +1,32 @@
 steps:
-- name: 'gcr.io/cloud-builders/npm:node-14.10.1'
-  dir: 'client'
-  args: ['install']
-- name: 'gcr.io/cloud-builders/npm:node-14.10.1'
-  dir: 'client'
-  args: ['run','build']
-- name: 'maven:3.8.1-jdk-11'
-  entrypoint: 'mvn'
-  args: ['package', '-Dmaven.test.skip=true', '-Dexec.skip']
-- name: 'maven:3.8.3-jdk-11'
-  entrypoint: 'mvn'
-  args: ['validate', 'appengine:deploy', '-Dapp.stage.appEngineDirectory=src/main/appengine/prod']
-  dir: 'app'
+# steps
+#- name: 'gcr.io/cloud-builders/npm:node-14.10.1'
+#  dir: 'client'
+#  args: ['install']
+#- name: 'gcr.io/cloud-builders/npm:node-14.10.1'
+#  dir: 'client'
+#  args: ['run','build']
+#- name: 'maven:3.8.1-jdk-11'
+#  entrypoint: 'mvn'
+#  args: ['package', '-Dmaven.test.skip=true', '-Dexec.skip']
+#- name: 'maven:3.8.3-jdk-11'
+#  entrypoint: 'mvn'
+#  args: ['validate', 'appengine:deploy', '-Dapp.stage.appEngineDirectory=src/main/appengine/prod']
+#  dir: 'app'
+
+# For Cloud Run
+# https://cloud.google.com/build/docs/deploying-builds/deploy-cloud-run
+# Build the container image in HK region
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'asia-east2-docker.pkg.dev/$PROJECT_ID/accountrptgen/app', '.' ]
+# Push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'asia-east2-docker.pkg.dev/$PROJECT_ID/accountrptgen/app']
+# Deploy container image to Cloud RunTasks
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['run', 'deploy', 'acctrptgen', '--image', 'asia-east2-docker.pkg.dev/accountrptgen-hk/accountrptgen/app', '--region', 'asia-east2']
+
+
+
 timeout: '1600s'
