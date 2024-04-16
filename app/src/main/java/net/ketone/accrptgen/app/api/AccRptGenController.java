@@ -58,7 +58,7 @@ public class AccRptGenController {
 
 //    @CrossOrigin
     @PostMapping(path = "/file", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
+    public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
         log.info("USER IS " + UserUtils.getAuthenticatedUser());
         if(file.getOriginalFilename().lastIndexOf(".") == -1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file extension found");
@@ -71,19 +71,6 @@ public class AccRptGenController {
     @GetMapping("/taskList")
     public List<AccountJob> listFiles() {
         return statisticsService.getRecentTasks(UserUtils.getAuthenticatedUser());
-    }
-
-    @GetMapping("/terminateTask/{id}")
-    public int deleteTask(@PathVariable("id") String id) {
-        return tasksService.terminateTask(id) ? 1 : 0;
-    }
-
-
-    @GetMapping("/purgeQueue")
-    public boolean purgeQueue() {
-        Queue q = QueueFactory.getQueue(Constants.GEN_QUEUE_NAME);
-        q.purge();
-        return true;
     }
 
 }

@@ -8,13 +8,16 @@ import net.ketone.accrptgen.common.model.AccountJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Sinks;
 
 import java.io.IOException;
 
 @Service
 @Profile("gCloudStandard & !cloudRun")
 @Slf4j
+@Deprecated
 public class TaskQueueService implements TasksService {
 
     @Autowired
@@ -24,7 +27,7 @@ public class TaskQueueService implements TasksService {
     private String projectId;
 
     @Override
-    public AccountJob submitTask(AccountJob dto, final String endpoint) throws IOException {
+    public void submitTask(AccountJob dto, final String endpoint, final Sinks.Many<ServerSentEvent<AccountJob>> sink) throws IOException {
         try (CloudTasksClient client = CloudTasksClient.create()) {
             String locationId = "asia-east2";
             String queueId = "accountrptgen-queue";
@@ -50,7 +53,6 @@ public class TaskQueueService implements TasksService {
                 log.info("task created, resp={}", response);
             }
         }
-        return dto;
     }
 
     @Override

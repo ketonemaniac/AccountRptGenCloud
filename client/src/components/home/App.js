@@ -89,7 +89,8 @@ class App extends Component {
                 c.id = resData.id
                 c.period = resData.period
                 c.docType = resData.docType
-                c.referredBy = resData.referredBy     
+                c.referredBy = resData.referredBy
+                c.generationTime = resData.generationTime
                 hasMatch = true;
                 }
             })
@@ -102,7 +103,8 @@ class App extends Component {
                 id: resData.id,
                 period: resData.period,
                 docType: resData.docType,
-                referredBy: resData.referredBy 
+                referredBy: resData.referredBy,
+                generationTime: resData.generationTime,
               }, ...state.companies];
             }
             

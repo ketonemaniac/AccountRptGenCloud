@@ -23,6 +23,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Sinks;
@@ -42,7 +43,7 @@ import static net.ketone.accrptgen.common.util.SSEUtils.toSSE;
  * Done on a background thread
  */
 @Slf4j
-@Service
+@Component
 @Scope("prototype")
 public class AccountRptTask implements Runnable {
 

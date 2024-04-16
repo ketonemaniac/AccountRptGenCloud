@@ -87,12 +87,10 @@ public class TaskSubmissionService {
                 .build();
         sink.tryEmitNext(toSSE(accountJob));
         statisticsService.updateTask(accountJob);
-//        tasksService.submitTask(accountJob, Constants.GEN_QUEUE_ENDPOINT);
-        AccountRptTask accountRptTask = ctx.getBean(AccountRptTask.class, accountJob, sink);
-        accountRptTask.run();
+        tasksService.submitTask(accountJob, Constants.GEN_QUEUE_ENDPOINT, sink);
     }
 
-    private AccountJob submitExcelExtractTask(final Sinks.Many<ServerSentEvent<AccountJob>> sink,
+    private void submitExcelExtractTask(final Sinks.Many<ServerSentEvent<AccountJob>> sink,
             final XSSFWorkbook workbook,
             final AccountJob.AccountJobBuilder jobBuilder) throws IOException {
         AccountJob job = jobBuilder
@@ -107,8 +105,7 @@ public class TaskSubmissionService {
                 .generationTime(LocalDateTime.now())
                 .build();
         statisticsService.updateTask(job);
-        tasksService.submitTask(job, Constants.GEN_QUEUE_ENDPOINT_EXECL_EXTRACT);
-        return job;
+        tasksService.submitTask(job, Constants.GEN_QUEUE_ENDPOINT_EXECL_EXTRACT, sink);
     }
 
     private RuntimeException handleError(final Throwable e) {
