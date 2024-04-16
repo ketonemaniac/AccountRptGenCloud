@@ -91,6 +91,7 @@ class App extends Component {
                 c.docType = resData.docType
                 c.referredBy = resData.referredBy
                 c.generationTime = resData.generationTime
+                c.errorMsg = resData.errorMsg
                 hasMatch = true;
                 }
             })
@@ -105,6 +106,7 @@ class App extends Component {
                 docType: resData.docType,
                 referredBy: resData.referredBy,
                 generationTime: resData.generationTime,
+                errorMsg: resData.errorMsg,
               }, ...state.companies];
             }
             
