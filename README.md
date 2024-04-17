@@ -55,22 +55,9 @@ https://cloud.google.com/appengine/docs/standard/python/config/queueref
 
 1.0.0: initial version
 
-## Docker
 
-gcloud config set run/region australia-southeast1
-gcloud config set run/platform managed
 
-image location
-australia-southeast1-docker.pkg.dev/accountrptgen-hk-test/accountrptgen/app
-
-Cloud run UI
-https://console.cloud.google.com/run?project=accountrptgen-hk-test&supportedpurview=project
-
-deploy service/IAM
-gcloud run services replace cloud-run/staging/service.yaml
-gcloud run services set-iam-policy acctrptgen-test cloud-run/staging/policy.yaml
-
-#### docker desktop login
+# Manual Dockerfile build (Docker Desktop)
 docker build . -t my-image
 
 gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://australia-southeast1-docker.pkg.dev
