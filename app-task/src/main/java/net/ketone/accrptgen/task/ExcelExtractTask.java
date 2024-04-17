@@ -20,16 +20,22 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Sinks;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static net.ketone.accrptgen.common.util.SSEUtils.toSSE;
+
 @Slf4j
 @Component
-public class ExcelExtractTask {
+@Scope("prototype")
+public class ExcelExtractTask implements Runnable {
 
     @Autowired
     private StorageService tempStorage;
@@ -46,7 +52,17 @@ public class ExcelExtractTask {
 
     private static List<String> CONTROL_SHEETS = Arrays.asList("metadata", "Control");
 
-    public void doExcelExtract(final AccountJob job) {
+    private AccountJob job;
+    private Sinks.Many<ServerSentEvent<AccountJob>> sink;
+
+    public ExcelExtractTask(final AccountJob job, final Sinks.Many<ServerSentEvent<AccountJob>> sink) {
+        this.job = job;
+        this.sink = sink;
+    }
+
+    @Override
+    public void run() {
+        sink.tryEmitNext(toSSE(job.toBuilder().status(Constants.Status.GENERATING.name()).build()));
         String inputFileName = job.getFilename();
         log.info("Opening file: " + inputFileName);
         String outputFilename = FileUtils.uniqueFilename(job.getCompany(), job.getGenerationTime());
@@ -86,6 +102,7 @@ public class ExcelExtractTask {
 
             job.setStatus(Constants.Status.EMAIL_SENT.name());
             job.setFilename(outputFilename + fileExtension);
+            sink.tryEmitNext(toSSE(job));
             statisticsService.updateTask(job);
             log.info("Operation complete");
 
@@ -95,10 +112,13 @@ public class ExcelExtractTask {
             job.setStatus(Constants.Status.FAILED.name());
             try {
                 job.setErrorMsg(e.getMessage());
+                sink.tryEmitNext(toSSE(job));
                 statisticsService.updateTask(job);
             } catch (Throwable e1) {
                 log.warn("History file write failed", e1);
             }
+        } finally {
+            sink.tryEmitComplete();
         }
     }
 

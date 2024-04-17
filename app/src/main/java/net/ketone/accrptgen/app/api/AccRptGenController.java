@@ -19,13 +19,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Function;
 
 @RestController
 @RequestMapping("/api/accrptgen")
@@ -41,16 +45,6 @@ public class AccRptGenController {
     @Autowired
     private TaskSubmissionService taskSubmissionService;
 
-    @PostMapping("/file")
-    public AccountJob handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException, ValidationException {
-        if(file.getOriginalFilename().lastIndexOf(".") == -1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file extension found");
-        }
-        return taskSubmissionService.triage(
-                file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")),
-                file.getBytes());
-    }
-
     @GetMapping("/file")
     public ResponseEntity<Resource> downloadFile(@RequestParam("file") String fileName) throws IOException {
         log.info("filename is " + fileName);
@@ -62,22 +56,21 @@ public class AccRptGenController {
                 "attachment; filename=\"" + fileName + "\"").body(resource);
     }
 
+//    @CrossOrigin
+    @PostMapping(path = "/file", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
+        log.info("USER IS " + UserUtils.getAuthenticatedUser());
+        if(file.getOriginalFilename().lastIndexOf(".") == -1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file extension found");
+        }
+        return taskSubmissionService.triage(
+                    file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")),
+                    file.getBytes());
+    }
+
     @GetMapping("/taskList")
     public List<AccountJob> listFiles() {
         return statisticsService.getRecentTasks(UserUtils.getAuthenticatedUser());
-    }
-
-    @GetMapping("/terminateTask/{id}")
-    public int deleteTask(@PathVariable("id") String id) {
-        return tasksService.terminateTask(id) ? 1 : 0;
-    }
-
-
-    @GetMapping("/purgeQueue")
-    public boolean purgeQueue() {
-        Queue q = QueueFactory.getQueue(Constants.GEN_QUEUE_NAME);
-        q.purge();
-        return true;
     }
 
 }

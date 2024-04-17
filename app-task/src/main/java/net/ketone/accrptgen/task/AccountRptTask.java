@@ -22,7 +22,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks;
+import reactor.core.publisher.SynchronousSink;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,12 +36,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static net.ketone.accrptgen.common.util.SSEUtils.toSSE;
+
 /**
  * File generation batch processes pipeline
  * Done on a background thread
  */
 @Slf4j
-@Service
+@Component
 @Scope("prototype")
 public class AccountRptTask implements Runnable {
 
@@ -65,10 +72,12 @@ public class AccountRptTask implements Runnable {
     private String filename;
     private String cacheFilename;
     private AccountJob dto;
+    private Sinks.Many<ServerSentEvent<AccountJob>> sink;
 
-    public AccountRptTask(final AccountJob dto) {
+    public AccountRptTask(final AccountJob dto, final Sinks.Many<ServerSentEvent<AccountJob>> sink) {
         this.cacheFilename = String.valueOf(dto.getFilename());
         this.dto = dto;
+        this.sink = sink;
     }
 
     /**
@@ -77,6 +86,7 @@ public class AccountRptTask implements Runnable {
      */
     @Override
     public void run() {
+        sink.tryEmitNext(toSSE(dto.toBuilder().status(Constants.Status.GENERATING.name()).build()));
         String inputFileName = cacheFilename;
         log.info("Opening file: " + inputFileName);
         try {
@@ -129,6 +139,7 @@ public class AccountRptTask implements Runnable {
             dto.setFilename(filename + ".zip");
             dto.setStatus(Constants.Status.EMAIL_SENT.name());
             log.info("Updating statistics for " + filename);
+            sink.tryEmitNext(toSSE(dto));
             statisticsService.updateTask(dto);
             log.info("Operation complete for " + filename);
 
@@ -138,12 +149,14 @@ public class AccountRptTask implements Runnable {
             dto.setStatus(Constants.Status.FAILED.name());
             try {
                 dto.setErrorMsg(e.getMessage());
+                sink.tryEmitNext(toSSE(dto));
                 statisticsService.updateTask(dto);
             } catch (Throwable e1) {
                 log.warn("History file write failed", e1);
             }
+        } finally {
+            sink.tryEmitComplete();
         }
-
     }
 
 }

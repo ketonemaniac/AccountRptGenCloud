@@ -15,6 +15,7 @@ import { faRedo } from '@fortawesome/free-solid-svg-icons'
 import Dropzone from 'react-dropzone';
 import Endpoints from '../../api/Endpoints';
 import { CSSTransition } from 'react-transition-group';
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 
 class App extends Component {
@@ -27,7 +28,6 @@ class App extends Component {
     uploadError: null,
     isUploadErrorModalOpen: false
   };
-  timer = null;
 
   // INIT ======================
   componentDidMount() {
@@ -43,14 +43,6 @@ class App extends Component {
   }
 
   componentDidUpdate() {
-    if (this.timer != null) {
-      clearTimeout(this.timer);
-    }
-    if (this.state.companies.filter(c => (c.status == "PENDING" || c.status == "GENERATING")).length > 0) {
-      this.timer = setTimeout(() => {
-        this.getProgress();
-      }, 10000);
-    }
   }
 
 
@@ -65,34 +57,104 @@ class App extends Component {
       console.log("acceptedFile=" + file.name + " size=" + file.size);
       const data = new FormData()
       data.append('file', file, file.name)
-
-      Endpoints.uploadFile(data)
-        .then(resData => {
-          this.setState(state => {
-            const companies = [{
-              company: resData.company,
-              filename: resData.filename,
-              status: resData.status,
-              id: resData.id,
-              period: resData.period,
-              docType: resData.docType,
-              referredBy: resData.referredBy 
-            }, ...state.companies];
+      var that = this;
+      const fetchData = async () => {
+      await fetchEventSource(`/api/accrptgen/file`, {
+        method: "POST",
+        headers: {
+          Accept: "text/event-stream",
+        },
+        body: data,
+        onopen(res) {
+          if (res.ok && res.status === 200) {
+            console.log("Connection made ", res);
+          } else if (
+            res.status >= 400 &&
+            res.status < 500 &&
+            res.status !== 429
+          ) {
+            console.log("Client side error ", res);
+          }
+        },
+        onmessage(event) {
+          console.log(event.data);
+          var resData = JSON.parse(event.data)
+          that.setState(state => {
+            var hasMatch = false;
+            state.companies.forEach(c => {
+              if(c.id == resData.id) {
+                c.company = resData.company
+                c.filename = resData.filename
+                c.status = resData.status
+                c.id = resData.id
+                c.period = resData.period
+                c.docType = resData.docType
+                c.referredBy = resData.referredBy
+                c.generationTime = resData.generationTime
+                c.errorMsg = resData.errorMsg
+                hasMatch = true;
+                }
+            })
+            var companies = state.companies;
+            if(!hasMatch) {
+              companies = [{
+                company: resData.company,
+                filename: resData.filename,
+                status: resData.status,
+                id: resData.id,
+                period: resData.period,
+                docType: resData.docType,
+                referredBy: resData.referredBy,
+                generationTime: resData.generationTime,
+                errorMsg: resData.errorMsg,
+              }, ...state.companies];
+            }
+            
             return {
               companies: companies,
               fileUploadBlock: false
             };
           });
-        })
-        .catch(e => {
-          this.setState({
-            uploadError: e?.response?.data?.message,
-            fileUploadBlock: false,
-            isUploadErrorModalOpen: true
-          }
-          )
-        }
-        )
+        },
+        onclose() {
+          console.log("Connection closed by the server");
+        },
+        onerror(err) {
+          console.log("There was an error from server", err);
+        },
+      });
+    };
+    fetchData();
+      
+
+      // Endpoints.uploadFile(data)
+        // var resData = e.data
+        // .then(resData => {
+          // this.setState(state => {
+          //   const companies = [{
+          //     company: resData.company,
+          //     filename: resData.filename,
+          //     status: resData.status,
+          //     id: resData.id,
+          //     period: resData.period,
+          //     docType: resData.docType,
+          //     referredBy: resData.referredBy 
+          //   }, ...state.companies];
+        //     return {
+        //       companies: companies,
+        //       fileUploadBlock: false
+        //     };
+        //   });
+        // })
+        // .catch(e => {
+        //   this.setState({
+        //     uploadError: e?.response?.data?.message,
+        //     fileUploadBlock: false,
+        //     isUploadErrorModalOpen: true
+        //   }
+        //   )
+        // }
+        // )
 
     }
     );
@@ -120,13 +182,13 @@ class App extends Component {
   }
 
   // ON GENERATE ===========================
-  handleStartGeneration = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.target);
+  // handleStartGeneration = (event) => {
+  //   event.preventDefault();
+  //   const data = new FormData(event.target);
 
-    Endpoints.generate(data)
-      .then(res => this.getProgress());
-  }
+  //   Endpoints.generate(data)
+  //     .then(res => this.getProgress());
+  // }
 
   // FINISHED ===============================
   handleDownload(company) {
@@ -147,7 +209,7 @@ class App extends Component {
                   paddingTop: showAddDetail ? "5%" : "15%",
                   paddingBottom: showAddDetail ? "5%" : "15%"
                 }}
-                  fluid {...getRootProps({ onClick: evt => evt.preventDefault() })}>
+                  fluid="true" {...getRootProps({ onClick: evt => evt.preventDefault() })}>
                   <input {...getInputProps()} />
                   <Container>
                     <h1 className="display-3">Instant Report Generation</h1>
@@ -167,7 +229,7 @@ class App extends Component {
               )
             }}
           </Dropzone>
-          <CSSTransition transitionName="rpt-generation">
+          <CSSTransition timeout={500}>
             {this.renderGenerating()}
           </CSSTransition>
           <CardDeck className="px-5">
@@ -183,15 +245,13 @@ class App extends Component {
                             <Col xs="12" lg="10">
                               <Container>
                                 <Input key={c.id + "-id"} type="hidden" name="id" value={c.id} />
-                                <Input key={c.id + "-filename"} type="hidden" name="filename" value={c.filename} />
                                 <Input key={c.id + "-company"} type="hidden" name="company" value={c.company} />
-                                <Input key={c.id + "-submittedBy"} type="hidden" name="submittedBy" value={c.submittedBy} />
                                 <Input key={c.id + "-period"} type="hidden" name="period" value={c.period} />
                                 
                                 <FormGroup row>
                                       <Label sm={3} for="referredBy">Referrer</Label>
                                         <Col sm={9}>
-                                          <Input key={c.company.id + "-referredBy"} className="input-text-borderless"
+                                          <Input key={c.id + "-referredBy"} className="input-text-borderless"
                                             disabled="disabled"
                                             type="text" name="referredBy" id="referredBy"
                                             value={c.referredBy} />

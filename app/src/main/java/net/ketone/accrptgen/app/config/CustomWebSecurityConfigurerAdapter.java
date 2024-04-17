@@ -47,6 +47,7 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
                 .antMatchers("/task/**").permitAll()
                 .antMatchers("/login").permitAll()
                 .antMatchers("/api/user/encode/**").permitAll()
+                .antMatchers("/swagger-ui.html","/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 ;
 
         if(!enableSecurity) {

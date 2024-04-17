@@ -8,7 +8,9 @@ import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.task.AccountRptTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Sinks;
 
 import java.io.IOException;
 
@@ -19,6 +21,7 @@ import static net.ketone.accrptgen.common.constants.Constants.GEN_QUEUE_ENDPOINT
  */
 @Slf4j
 @RestController
+@Deprecated
 public class AccountRptTaskApi {
 
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -39,7 +42,9 @@ public class AccountRptTaskApi {
             log.warn("History file write failed (GENERATING)", e);
             return "NOT OK";
         }
-        AccountRptTask accountRptTask = ctx.getBean(AccountRptTask.class, dto);
+        // this is a useless sink
+        final Sinks.Many<ServerSentEvent<AccountJob>> sink = Sinks.many().unicast().onBackpressureError();
+        AccountRptTask accountRptTask = ctx.getBean(AccountRptTask.class, dto, sink);
         accountRptTask.run();
         return "OK";
     }
