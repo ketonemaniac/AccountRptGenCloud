@@ -2,6 +2,7 @@ package net.ketone.accrptgen.app.service.tasks;
 
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
+import net.ketone.accrptgen.common.model.auth.User;
 import net.ketone.accrptgen.common.util.ExcelUtils;
 import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.model.AccountJob;
@@ -42,14 +43,16 @@ public class TaskSubmissionService {
     @Autowired
     private ApplicationContext ctx;
 
-    public Flux<ServerSentEvent<AccountJob>> triage(final String fileExtension, final byte[] fileBytes) throws IOException {
+    public Flux<ServerSentEvent<AccountJob>> triage(final String fileExtension, final byte[] fileBytes,
+                                                    final Optional<User> optionalUser) throws IOException {
         final Sinks.Many<ServerSentEvent<AccountJob>> sink = Sinks.many().unicast().onBackpressureError();
         long curTimeMs = System.currentTimeMillis();
         tempStorage.store(fileBytes, curTimeMs + fileExtension);
         AccountJob.AccountJobBuilder jobBuilder = AccountJob.builder()
                 .id(UUID.randomUUID())
                 .filename(curTimeMs + fileExtension)
-                .submittedBy(UserUtils.getAuthenticatedUser());
+                .submittedBy(UserUtils.getAuthenticatedUser())
+                .noCCemail(optionalUser.map(User::getNoCCemail).orElse(Boolean.FALSE));
         sink.tryEmitNext(toSSE(jobBuilder.status(Constants.Status.PRELOADED.name()).build()));
         new Thread(() -> Try.run(() -> {
             XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));

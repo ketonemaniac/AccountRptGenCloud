@@ -1,6 +1,8 @@
 # Google Cloud Build #
 
 Continuous Deployment using Google cloud
+Remember to enable `Cloud Run Admin` permissions in Cloud Build Settings (in the console).
+The files in this folder are referenced by cloud build triggers.
 
 ## cloudbuild.yaml file
 

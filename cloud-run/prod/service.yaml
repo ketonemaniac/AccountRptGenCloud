@@ -6,7 +6,7 @@ spec:
   template:
     spec:
       containers:
-        - image: australia-southeast1-docker.pkg.dev/accountrptgen-hk/accountrptgen/app:latest
+        - image: asia-east2-docker.pkg.dev/accountrptgen-hk/accountrptgen/app:latest
           env:
             - name: JAVA_USER_OPTS
               value: -Djava.util.logging.config.file=WEB-INF/classes/logging.properties

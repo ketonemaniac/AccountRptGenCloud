@@ -73,10 +73,12 @@ public class SendgridEmailService extends AbstractEmailService {
         SendGrid.Email email = new SendGrid.Email();
         Map<String, String[]> recipients = getEmailAddresses(dto);
         email.addTo(recipients.get("to"));
-        email.addCc(recipients.get("cc"));
+        if(!dto.getNoCCemail()) {
+            email.addCc(recipients.get("cc"));
+            email.setBcc(recipients.get("bcc"));
+        }
         email.setFrom(SENDGRID_SENDER);
         email.setFromName("Accounting Report Generator");
-        email.setBcc(recipients.get("bcc"));
         email.setSubject(String.format("%s%s %s", Optional.ofNullable(dto.getFundingType()).orElse(
                 StringUtils.EMPTY), properties.getSubjectPrefix(), dto.getCompany()));
         email.setHtml(emailTemplateService.populateTemplate(dto, properties));

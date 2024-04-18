@@ -1,17 +1,14 @@
 package net.ketone.accrptgen.app.api;
 
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.QueueFactory;
-import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
-import net.ketone.accrptgen.common.constants.Constants;
-import net.ketone.accrptgen.app.exception.ValidationException;
-import net.ketone.accrptgen.common.domain.stats.StatisticsService;
-import net.ketone.accrptgen.common.model.AccountJob;
-import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.app.service.tasks.TaskSubmissionService;
 import net.ketone.accrptgen.app.service.tasks.TasksService;
 import net.ketone.accrptgen.app.util.UserUtils;
+import net.ketone.accrptgen.common.domain.stats.StatisticsService;
+import net.ketone.accrptgen.common.model.AccountJob;
+import net.ketone.accrptgen.common.model.auth.AuthenticatedUser;
+import net.ketone.accrptgen.common.model.auth.User;
+import net.ketone.accrptgen.common.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -20,16 +17,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import java.util.function.Function;
+import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/accrptgen")
@@ -58,14 +56,21 @@ public class AccRptGenController {
 
 //    @CrossOrigin
     @PostMapping(path = "/file", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
+    public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file, Principal principal) throws IOException {
+        Optional<User> optionalUser = Optional.ofNullable(principal)
+                .map(UsernamePasswordAuthenticationToken.class::cast)
+                .map(UsernamePasswordAuthenticationToken::getPrincipal)
+                .filter(AuthenticatedUser.class::isInstance)
+                .map(AuthenticatedUser.class::cast)
+                .map(AuthenticatedUser::getUser);
         log.info("USER IS " + UserUtils.getAuthenticatedUser());
         if(file.getOriginalFilename().lastIndexOf(".") == -1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file extension found");
         }
         return taskSubmissionService.triage(
                     file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")),
-                    file.getBytes());
+                    file.getBytes(),
+                    optionalUser);
     }
 
     @GetMapping("/taskList")
