@@ -27,9 +27,11 @@ gcloud run services set-iam-policy acctrptgen-test cloud-run/staging/policy.yaml
 ```
 
 ## Prod
-
+Note: asia-east2 (hk) has no cloud run domain mapping. Use asia-east1 instead
+"Firebase Hosting is unavailable for this service. Reason: Region not supported."
+See https://cloud.google.com/run/docs/mapping-custom-domains#top
 ```
-gcloud config set run/region asia-east2
+gcloud config set run/region asia-east1
 gcloud config set run/platform managed
 ```
 
