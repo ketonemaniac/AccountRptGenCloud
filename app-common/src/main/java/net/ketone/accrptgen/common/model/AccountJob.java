@@ -60,4 +60,6 @@ public class AccountJob implements Serializable {
 
     private Boolean firstYear;
 
+    private Boolean noCCemail;
+
 }

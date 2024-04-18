@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.app.service.auth;
 
+import net.ketone.accrptgen.common.model.auth.AuthenticatedUser;
 import net.ketone.accrptgen.common.model.auth.Role;
 import net.ketone.accrptgen.common.model.auth.User;
 import net.ketone.accrptgen.common.repo.UserRepository;
@@ -33,7 +34,6 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         }
         grantedAuthorities.add(new SimpleGrantedAuthority("User"));
 
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
-                grantedAuthorities);
+        return new AuthenticatedUser(user, grantedAuthorities);
     }
 }

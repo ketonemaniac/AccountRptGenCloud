@@ -34,4 +34,6 @@ public class User {
 
     private List<String> cc;
 
+    private Boolean noCCemail;
+
 }

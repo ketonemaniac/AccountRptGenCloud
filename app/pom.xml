@@ -197,17 +197,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>com.google.cloud.tools</groupId>
-				<artifactId>appengine-maven-plugin</artifactId>
-				<version>2.4.4</version>
-				<configuration>
-					<devserver.host>0.0.0.0</devserver.host>
-					<devserver.port>8080</devserver.port>
-					<deploy.projectId>GCLOUD_CONFIG</deploy.projectId>
-					<deploy.version>${parsedVersion.majorVersion}-${parsedVersion.minorVersion}-${parsedVersion.incrementalVersion}</deploy.version>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-maven-plugin</artifactId>
 				<version>${kotlin.version}</version>
