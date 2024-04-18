@@ -16,16 +16,16 @@ steps:
 
 # For Cloud Run
 # https://cloud.google.com/build/docs/deploying-builds/deploy-cloud-run
-# Build the container image in HK region
+# Build the container image in Taiwan region
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'asia-east2-docker.pkg.dev/$PROJECT_ID/accountrptgen/app', '.' ]
+  args: [ 'build', '-t', 'asia-east1-docker.pkg.dev/$PROJECT_ID/accountrptgen/app', '.' ]
 # Push the container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'asia-east2-docker.pkg.dev/$PROJECT_ID/accountrptgen/app']
+  args: ['push', 'asia-east1-docker.pkg.dev/$PROJECT_ID/accountrptgen/app']
 # Deploy container image to Cloud RunTasks
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
-  args: ['run', 'deploy', 'acctrptgen', '--image', 'asia-east1-docker.pkg.dev/accountrptgen-hk/accountrptgen/app', '--region', 'asia-east2']
+  args: ['run', 'deploy', 'acctrptgen', '--image', 'asia-east1-docker.pkg.dev/accountrptgen-hk/accountrptgen/app', '--region', 'asia-east1']
 
 
 
