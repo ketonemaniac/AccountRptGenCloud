@@ -25,7 +25,7 @@ steps:
 # Deploy container image to Cloud RunTasks
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
-  args: ['run', 'deploy', 'acctrptgen', '--image', 'asia-east2-docker.pkg.dev/accountrptgen-hk/accountrptgen/app', '--region', 'asia-east2']
+  args: ['run', 'deploy', 'acctrptgen', '--image', 'asia-east1-docker.pkg.dev/accountrptgen-hk/accountrptgen/app', '--region', 'asia-east2']
 
 
 
