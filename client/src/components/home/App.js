@@ -229,9 +229,6 @@ class App extends Component {
               )
             }}
           </Dropzone>
-          <CSSTransition timeout={500}>
-            {this.renderGenerating()}
-          </CSSTransition>
           <CardDeck className="px-5">
             {this.state.companies
               .map((c, i) => {
@@ -297,20 +294,6 @@ class App extends Component {
         {this.uploadErrorModalAlert(this.state.uploadError)}
       </React.Fragment>
     );
-  }
-
-
-  renderGenerating() {
-    if (this.state.companies.filter(c => (c.status == "PENDING" || c.status == "GENERATING")).length > 0) {
-      return (
-        <Alert color="warning" className="px-5">
-          A report generation is under progress. Please click to refresh
-          <Button color="warning" className="mx-2" onClick={this.getProgress.bind(this)}>
-            <FontAwesomeIcon icon={faRedo} /></Button>
-        </Alert>
-      )
-    }
-    return <span />;
   }
 
   renderGenerationTime(company) {

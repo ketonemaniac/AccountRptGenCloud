@@ -6,7 +6,8 @@ The files in this folder is to be run locally using gcloud command.
 
 [Cloud Run Dashboard](https://console.cloud.google.com/run?project=accountrptgen-hk&supportedpurview=project)
 
-Run the following in project root:
+Create the artifact repository first.
+Then Run the following in project root. Service deploy will fail at first but it's ok:
 
 ## Staging
 ```
