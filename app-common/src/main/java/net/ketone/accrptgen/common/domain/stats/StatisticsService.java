@@ -18,5 +18,5 @@ public interface StatisticsService {
 
     void updateTask(AccountJob dto) throws IOException;
 
-    AccountJob getTask(String task);
+    AccountJob getTaskByClientRandInt(Integer clientRandInt);
 }

@@ -39,7 +39,7 @@ public class MongoStatisticsService implements StatisticsService {
     }
 
     @Override
-    public AccountJob getTask(String task) {
-        return null;
+    public AccountJob getTaskByClientRandInt(Integer clientRandInt) {
+        return repository.getByClientRandInt(clientRandInt);
     }
 }

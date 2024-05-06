@@ -62,4 +62,6 @@ public class AccountJob implements Serializable {
 
     private Boolean noCCemail;
 
+    private Integer clientRandInt;
+
 }

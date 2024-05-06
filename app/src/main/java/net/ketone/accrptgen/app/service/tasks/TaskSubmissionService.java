@@ -44,7 +44,7 @@ public class TaskSubmissionService {
     private ApplicationContext ctx;
 
     public Flux<ServerSentEvent<AccountJob>> triage(final String fileExtension, final byte[] fileBytes,
-                                                    final Optional<User> optionalUser) throws IOException {
+                                                    final Optional<User> optionalUser, final Integer clientRandInt) throws IOException {
         final Sinks.Many<ServerSentEvent<AccountJob>> sink = Sinks.many().unicast().onBackpressureError();
         long curTimeMs = System.currentTimeMillis();
         tempStorage.store(fileBytes, curTimeMs + fileExtension);
@@ -52,7 +52,8 @@ public class TaskSubmissionService {
                 .id(UUID.randomUUID())
                 .filename(curTimeMs + fileExtension)
                 .submittedBy(UserUtils.getAuthenticatedUser())
-                .noCCemail(optionalUser.map(User::getNoCCemail).orElse(Boolean.FALSE));
+                .noCCemail(optionalUser.map(User::getNoCCemail).orElse(Boolean.FALSE))
+                .clientRandInt(clientRandInt);
         sink.tryEmitNext(toSSE(jobBuilder.status(Constants.Status.PRELOADED.name()).build()));
         new Thread(() -> Try.run(() -> {
             XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
