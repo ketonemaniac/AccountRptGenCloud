@@ -12,4 +12,6 @@ public interface AccountJobRepository extends MongoRepository<AccountJob, UUID> 
 
     List<AccountJob> findTop10BySubmittedByOrderByGenerationTimeDesc(
             final String submittedBy);
+
+    AccountJob getByClientRandInt(Integer clientRandInt);
 }

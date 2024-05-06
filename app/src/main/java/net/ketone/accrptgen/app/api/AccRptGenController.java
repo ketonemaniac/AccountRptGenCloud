@@ -1,6 +1,7 @@
 package net.ketone.accrptgen.app.api;
 
 import lombok.extern.slf4j.Slf4j;
+import net.ketone.accrptgen.app.service.ClientRandIntChecker;
 import net.ketone.accrptgen.app.service.tasks.TaskSubmissionService;
 import net.ketone.accrptgen.app.service.tasks.TasksService;
 import net.ketone.accrptgen.app.util.UserUtils;
@@ -42,6 +43,8 @@ public class AccRptGenController {
     private TasksService tasksService;
     @Autowired
     private TaskSubmissionService taskSubmissionService;
+    @Autowired
+    private ClientRandIntChecker clientRandIntChecker;
 
     @GetMapping("/file")
     public ResponseEntity<Resource> downloadFile(@RequestParam("file") String fileName) throws IOException {
@@ -56,21 +59,27 @@ public class AccRptGenController {
 
 //    @CrossOrigin
     @PostMapping(path = "/file", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file, Principal principal) throws IOException {
+    public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file,
+                                                              @RequestParam("seed") Integer clientRandInt,
+                                                              Principal principal) throws IOException {
+
         Optional<User> optionalUser = Optional.ofNullable(principal)
                 .map(UsernamePasswordAuthenticationToken.class::cast)
                 .map(UsernamePasswordAuthenticationToken::getPrincipal)
                 .filter(AuthenticatedUser.class::isInstance)
                 .map(AuthenticatedUser.class::cast)
                 .map(AuthenticatedUser::getUser);
-        log.info("USER IS " + UserUtils.getAuthenticatedUser());
+        log.info("USER IS {}, CLIENT RAND INT IS {}", UserUtils.getAuthenticatedUser(), clientRandInt);
+        if(clientRandIntChecker.checkDuplicate(clientRandInt)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate Request " + clientRandInt);
+        };
         if(file.getOriginalFilename().lastIndexOf(".") == -1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file extension found");
         }
         return taskSubmissionService.triage(
                     file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")),
                     file.getBytes(),
-                    optionalUser);
+                    optionalUser, clientRandInt);
     }
 
     @GetMapping("/taskList")

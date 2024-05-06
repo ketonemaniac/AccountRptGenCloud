@@ -50,13 +50,14 @@ class App extends Component {
     this.setState({ isAdmin: admin });
   }
 
-
   // ON DROP ======================
   onDrop = (acceptedFiles, rejectedFiles) => {
+    var randInt = Math.floor(Math.random() * 10000000);
     acceptedFiles.map(file => {
       console.log("acceptedFile=" + file.name + " size=" + file.size);
       const data = new FormData()
       data.append('file', file, file.name)
+      data.append('seed', randInt)
       var that = this;
       const fetchData = async () => {
       await fetchEventSource(`/api/accrptgen/file`, {
