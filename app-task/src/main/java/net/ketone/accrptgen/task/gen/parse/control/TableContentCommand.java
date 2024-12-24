@@ -66,7 +66,7 @@ public class TableContentCommand implements ControlCommand {
     }
 
     private String cellText(final Cell dataCell) {
-        switch (dataCell.getCellTypeEnum()) {
+        switch (dataCell.getCellType()) {
             case STRING:
                 return dataCell.getStringCellValue();
             case NUMERIC:
@@ -99,18 +99,18 @@ public class TableContentCommand implements ControlCommand {
         // horizontal alignment
         Optional.ofNullable(style)
                 .map(XSSFCellStyle.class::cast)
-                .map(XSSFCellStyle::getAlignmentEnum)
+                .map(XSSFCellStyle::getAlignment)
                 .ifPresent(a -> cell.setAlignment(alignment(a)));
         // underline
         Optional.ofNullable(style)
                 .map(XSSFCellStyle.class::cast)
-                .map(XSSFCellStyle::getBorderBottomEnum)
+                .map(XSSFCellStyle::getBorderBottom)
                 .filter(s -> !s.equals(BorderStyle.NONE))
                 .ifPresent(f -> cell.setBottomBorderStyle(cellStyle(f)));
         // see if the cell below has a top border...
         Optional.ofNullable(nextRowStyle)
                 .map(XSSFCellStyle.class::cast)
-                .map(XSSFCellStyle::getBorderTopEnum)
+                .map(XSSFCellStyle::getBorderTop)
                 .filter(s -> !s.equals(BorderStyle.NONE))
                 .ifPresent(f -> cell.setBottomBorderStyle(cellStyle(f)));
         return cell;

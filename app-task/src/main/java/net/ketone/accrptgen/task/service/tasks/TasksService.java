@@ -1,4 +1,4 @@
-package net.ketone.accrptgen.app.service.tasks;
+package net.ketone.accrptgen.task.service.tasks;
 
 import net.ketone.accrptgen.common.model.AccountJob;
 import org.springframework.http.codec.ServerSentEvent;

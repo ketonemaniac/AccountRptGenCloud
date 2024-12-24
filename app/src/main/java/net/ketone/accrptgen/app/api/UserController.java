@@ -13,8 +13,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    // @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
     @GetMapping
     public User getCurrentUser() {

@@ -19,6 +19,8 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
 
 	<dependencies>
@@ -39,10 +41,6 @@
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
@@ -61,10 +59,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+			<version>2.7.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.docx4j</groupId>
-			<artifactId>docx4j</artifactId>
+			<artifactId>docx4j-core</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>com.google.guava</groupId>
@@ -89,33 +92,28 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-storage -->
-		<dependency>
+		<!--dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-tasks</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-1.0-sdk</artifactId>
-		</dependency>
+		</dependency -->
 		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-logging</artifactId>
 		</dependency>
-		<dependency>
+		<!-- dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
  			<scope>provided</scope>
-		</dependency>
+		</dependency -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.2.32</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -130,10 +128,10 @@
 			<groupId>io.vavr</groupId>
 			<artifactId>vavr</artifactId>
 		</dependency>
-		<dependency>
+		<!-- dependency>
 			<groupId>org.reactivestreams</groupId>
 			<artifactId>reactive-streams</artifactId>
-		</dependency>
+		</dependency -->
 	</dependencies>
 
 	<build>
@@ -216,13 +214,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<repositories>
-		<repository>
-			<id>spring</id>
-			<name>spring-milestones</name>
-			<url>http://repo.spring.io/milestone/</url>
-		</repository>
-	</repositories>
 
 </project>

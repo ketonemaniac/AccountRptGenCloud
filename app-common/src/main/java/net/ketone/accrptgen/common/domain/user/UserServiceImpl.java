@@ -2,6 +2,7 @@ package net.ketone.accrptgen.common.domain.user;
 
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
+import net.ketone.accrptgen.common.encryption.EncryptionConfig;
 import net.ketone.accrptgen.common.model.auth.Role;
 import net.ketone.accrptgen.common.model.auth.User;
 import net.ketone.accrptgen.common.repo.RoleRepository;
@@ -11,6 +12,7 @@ import net.ketone.accrptgen.common.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
@@ -31,12 +33,10 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+//    @Autowired
+    private PasswordEncoder bCryptPasswordEncoder = EncryptionConfig.getEncoder();
     @Autowired
     private StorageService persistentStorage;
-    @Autowired
-    private EmailService emailService;
 
 
     private Map<String, Role> roles;
@@ -127,13 +127,7 @@ public class UserServiceImpl implements UserService {
         return this.updatePassword(user.getUsername(), pwd)
                 .doOnNext(u -> {
                     u.setPassword(pwd);
-                    try {
-                        emailService.sendResetPasswordEmail(u);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .map(this::ripPassword);
+                });
     }
 
     @Override

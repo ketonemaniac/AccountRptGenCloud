@@ -16,7 +16,15 @@
 
 package net.ketone.accrptgen.common.mail;
 
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Attachments;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+import com.sendgrid.helpers.mail.objects.Personalization;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.config.properties.MailProperties;
 import net.ketone.accrptgen.common.model.AccountJob;
@@ -27,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -69,32 +78,46 @@ public class SendgridEmailService extends AbstractEmailService {
     public void sendEmail(AccountJob dto, List<Attachment> attachments,
                           final MailProperties properties) throws Exception {
         if(!SENDGRID_ENABLE) return;
-        SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
-        SendGrid.Email email = new SendGrid.Email();
+        Mail email = new Mail();
+        Personalization personalization = new Personalization();
         Map<String, String[]> recipients = getEmailAddresses(dto);
-        email.addTo(recipients.get("to"));
+        Arrays.stream(recipients.get("to"))
+                .filter(StringUtils::isNotEmpty)
+                .forEach(to -> {
+            personalization.addTo(new Email(to, to));
+        });
         if(!dto.getNoCCemail()) {
-            email.addCc(recipients.get("cc"));
-            email.setBcc(recipients.get("bcc"));
+            Arrays.stream(recipients.get("cc"))
+                    .filter(StringUtils::isNotEmpty)
+                    .forEach(cc -> {
+                personalization.addCc(new Email(cc, cc));
+            });
+            Arrays.stream(recipients.get("bcc"))
+                    .filter(StringUtils::isNotEmpty)
+                    .forEach(bcc -> {
+                personalization.addBcc(new Email(bcc, bcc));
+            });
         }
-        email.setFrom(SENDGRID_SENDER);
-        email.setFromName("Accounting Report Generator");
+        email.addPersonalization(personalization);
+        email.setFrom(new Email(SENDGRID_SENDER, "Accounting Report Generator"));
         email.setSubject(String.format("%s%s %s", Optional.ofNullable(dto.getFundingType()).orElse(
                 StringUtils.EMPTY), properties.getSubjectPrefix(), dto.getCompany()));
-        email.setHtml(emailTemplateService.populateTemplate(dto, properties));
+        email.addContent(new Content("text/html", emailTemplateService.populateTemplate(dto, properties)));
 
         for(Attachment attachment : attachments) {
             InputStream data = new ByteArrayInputStream(attachment.getData());
-            email.addAttachment(attachment.getAttachmentName(), data);
+            Attachments emailAttachment = new Attachments();
+            emailAttachment.setContent(Base64.getEncoder().encodeToString(data.readAllBytes()));
+            emailAttachment.setFilename(attachment.getAttachmentName());
+            emailAttachment.setType("application/zip");
+            emailAttachment.setDisposition("attachment");
+
+            email.addAttachments(emailAttachment);
             data.close();
             log.info("Added attachment " + attachment.getAttachmentName());
         }
 
-        SendGrid.Response response = sendgrid.send(email);
-        if (response.getCode() != 200) {
-            log.warn(String.format("An error occured: %s Code=%d", response.getMessage(), response.getCode()));
-            return;
-        }
+        sendMail(email);
         recipients.forEach((k,v) -> {
             log.info("email " + k + ":" + Arrays.asList(v).stream().collect(Collectors.joining(";")));
         });
@@ -104,22 +127,30 @@ public class SendgridEmailService extends AbstractEmailService {
     @Override
     public void sendResetPasswordEmail(User user) throws Exception {
         if(!SENDGRID_ENABLE) return;
-        SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
-        SendGrid.Email email = new SendGrid.Email();
-        email.addTo(user.getEmail());
-        email.setFrom(SENDGRID_SENDER);
-        email.setFromName("Accounting Report Generator");
-        email.setBcc(Optional.ofNullable(EMAIL_BCC)
-                .map(s -> s.split(";"))
-                .orElse(new String[]{}));
+        Mail email = new Mail();
+        Personalization personalization = new Personalization();
+        personalization.addTo(new Email(user.getEmail(), user.getEmail()));
+        email.addPersonalization(personalization);
+        email.setFrom(new Email(SENDGRID_SENDER, "Accounting Report Generator"));
         email.setSubject("Accounting Report Generator Password Reset");
-        email.setText(String.format("User %s password reset: %s . Please change your password once logged in.",
-                user.getUsername(), user.getPassword()));
 
-        SendGrid.Response response = sendgrid.send(email);
-        if (response.getCode() != 200) {
-            log.warn(String.format("An error occured: %s Code=%d", response.getMessage(), response.getCode()));
-            return;
+        email.addContent(new Content("text/html",
+                String.format("User %s password reset: %s . Please change your password once logged in.",
+                        user.getUsername(), user.getPassword())));
+        sendMail(email);
+    }
+
+    private void sendMail(Mail email) throws Exception {
+        SendGrid sendgrid = new SendGrid(SENDGRID_API_KEY);
+        final Request request = new Request();
+        request.setMethod(Method.POST);
+        request.setEndpoint("mail/send");
+        request.setBody(email.build());
+
+        Response response = sendgrid.api(request);
+        if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+            log.warn(String.format("An error occurred: Code=%d %s %s", response.getStatusCode(), response.getHeaders().toString(),
+                    response.getBody()));
         }
     }
 

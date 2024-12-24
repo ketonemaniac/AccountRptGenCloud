@@ -7,7 +7,7 @@ import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.common.util.ExcelUtils;
 import net.ketone.accrptgen.task.gen.model.AuditProgrammeMapping;
 import net.ketone.accrptgen.common.util.ExcelTaskUtils;
-import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;

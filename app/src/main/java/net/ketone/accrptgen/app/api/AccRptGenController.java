@@ -2,12 +2,12 @@ package net.ketone.accrptgen.app.api;
 
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.app.service.ClientRandIntChecker;
-import net.ketone.accrptgen.app.service.tasks.TaskSubmissionService;
-import net.ketone.accrptgen.app.service.tasks.TasksService;
+import net.ketone.accrptgen.task.service.tasks.TaskSubmissionService;
+import net.ketone.accrptgen.task.service.tasks.TasksService;
 import net.ketone.accrptgen.app.util.UserUtils;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.common.model.AccountJob;
-import net.ketone.accrptgen.common.model.auth.AuthenticatedUser;
+import net.ketone.accrptgen.app.model.auth.AuthenticatedUser;
 import net.ketone.accrptgen.common.model.auth.User;
 import net.ketone.accrptgen.common.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;

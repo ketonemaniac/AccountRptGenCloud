@@ -11,15 +11,15 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.5.4</version>
+		<version>3.4.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
 	<name>Account Report Generator :: Root</name>
 
 	<properties>
-		<java.version>11</java.version>
-		<spring-cloud-gcp.version>1.2.5.RELEASE</spring-cloud-gcp.version>
+		<java.version>21</java.version>
+		<spring-cloud-gcp.version>5.9.0</spring-cloud-gcp.version>
 	</properties>
 
 	<modules>
@@ -55,7 +55,7 @@
 
 			<!-- Spring -->
 			<dependency>
-				<groupId>org.springframework.cloud</groupId>
+				<groupId>com.google.cloud</groupId>
 				<artifactId>spring-cloud-gcp-dependencies</artifactId>
 				<version>${spring-cloud-gcp.version}</version>
 				<type>pom</type>
@@ -66,7 +66,7 @@
 			<dependency>
 				<groupId>com.google.cloud</groupId>
 				<artifactId>libraries-bom</artifactId>
-				<version>23.1.0</version>
+				<version>26.52.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -75,59 +75,74 @@
 			<dependency>
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi-ooxml</artifactId>
-				<version>3.17</version>
+				<version>5.2.2</version>
 			</dependency>
 			<dependency>
-				<groupId>org.docx4j</groupId>
-				<artifactId>docx4j</artifactId>
-				<version>3.3.6</version>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.15.0</version>
 			</dependency>
 
+			<!--			<dependency>-->
+<!--				<groupId>org.apache.commons</groupId>-->
+<!--				<artifactId>commons-lang3</artifactId>-->
+<!--				<version>3.17.0</version>-->
+<!--			</dependency>-->
+			<dependency>
+				<groupId>org.docx4j</groupId>
+				<artifactId>docx4j-core</artifactId>
+				<version>11.5.1</version>
+			</dependency>
+
+
 			<!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-storage -->
-			<dependency>
-				<groupId>com.google.cloud</groupId>
-				<artifactId>google-cloud-storage</artifactId>
-				<version>1.113.3</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.appengine</groupId>
-				<artifactId>appengine-api-1.0-sdk</artifactId>
-				<version>1.9.83</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.cloud</groupId>
-				<artifactId>google-cloud-logging</artifactId>
-				<version>1.102.0</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.cloud</groupId>
-				<artifactId>google-cloud-tasks</artifactId>
-				<version>1.30.7</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-lang3</artifactId>
-				<version>3.7</version>
-			</dependency>
+<!--			<dependency>-->
+<!--				<groupId>com.google.cloud</groupId>-->
+<!--				<artifactId>google-cloud-storage</artifactId>-->
+<!--				<version>1.113.3</version>-->
+<!--			</dependency>-->
+<!--			<dependency>-->
+<!--				<groupId>com.google.appengine</groupId>-->
+<!--				<artifactId>appengine-api-1.0-sdk</artifactId>-->
+<!--				<version>1.9.83</version>-->
+<!--			</dependency>-->
+<!--			<dependency>-->
+<!--				<groupId>com.google.cloud</groupId>-->
+<!--				<artifactId>google-cloud-logging</artifactId>-->
+<!--				<version>1.102.0</version>-->
+<!--			</dependency>-->
+<!--			<dependency>-->
+<!--				<groupId>com.google.cloud</groupId>-->
+<!--				<artifactId>google-cloud-tasks</artifactId>-->
+<!--				<version>1.30.7</version>-->
+<!--			</dependency>-->
+
 
 			<!-- mail client -->
 			<dependency>
 				<groupId>com.sendgrid</groupId>
 				<artifactId>sendgrid-java</artifactId>
-				<version>2.2.2</version>
+				<version>4.10.3</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>30.0-jre</version>
+				<version>33.4.0-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>io.vavr</groupId>
 				<artifactId>vavr</artifactId>
-				<version>0.10.3</version>
+				<version>0.10.5</version>
 			</dependency>
 
 		</dependencies>
 	</dependencyManagement>
 
+<!--	<repositories>-->
+<!--		<repository>-->
+<!--			<id>spring</id>-->
+<!--			<name>spring-milestones</name>-->
+<!--			<url>https://repo.spring.io/milestone/</url>-->
+<!--		</repository>-->
+<!--	</repositories>-->
 </project>

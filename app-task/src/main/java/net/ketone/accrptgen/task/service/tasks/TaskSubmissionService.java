@@ -1,4 +1,4 @@
-package net.ketone.accrptgen.app.service.tasks;
+package net.ketone.accrptgen.task.service.tasks;
 
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
@@ -8,8 +8,6 @@ import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
-import net.ketone.accrptgen.app.util.UserUtils;
-import net.ketone.accrptgen.task.AccountRptTask;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,6 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Sinks;
 
 import java.io.ByteArrayInputStream;
@@ -51,11 +48,12 @@ public class TaskSubmissionService {
         AccountJob.AccountJobBuilder jobBuilder = AccountJob.builder()
                 .id(UUID.randomUUID())
                 .filename(curTimeMs + fileExtension)
-                .submittedBy(UserUtils.getAuthenticatedUser())
+                .submittedBy(optionalUser.map(User::getUsername).orElse("anonymous"))
                 .noCCemail(optionalUser.map(User::getNoCCemail).orElse(Boolean.FALSE))
                 .clientRandInt(clientRandInt);
         sink.tryEmitNext(toSSE(jobBuilder.status(Constants.Status.PRELOADED.name()).build()));
         new Thread(() -> Try.run(() -> {
+            System.out.println("going to XSSFWorkbook");
             XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
 
             if(Optional.ofNullable(workbook.getSheet("metadata"))

@@ -4,7 +4,7 @@ import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.model.CellValueHolder;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -68,7 +68,7 @@ public class ExcelUtils {
     public static CellValueHolder getCellValue(Cell c) {
         String dataFormatStr = Optional.ofNullable(c.getCellStyle()).map(CellStyle::getDataFormatString)
                 .orElse(StringUtils.EMPTY);
-        if(CellType.NUMERIC.equals(c.getCellTypeEnum()) &&
+        if(CellType.NUMERIC.equals(c.getCellType()) &&
                 dataFormatStr.contains("y") && dataFormatStr.contains("m") && dataFormatStr.contains("d")) {
             // this should be a date type
             return CellValueHolder.builder()

@@ -386,7 +386,7 @@ public class GenerationServiceApachePOI implements GenerationService {
         }
         cTLvl.addNewLvlText().setVal("%1.");
         cTLvl.addNewStart().setVal(BigInteger.valueOf(1));
-        CTPPr ctpPr = cTLvl.addNewPPr();
+        CTPPrGeneral ctpPr = cTLvl.addNewPPr();
         CTInd ctInd = ctpPr.addNewInd();
         // magic indentations...
         // left controls the number itself

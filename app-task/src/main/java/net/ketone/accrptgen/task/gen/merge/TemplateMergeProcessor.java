@@ -94,7 +94,7 @@ public class TemplateMergeProcessor {
                 .doOnNext(tuple3 -> {
                     log.debug("MERGE copy to target Cell Address={}", tuple3._2.getAddress().formatAsString());
                 })
-                .map(tuple3 -> tuple3.append(Optional.ofNullable(cellTypeProcessorMap.get(tuple3._2.getCellTypeEnum()))
+                .map(tuple3 -> tuple3.append(Optional.ofNullable(cellTypeProcessorMap.get(tuple3._2.getCellType()))
                         .orElse(cellTypeProcessorMap.get(CellType._NONE)))
                 )
                 .doOnNext(tuple4 -> tuple4._4.visit(CellInfo.builder()

@@ -8,7 +8,7 @@ import net.ketone.accrptgen.task.config.properties.ParseProperties;
 import net.ketone.accrptgen.task.gen.generate.BannerService;
 import net.ketone.accrptgen.common.util.ExcelTaskUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -36,7 +36,7 @@ public class ParsingService {
     }
 
     private void removeColors(Cell cell) {
-        if(cell.getCellStyle() != null && cell.getCellStyle().getFillPatternEnum() != FillPatternType.NO_FILL) {
+        if(cell.getCellStyle() != null && cell.getCellStyle().getFillPattern() != FillPatternType.NO_FILL) {
             cell.getCellStyle().setFillPattern(FillPatternType.NO_FILL);
             cell.getCellStyle().setFillForegroundColor(IndexedColors.AUTOMATIC.getIndex());
         }

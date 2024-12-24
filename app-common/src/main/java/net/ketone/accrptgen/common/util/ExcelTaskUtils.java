@@ -70,9 +70,9 @@ public class ExcelTaskUtils {
                     .flatMap(color -> Optional.ofNullable(keepFormulaColor)
                             .map(color::equalsIgnoreCase))
                     .orElse(Boolean.FALSE)) {
-                evaluationResult = evaluator.evaluateFormulaCellEnum(cell);
+                evaluationResult = evaluator.evaluateFormulaCell(cell);
             } else {
-                evaluationResult = evaluator.evaluateInCell(cell).getCellTypeEnum();
+                evaluationResult = evaluator.evaluateInCell(cell).getCellType();
             };
             if (evaluationResult.equals(CellType.ERROR)) {
                 exceptions.add(new EvaluationException(stage, cell));
