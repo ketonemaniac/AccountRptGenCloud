@@ -5,7 +5,7 @@ RUN npm --version
 RUN npm install
 RUN npm run build
 
-FROM maven:3.8.1-jdk-11-slim AS build
+FROM maven:3.9.9-amazoncorretto-21 AS build
 COPY pom.xml .
 COPY app /app/
 COPY app-common/ /app-common/
