@@ -158,19 +158,19 @@ public class ParserITCase {
         Workbook outputWb = svc.postProcess(workbook, new ParseProperties());
         // number
         Cell c = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
-        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.NUMERIC);
+        assertThat(c.getCellType()).isEqualTo(CellType.NUMERIC);
         assertThat(c.getNumericCellValue()).isEqualTo(5);
         // string
         c = outputWb.getSheet("Sheet1").getRow(1).getCell(0);
-        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.STRING);
+        assertThat(c.getCellType()).isEqualTo(CellType.STRING);
         assertThat(c.getStringCellValue()).isEqualTo("hello world");
         // boolean
         c = outputWb.getSheet("Sheet1").getRow(2).getCell(0);
-        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.BOOLEAN);
+        assertThat(c.getCellType()).isEqualTo(CellType.BOOLEAN);
         assertThat(c.getBooleanCellValue()).isEqualTo(true);
         // date
         c = outputWb.getSheet("Sheet1").getRow(3).getCell(0);
-        assertThat(c.getCellTypeEnum()).isEqualTo(CellType.NUMERIC);    // date is stored as numeric
+        assertThat(c.getCellType()).isEqualTo(CellType.NUMERIC);    // date is stored as numeric
     }
 
     @Test
