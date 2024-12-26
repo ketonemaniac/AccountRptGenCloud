@@ -74,31 +74,42 @@ public class SendgridEmailService extends AbstractEmailService {
         SENDGRID_API_KEY = props.getProperty(SettingsService.SENDGRID_API_KEY_PROP);
     }
 
+    protected Personalization populateRecipients(Map<String, String[]> recipients, boolean noCCemail) {
+        Set<String> addedEmails = new HashSet<>();
+        Personalization personalization = new Personalization();
+        Arrays.stream(recipients.get("to"))
+                .filter(StringUtils::isNotEmpty)
+                .filter(to -> !addedEmails.contains(to))
+                .forEach(to -> {
+                    addedEmails.add(to);
+                    personalization.addTo(new Email(to, to));
+                });
+        if(!noCCemail) {
+            Arrays.stream(recipients.get("cc"))
+                    .filter(StringUtils::isNotEmpty)
+                    .filter(cc -> !addedEmails.contains(cc))
+                    .forEach(cc -> {
+                        addedEmails.add(cc);
+                        personalization.addCc(new Email(cc, cc));
+                    });
+            Arrays.stream(recipients.get("bcc"))
+                    .filter(StringUtils::isNotEmpty)
+                    .filter(bcc -> !addedEmails.contains(bcc))
+                    .forEach(bcc -> {
+                        addedEmails.add(bcc);
+                        personalization.addBcc(new Email(bcc, bcc));
+                    });
+        }
+        return personalization;
+    }
+
     @Override
     public void sendEmail(AccountJob dto, List<Attachment> attachments,
                           final MailProperties properties) throws Exception {
         if(!SENDGRID_ENABLE) return;
         Mail email = new Mail();
-        Personalization personalization = new Personalization();
         Map<String, String[]> recipients = getEmailAddresses(dto);
-        Arrays.stream(recipients.get("to"))
-                .filter(StringUtils::isNotEmpty)
-                .forEach(to -> {
-            personalization.addTo(new Email(to, to));
-        });
-        if(!dto.getNoCCemail()) {
-            Arrays.stream(recipients.get("cc"))
-                    .filter(StringUtils::isNotEmpty)
-                    .forEach(cc -> {
-                personalization.addCc(new Email(cc, cc));
-            });
-            Arrays.stream(recipients.get("bcc"))
-                    .filter(StringUtils::isNotEmpty)
-                    .forEach(bcc -> {
-                personalization.addBcc(new Email(bcc, bcc));
-            });
-        }
-        email.addPersonalization(personalization);
+        email.addPersonalization(populateRecipients(recipients, dto.getNoCCemail()));
         email.setFrom(new Email(SENDGRID_SENDER, "Accounting Report Generator"));
         email.setSubject(String.format("%s%s %s", Optional.ofNullable(dto.getFundingType()).orElse(
                 StringUtils.EMPTY), properties.getSubjectPrefix(), dto.getCompany()));
