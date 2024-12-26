@@ -3,9 +3,11 @@ package net.ketone.accrptgen.task.it;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.common.mail.EmailService;
 import net.ketone.accrptgen.common.store.StorageService;
+import net.ketone.accrptgen.common.util.ExcelTaskUtils;
 import net.ketone.accrptgen.task.config.properties.ParseProperties;
 import net.ketone.accrptgen.task.gen.GenerationService;
 import net.ketone.accrptgen.task.gen.ParsingService;
+import net.ketone.accrptgen.task.gen.generate.BannerService;
 import net.ketone.accrptgen.task.gen.model.Section;
 import net.ketone.accrptgen.task.gen.model.SectionElement;
 import net.ketone.accrptgen.task.gen.model.Table;
@@ -21,8 +23,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.FileOutputStream;
@@ -44,27 +48,34 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @IfProfileValue(name = "spring.profiles.active", values = {"itcase"})
 @ExtendWith(SpringExtension.class)
-@ActiveProfiles("local")
-@SpringBootTest
+@Import(ParsingService.class)
+//@ActiveProfiles("local")
+//@SpringBootTest
 public class ParserITCase {
+
+    @MockitoBean
+    StorageService storageService;
+
+    @MockitoBean
+    BannerService bannerService;
 
     @Autowired
     private ParsingService svc;
-    @Autowired
-    private GenerationService genSvc;
-    @Autowired
-    private StorageService storageSvc;
-    @Autowired
-    private EmailService emailSvc;
-    @Autowired
-    private StatisticsService statisticsSvc;
+//    @Autowired
+//    private GenerationService genSvc;
+//    @Autowired
+//    private StorageService storageSvc;
+//    @Autowired
+//    private EmailService emailSvc;
+//    @Autowired
+//    private StatisticsService statisticsSvc;
 
 
-    @Value("${template.filename}")
-    private String TEMPLATE_FILENAME;
-
-    @Value("${plain.filename}${plain.filename.extension}")
-    private String PLAIN_FILENAME;
+//    @Value("${template.filename}")
+//    private String TEMPLATE_FILENAME;
+//
+//    @Value("${plain.filename}${plain.filename.extension}")
+//    private String PLAIN_FILENAME;
 
 //    @Test
 //    public void testPreParse() throws Exception {
@@ -155,21 +166,21 @@ public class ParserITCase {
     public void testStringifyContents() throws IOException {
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("formulaToText.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(in);
-        Workbook outputWb = svc.postProcess(workbook, new ParseProperties());
+        ExcelTaskUtils.evaluateAll("test", workbook); // svc.postProcess(workbook, new ParseProperties());
         // number
-        Cell c = outputWb.getSheet("Sheet1").getRow(0).getCell(0);
+        Cell c = workbook.getSheet("Sheet1").getRow(0).getCell(0);
         assertThat(c.getCellType()).isEqualTo(CellType.NUMERIC);
         assertThat(c.getNumericCellValue()).isEqualTo(5);
         // string
-        c = outputWb.getSheet("Sheet1").getRow(1).getCell(0);
+        c = workbook.getSheet("Sheet1").getRow(1).getCell(0);
         assertThat(c.getCellType()).isEqualTo(CellType.STRING);
         assertThat(c.getStringCellValue()).isEqualTo("hello world");
         // boolean
-        c = outputWb.getSheet("Sheet1").getRow(2).getCell(0);
+        c = workbook.getSheet("Sheet1").getRow(2).getCell(0);
         assertThat(c.getCellType()).isEqualTo(CellType.BOOLEAN);
         assertThat(c.getBooleanCellValue()).isEqualTo(true);
         // date
-        c = outputWb.getSheet("Sheet1").getRow(3).getCell(0);
+        c = workbook.getSheet("Sheet1").getRow(3).getCell(0);
         assertThat(c.getCellType()).isEqualTo(CellType.NUMERIC);    // date is stored as numeric
     }
 

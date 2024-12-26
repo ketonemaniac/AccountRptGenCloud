@@ -1,5 +1,6 @@
 package net.ketone.accrptgen.it;
 
+import net.ketone.accrptgen.app.AccrptgenApplication;
 import net.ketone.accrptgen.common.mail.EmailService;
 import net.ketone.accrptgen.common.store.FileStorageService;
 import net.ketone.accrptgen.common.store.StorageService;
@@ -23,8 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 /**
  * This is a test file to run the meat without booting up the whole program.
@@ -37,7 +38,7 @@ import static org.mockito.Matchers.eq;
 @IfProfileValue(name = "spring.profiles.active", values = {"itcase"})
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("local")
-@SpringBootTest
+@SpringBootTest(classes = AccrptgenApplication.class)
 public class AccrptgenApplicationITCase {
 
 	@TestConfiguration
