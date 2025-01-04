@@ -1,16 +1,16 @@
-@import "../../../node_modules/ag-grid-community/src/styles/ag-grid.scss";
-@import "../../../node_modules/ag-grid-community/src/styles/ag-theme-alpine/sass/ag-theme-alpine-mixin";
+// @import "../../../node_modules/ag-grid-community/src/styles/ag-grid.scss";
+// @import "../../../node_modules/ag-grid-community/src/styles/ag-theme-alpine/sass/ag-theme-alpine-mixin";
 
 .myToast:has(.Toastify__toast--warning) {
     --toastify-toast-width: 80%;
 }
 
-.ag-theme-alpine {
-  @include ag-theme-alpine((
-      borders: false,
-      grid-size: 4px    
-  ));
-}
+// .ag-theme-alpine {
+//   @include ag-theme-alpine((
+//       borders: false,
+//       grid-size: 4px    
+//   ));
+// }
 
 .template-excel-card {
   margin-top: 1rem;

@@ -95,7 +95,7 @@ public class ConfigurationController {
     }
 
     @PostMapping("template/{fileType}/active/{filename}")
-    public AccountJob setActiveTemplate(@PathVariable final String fileType,
+    public AccountJob setActiveTemplate(@PathVariable("fileType") final String fileType,
             @PathVariable("filename") final String filename) {
         configurationService.saveSetting(
                 getConfigurationName(fileType), filename);

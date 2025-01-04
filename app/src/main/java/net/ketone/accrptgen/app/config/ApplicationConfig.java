@@ -10,11 +10,12 @@ import net.ketone.accrptgen.task.config.EnableTasks;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableMongoDomain
 @EnableEmail
-@Import(value = {EncryptionConfig.class})
+@Import(value = {EncryptionConfig.class, MvcConfig.class})
 @EnableTasks
 public class ApplicationConfig {
 

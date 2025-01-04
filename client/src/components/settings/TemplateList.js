@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { AgGridReact } from 'ag-grid-react';
 import '../../styles/settings/TemplateList.scss';
+import { themeAlpine, ClientSideRowModelModule, EventApiModule, ModuleRegistry, provideGlobalGridOptions, AllCommunityModule } from 'ag-grid-community';
 import Endpoints from '../../api/Endpoints.js';
-import {ReactComponent as StarFillIcon} from '../../assets/svg/star-fill.svg'
+import StarFillIcon from '../../assets/star-fill.svg'
 import { toast } from 'react-toastify';
 import {
     Card, CardImg, CardText, CardBody,
@@ -18,15 +19,31 @@ const TemplateList = (props) => {
         setRowData(props.rowData)   
     }, [props.rowData])    
 
-    const onGridReady = params => {
-        params.api.sizeColumnsToFit();
-        params.api.setDomLayout('autoHeight')
-        setGridApi(params.api);
+
+    const apiRef = React.useRef({
+      grid: undefined,
+      column: undefined
+    });
+    const onGridReady = (params) => {
+      apiRef.current.grid = params.api;
+      apiRef.current.column = params.columnApi;
+  
+      params.api.sizeColumnsToFit();
+      setGridApi(params.api);
     };
 
-    const iconCellRenderer = params  => params.value ? <StarFillIcon /> : <span/>
+    // const onGridReady = params => {
+    //     // params.api.sizeColumnsToFit();
+    //     // params.api.setDomLayout('autoHeight')
+    //     setGridApi(params.api);
+    // };
+
+    const iconCellRenderer = params  => {
+        return Boolean(params.value) ? <img src={StarFillIcon} /> : <span/>
+    }
     
     const onSelectionChanged = (event) => {
+        console.log("onCellClicked " + event.api);
         if(event.api.getSelectedNodes().length === 0) {
             setSelected({})
         } else {
@@ -64,6 +81,30 @@ const TemplateList = (props) => {
                 }));
     };
 
+    // Register all community features
+    ModuleRegistry.registerModules([AllCommunityModule, ClientSideRowModelModule, EventApiModule]);
+
+    const columnDefs = [{sortable: true,
+         filter: true,
+         resizable: true,
+         field: "filename",
+         checkboxSelection: true
+        },
+        {resizable: true,
+             field: "inUse",
+             rowClass: "testtest",
+             cellRenderer: iconCellRenderer
+        }
+    ];
+
+    const rowSelection = useMemo(() => { 
+        return {
+            mode: 'singleRow',
+            checkboxes: false,
+            enableClickSelection: true,
+        };
+    }, []);
+
     return (
         <React.Fragment>
             <Card className="template-excel-card">
@@ -84,16 +125,14 @@ const TemplateList = (props) => {
                     <Button className="template-excel-action-button" color="danger" 
                         onClick={handleDeleteTemplate}
                         disabled={selected.inUse === undefined || selected.inUse === null || selected.inUse} outline>Delete</Button>
-                    <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
+                    <div style={{ height: rowData?.length * 50, width: '100%' }}>
                         <AgGridReact rowData={rowData} 
                                         onGridReady={onGridReady}
-                                        onSelectionChanged={onSelectionChanged}
-                                        >
-                            <AgGridColumn sortable={ true } filter={ true } resizable={true} field="filename"
-                                checkboxSelection={true}
-                            ></AgGridColumn>
-                            <AgGridColumn resizable={true} field="inUse" rowClass="testtest"
-                                cellRendererFramework={iconCellRenderer}></AgGridColumn>
+                                        onRowSelected={onSelectionChanged}
+                                        theme={themeAlpine}
+                                        columnDefs={columnDefs}
+                                        rowSelection={rowSelection}
+                                        >                            
                         </AgGridReact>
                     </div>
                 </CardBody>

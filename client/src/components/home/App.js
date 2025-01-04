@@ -16,6 +16,7 @@ import Dropzone from 'react-dropzone';
 import Endpoints from '../../api/Endpoints';
 import { CSSTransition } from 'react-transition-group';
 import { fetchEventSource } from "@microsoft/fetch-event-source";
+import Bg from '../../assets/background.jpg'
 
 
 class App extends Component {
@@ -208,7 +209,8 @@ class App extends Component {
               return (
                 <div className="jumbotron" style={{
                   paddingTop: showAddDetail ? "5%" : "15%",
-                  paddingBottom: showAddDetail ? "5%" : "15%"
+                  paddingBottom: showAddDetail ? "5%" : "15%",
+                  backgroundImage: `url(${Bg})`,
                 }}
                   fluid="true" {...getRootProps({ onClick: evt => evt.preventDefault() })}>
                   <input {...getInputProps()} />
@@ -288,7 +290,7 @@ class App extends Component {
           </CardDeck>
         </div>
         <Container className="footer text-center">
-          <span className="text-muted"> © Ketone Maniac @ 2022</span>          
+          <span className="text-muted"> © Ketone Maniac @ 2024</span>          
         </Container>
 
 
