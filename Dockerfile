@@ -1,4 +1,4 @@
-FROM node:14.10.1-buster-slim AS npmBuild
+FROM node:20-buster-slim AS npmBuild
 COPY client /client
 WORKDIR /client
 RUN npm --version
