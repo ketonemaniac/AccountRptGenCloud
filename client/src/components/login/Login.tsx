@@ -1,9 +1,9 @@
-import React from 'react';
+import * as React from 'react';
 import { Container, Form, FormGroup, Label, Input, Button, Alert } from 'reactstrap';
 import '../../styles/login/Login.scss';
 import { useLocation } from 'react-router-dom';
 
-const Login = (props) => {
+const Login = (props: any) => {
     let location = useLocation();
     console.log(location);
     const err = location.search === "?error=true"
