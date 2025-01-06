@@ -2,9 +2,10 @@ import * as React from 'react';
 import { Container, Form, FormGroup, Label, Input, Button, Alert } from 'reactstrap';
 import '../../styles/login/Login.scss';
 import { useLocation } from 'react-router-dom';
+import * as H from 'history';
 
 const Login = (props: any) => {
-    let location = useLocation();
+    const location: H.Location = useLocation();
     console.log(location);
     const err = location.search === "?error=true"
     return (<Container className="login">
