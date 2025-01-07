@@ -1,22 +1,21 @@
 import React, { Component, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../../styles/home/App.scss';
+import '@/styles/home/App.scss';
 import {
   Container, Row, Col,
   Jumbotron,
   CardDeck, Card, CardHeader, CardImg, CardText, CardBody,
   CardTitle, CardSubtitle, Media,
   Form, FormGroup, Label, Input,
-  Alert, Modal, ModalHeader, ModalBody, ModalFooter
+  Alert, Modal, ModalHeader, ModalBody, ModalFooter, Button
 } from 'reactstrap';
-import Button from 'reactstrap-button-loader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRedo } from '@fortawesome/free-solid-svg-icons'
 import Dropzone from 'react-dropzone';
-import Endpoints from '../../api/Endpoints';
+import Endpoints from '@/api/Endpoints';
 import { CSSTransition } from 'react-transition-group';
 import { fetchEventSource } from "@microsoft/fetch-event-source";
-import Bg from '../../assets/background.jpg'
+import Bg from '@/assets/background.jpg'
 
 
 class App extends Component {
@@ -127,37 +126,6 @@ class App extends Component {
       });
     };
     fetchData();
-      
-
-      // Endpoints.uploadFile(data)
-        // var resData = e.data
-        // .then(resData => {
-          // this.setState(state => {
-          //   const companies = [{
-          //     company: resData.company,
-          //     filename: resData.filename,
-          //     status: resData.status,
-          //     id: resData.id,
-          //     period: resData.period,
-          //     docType: resData.docType,
-          //     referredBy: resData.referredBy 
-          //   }, ...state.companies];
-        //     return {
-        //       companies: companies,
-        //       fileUploadBlock: false
-        //     };
-        //   });
-        // })
-        // .catch(e => {
-        //   this.setState({
-        //     uploadError: e?.response?.data?.message,
-        //     fileUploadBlock: false,
-        //     isUploadErrorModalOpen: true
-        //   }
-        //   )
-        // }
-        // )
-
     }
     );
     this.setState({ fileUploadBlock: true });
@@ -222,7 +190,7 @@ class App extends Component {
                       </span>
                       <span className="lead" ><p />
                         <Button color="primary" className="bigButton" onClick={() => dropzoneRef.current.open()}
-                          loading={this.state.fileUploadBlock}>
+                          disabled={this.state.fileUploadBlock}>
                           Select File
                         </Button>
                       </span>
@@ -331,13 +299,13 @@ class App extends Component {
         )
       case "PENDING":
         return (
-          <Button loading="true"
-            disabled color="secondary" className="generate-button mr-2">Pending</Button>
+          <Button disabled={true}
+            color="secondary" className="generate-button mr-2">Pending</Button>
         )
       case "GENERATING":
         return (
-          <Button loading="true"
-            disabled color="secondary" className="generate-button mr-2">Generating</Button>
+          <Button disabled={true}
+            color="secondary" className="generate-button mr-2">Generating</Button>
         )
 
     }

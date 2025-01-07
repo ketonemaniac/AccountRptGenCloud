@@ -32,18 +32,11 @@ const TemplateList = (props) => {
       setGridApi(params.api);
     };
 
-    // const onGridReady = params => {
-    //     // params.api.sizeColumnsToFit();
-    //     // params.api.setDomLayout('autoHeight')
-    //     setGridApi(params.api);
-    // };
-
     const iconCellRenderer = params  => {
         return Boolean(params.value) ? <img src={StarFillIcon} /> : <span/>
     }
     
     const onSelectionChanged = (event) => {
-        console.log("onCellClicked " + event.api);
         if(event.api.getSelectedNodes().length === 0) {
             setSelected({})
         } else {
@@ -125,7 +118,7 @@ const TemplateList = (props) => {
                     <Button className="template-excel-action-button" color="danger" 
                         onClick={handleDeleteTemplate}
                         disabled={selected.inUse === undefined || selected.inUse === null || selected.inUse} outline>Delete</Button>
-                    <div style={{ height: rowData?.length * 50, width: '100%' }}>
+                    <div style={{ height: (rowData?.length + 1) * 50, width: '100%' }}>
                         <AgGridReact rowData={rowData} 
                                         onGridReady={onGridReady}
                                         onRowSelected={onSelectionChanged}

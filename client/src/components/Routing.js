@@ -1,24 +1,27 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import App from './home/App';
 import UserAdmin from './useradmin/UserAdmin.js'
-import Settings from './settings/Settings.js'
+import Settings from './settings/Settings'
 import Frame from './Frame.js';
 import Login from './login/Login';
+import BreakdownTabsGen from './breakdownTabs/BreakdownTabsGen';
 
 
 const Routing = () => {
 
     return (
             <Router>
-                <Route exact path="/">
-                    <Redirect to='/app/main' />
-                </Route>
-                <Route exact path="/login" component={Login} />
-                <Route path="/app" component={Frame} />
-                <Route path="/app/users" component={UserAdmin} />
-                <Route path="/app/settings" component={Settings} />
-                <Route path="/app/main" component={App} />
+                <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/app" element={<Frame />} >
+                        <Route path="users" element={<UserAdmin />} />
+                        <Route path="breakdown" element={<BreakdownTabsGen />} />
+                        <Route path="settings" element={<Settings />} />
+                        <Route path="main" element={<App />} />
+                    </Route>
+                    <Route path="/" element={<Navigate to="/app/main" replace />} />
+                </Routes>
             </Router>
     );
 }

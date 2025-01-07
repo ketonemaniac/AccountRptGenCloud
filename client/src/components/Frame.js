@@ -6,6 +6,7 @@ import '../styles/Frame.css'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Endpoints from '../api/Endpoints.js';
+import { Outlet } from 'react-router-dom';
 
 class Frame extends Component {
 
@@ -50,7 +51,9 @@ class Frame extends Component {
                 <User user={this.state.user}
                     toggleUserModal={this.toggleUserModal.bind(this)} isUserModalOpen={this.state.isUserModalOpen}></User>
                 <ToastContainer className="myToast" />
-
+                <div style={{marginTop: '6rem'}}>
+                    <Outlet />
+                </div>                
             </div>
         );
     }

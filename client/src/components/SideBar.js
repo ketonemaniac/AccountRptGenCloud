@@ -14,6 +14,7 @@ class SideBar extends Component {
             <div className={this.props.isSideBarCollapsed ? "width show" : "width"} id="sidebar">
                 <ListGroup className="sidebar-list text-nowrap">
                     <Link onClick={this.linkOnclick.bind(this)} to="/app/main"><ListGroupItem>Report Generation</ListGroupItem></Link>
+                    <Link onClick={this.linkOnclick.bind(this)} to="/app/breakdown"><ListGroupItem>Breakdown Tabs Generation</ListGroupItem></Link>
                     <Link onClick={this.linkOnclick.bind(this)} to="/app/users"><ListGroupItem>Users</ListGroupItem></Link>
                     <Link onClick={this.linkOnclick.bind(this)} to="/app/settings"><ListGroupItem>Settings</ListGroupItem></Link>
                 </ListGroup>

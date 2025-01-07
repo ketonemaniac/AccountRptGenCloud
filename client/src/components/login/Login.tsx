@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Container, Form, FormGroup, Label, Input, Button, Alert } from 'reactstrap';
-import '../../styles/login/Login.scss';
+import '@/styles/login/Login.scss';
 import { useLocation } from 'react-router-dom';
 import * as H from 'history';
 

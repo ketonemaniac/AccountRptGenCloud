@@ -38,6 +38,7 @@ public class ConfigurationController {
     private static final String ALLDOCS = "allDocs";
     private static final String AUDITPRG = "auditPrg";
     private static final String DBIZFUNDING = "dBizFunding";
+    private static final String BREAKDOWNTABS = "breakdownTabs";
     private static final String BANNER = "banner";
 
 
@@ -53,6 +54,8 @@ public class ConfigurationController {
                 return StorageService.DBIZ_FUNDING_PATH;
             case BANNER:
                 return StorageService.BANNER_PATH;
+            case BREAKDOWNTABS:
+                return StorageService.BREAKDOWN_TABS_PATH;
             default:
                 return StringUtils.EMPTY;
         }
@@ -66,6 +69,8 @@ public class ConfigurationController {
                 return SettingsService.PREPARSE_AUIDTPRG_TEMPLATE_PROP;
             case DBIZFUNDING:
                 return SettingsService.PREPARSE_DBIZ_FUNDING_TEMPLATE_PROP;
+            case BREAKDOWNTABS:
+                return SettingsService.PREPARSE_BREAKDOWN_TABS_TEMPLATE_PROP;
             default:
                 return StringUtils.EMPTY;
         }
@@ -131,6 +136,7 @@ public class ConfigurationController {
                 .allDocs(properties.getProperty(SettingsService.PREPARSE_TEMPLATE_PROP))
                 .auditPrg(properties.getProperty(SettingsService.PREPARSE_AUIDTPRG_TEMPLATE_PROP))
                 .dBizFunding(properties.getProperty(SettingsService.PREPARSE_DBIZ_FUNDING_TEMPLATE_PROP))
+                .breakdownTabs(properties.getProperty(SettingsService.PREPARSE_BREAKDOWN_TABS_TEMPLATE_PROP))
                 .sendTo(Arrays.asList(properties.getProperty(SettingsService.SEND_TO_PROP).split(";")))
                 .auditors(properties.entrySet().stream()
                         .filter(entry -> entry.getKey().toString().startsWith("auditor."))

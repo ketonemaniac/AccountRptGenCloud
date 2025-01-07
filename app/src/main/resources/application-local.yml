@@ -14,8 +14,8 @@ mongo:
   database:
     name: testing
 
-#security:
-#  enable: false
+security:
+  enable: false
 
 logging:
   level:
