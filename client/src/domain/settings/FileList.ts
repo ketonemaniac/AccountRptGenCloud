@@ -1,4 +1,4 @@
-export interface FileList {
+export default interface FileList {
     dBizFunding: string[];
     allDocs: string[];
     auditPrg: string[];

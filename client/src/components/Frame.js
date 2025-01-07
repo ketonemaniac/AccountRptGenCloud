@@ -5,7 +5,7 @@ import User from './header/User.js';
 import '../styles/Frame.css'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Endpoints from '../api/Endpoints.js';
+import Endpoints from '@/api/Endpoints.js';
 import { Outlet } from 'react-router-dom';
 
 class Frame extends Component {

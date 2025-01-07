@@ -1,11 +1,10 @@
 import * as React from 'react';
 import { Container ,Button, Form, FormGroup, Label, Input, Row, Col } from 'reactstrap';
-import Endpoints from '../../api/Endpoints';
+import Endpoints from '@/api/Endpoints';
 import { toast } from 'react-toastify';
 import TemplateList from './TemplateList.js'
 import { useState, useEffect } from 'react';
-import '../../styles/settings/Settings.scss';
-import {FileList} from '../../domain/settings/FileList';
+import FileList from '@/domain/settings/FileList';
 
 interface SettingFile {
     filename: string;
