@@ -23,7 +23,7 @@ public class ExcelUtils {
 
     private static final String MISSING_INFO = "Please provide data(Col %s) with title(Col A) '%s' of sheet '%s'";
 
-    private static final String colStrMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public static final String colStrMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     public static String extractByTitleCellName(final XSSFWorkbook workbook, final String sheetName,
                                                     final String titleCellName, final int dataColumn) {

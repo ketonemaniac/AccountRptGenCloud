@@ -7,6 +7,7 @@ import net.ketone.accrptgen.common.mail.Attachment;
 import net.ketone.accrptgen.common.mail.EmailService;
 import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.store.StorageService;
+import net.ketone.accrptgen.common.util.ExcelTaskUtils;
 import net.ketone.accrptgen.common.util.FileUtils;
 import net.ketone.accrptgen.task.config.properties.AccountRptProperties;
 import net.ketone.accrptgen.task.gen.GenerationService;
@@ -18,19 +19,13 @@ import net.ketone.accrptgen.task.gen.model.AccountData;
 import net.ketone.accrptgen.task.gen.model.AuditProgrammeMapping;
 import net.ketone.accrptgen.task.gen.parse.TemplateParseProcessor;
 import net.ketone.accrptgen.task.util.ZipUtils;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Sinks;
-import reactor.core.publisher.SynchronousSink;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -93,14 +88,16 @@ public class AccountRptTask implements Runnable {
             filename = FileUtils.uniqueFilename(dto.getCompany(), dto.getGenerationTime());
 
             byte[] workbookArr = tempStorage.load(inputFileName);
-            byte[] preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
+            XSSFWorkbook preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
+            log.debug("start refreshing preParseOutput");
+            ExcelTaskUtils.evaluateAll("TemplateMergeProcessor", preParseOutput, properties.getMerge().getKeepFormulaColor());
+
             List<AuditProgrammeMapping> mappings = auditProgrammeMappingExtract.process();
 
             Attachment inputXlsx = new Attachment(filename + "-plain.xlsm", workbookArr);
-            // no need to use the template anymore, delete it.
+            // no need to use the input file anymore, delete it.
             tempStorage.delete(inputFileName);
 
-            log.info("template Closing input file stream, " + preParseOutput.length + "_bytes");
             log.info("Start parse operation for " + filename);
             AccountData data = templateParseProcessor.process(preParseOutput, properties.getParse());
 
@@ -109,25 +106,30 @@ public class AccountRptTask implements Runnable {
             dto.setPrevProfessionalFees(data.getPrevProfessionalFees());
             log.info("template finished parsing, sections=" + data.getSections().size());
 
+            // map preParseOutput data to audit programme before deleting working sheets
+            XSSFWorkbook auditPrgTemplateWb = auditProgrammeProcessor.process(mappings, preParseOutput);
+
             // remove sheets and stringify contents
-            XSSFWorkbook allDocs = new XSSFWorkbook(new ByteArrayInputStream(preParseOutput));
-            Workbook allDocsFinal = parsingService.deleteSheets(
-                parsingService.postProcess(allDocs, properties.getParse()), Arrays.asList(
+            XSSFWorkbook allDocsFinal = parsingService.deleteSheets(
+                parsingService.postProcess(preParseOutput, properties.getParse())
+            , Arrays.asList(
                         "metadata", "Cover", "Contents", "Control", "Dir info", "Doc list",
                         "Section1", "Section2", "Section3", "Section4", "Section5", "Section6",
                             "Accounts (3)"));
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            allDocsFinal.write(os);
+            byte[] os = ExcelTaskUtils.saveExcelToBytes(allDocsFinal);
 
             byte[] generatedDoc = generationService.generate(data);
             log.info("Generated doc. " + generatedDoc.length + "_bytes");
 
-            byte[] generatedAuditProgramme = auditProgrammeProcessor.process(mappings, preParseOutput);
+            log.debug("start refreshing auditPrgTemplateWb");
+            ExcelTaskUtils.evaluateAll("AuditProgrammeProcessor", auditPrgTemplateWb);
+            log.info("auditPrgTemplateWb refreshed. Writing to stream");
+            byte[] generatedAuditProgramme = ExcelTaskUtils.saveExcelToBytes(auditPrgTemplateWb);
 
             Attachment doc = new Attachment(filename + ".docx", generatedDoc);
             Attachment auditPrgAttachment = new Attachment(filename + "-auditProgramme.xlsm",
                     generatedAuditProgramme);
-            Attachment template = new Attachment(filename + "-allDocs.xlsm", os.toByteArray());
+            Attachment template = new Attachment(filename + "-allDocs.xlsm", os);
             List<Attachment> attachments = Arrays.asList(doc, template, inputXlsx, auditPrgAttachment);
             emailService.sendEmail(dto, attachments, properties.getMail());
 

@@ -61,11 +61,10 @@ public class TemplateParseProcessor {
      * @return
      * @throws IOException
      */
-    public AccountData process(byte[] preParseOutput, final ParseProperties properties)
+    public AccountData process(XSSFWorkbook workbook, final ParseProperties properties)
             throws IOException {
 
         AccountData data = new AccountData();
-        XSSFWorkbook workbook = ExcelTaskUtils.openExcelWorkbook(preParseOutput);
         extract(data::setCompanyName, cell -> Optional.ofNullable(cell.getStringCellValue()),
                 workbook, "Control", 1, 3, "N/A");
         extract(data::setProcessionalFees,
@@ -91,7 +90,6 @@ public class TemplateParseProcessor {
             data.addSection(section);
             secIdx++;
         }
-        workbook.close();
         return data;
     }
 

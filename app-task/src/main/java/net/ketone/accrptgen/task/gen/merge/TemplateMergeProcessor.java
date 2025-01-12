@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.PostConstruct;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -55,7 +54,7 @@ public class TemplateMergeProcessor {
      * @return merged Excel
      * @throws IOException
      */
-    public byte[] process(byte[] input, final MergeProperties properties) throws IOException {
+    public XSSFWorkbook process(byte[] input, final MergeProperties properties) throws IOException {
         XSSFWorkbook workbook = ExcelTaskUtils.openExcelWorkbook(input);
         XSSFWorkbook templateWb = Optional.ofNullable(configurationService.getSettings())
                 .flatMap(settings -> Optional.ofNullable(properties.getTemplateFileProperty())
@@ -109,20 +108,7 @@ public class TemplateMergeProcessor {
                                 .cell(tuple4._3)
                                 .build()))
                 .blockLast();
-
-        // refresh everything
-        log.debug("start refreshing template");
-        ExcelTaskUtils.evaluateAll("TemplateMergeProcessor", templateWb, properties.getKeepFormulaColor());
-        log.info("template refreshed. Writing to stream");
-        ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
-        log.debug("writing template. os.size()=" + os.size());
-        templateWb.write(os);
-        log.info("creating byte[] from template. os.size()=" + os.size());
-        byte [] result = os.toByteArray();
-        log.debug("closing template");
-        workbook.close();
-        templateWb.close();
-        return result;
+        return templateWb;
     }
 
     private Map<String, Sheet> initSheetMap(Workbook wb) throws IOException {

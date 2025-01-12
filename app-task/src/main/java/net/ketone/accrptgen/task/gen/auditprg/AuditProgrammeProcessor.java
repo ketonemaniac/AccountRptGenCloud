@@ -30,10 +30,8 @@ public class AuditProgrammeProcessor {
     @Autowired
     private StorageService persistentStorage;
 
-    public byte[] process(final List<AuditProgrammeMapping> mappingList, byte[] preParseOutput) throws IOException {
+    public XSSFWorkbook process(final List<AuditProgrammeMapping> mappingList, XSSFWorkbook allDocs) throws IOException {
 
-        XSSFWorkbook allDocs = new XSSFWorkbook(new ByteArrayInputStream(preParseOutput));
-        
         String auditPrgTemplateName = configurationService.getSettings().getProperty(
                 SettingsService.PREPARSE_AUIDTPRG_TEMPLATE_PROP);
         log.info("starting fetch audit programme template " + auditPrgTemplateName);
@@ -63,17 +61,7 @@ public class AuditProgrammeProcessor {
                     }
                 }).blockLast();
 
-        log.debug("start refreshing auditPrgTemplateWb");
-        ExcelTaskUtils.evaluateAll("AuditProgrammeProcessor", auditPrgTemplateWb);
-        log.info("auditPrgTemplateWb refreshed. Writing to stream");
-        ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
-        log.debug("writing template. os.size()=" + os.size());
-        auditPrgTemplateWb.write(os);
-        byte [] result = os.toByteArray();
-        log.debug("closing template");
-        auditPrgTemplateWb.close();
-
-        return result;
+        return auditPrgTemplateWb;
     }
 
 }

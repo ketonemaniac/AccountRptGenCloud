@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Modal, ModalBody, ModalHeader, Form, FormGroup, Label, Input, Button, Alert } from 'reactstrap';
-import Endpoints from '@/api/Endpoints.js';
+import Endpoints from '@/api/Endpoints';
 import { toast } from 'react-toastify';
 
 class UserEditModal extends Component {

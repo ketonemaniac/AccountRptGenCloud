@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import '@/styles/settings/TemplateList.scss';
 import { themeAlpine, ClientSideRowModelModule, EventApiModule, ModuleRegistry, provideGlobalGridOptions, AllCommunityModule } from 'ag-grid-community';
-import Endpoints from '@/api/Endpoints.js';
+import Endpoints from '@/api/Endpoints';
 import StarFillIcon from '@/assets/star-fill.svg'
 import { toast } from 'react-toastify';
 import {

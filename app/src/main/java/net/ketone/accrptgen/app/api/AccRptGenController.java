@@ -63,12 +63,6 @@ public class AccRptGenController {
                                                               @RequestParam("seed") Integer clientRandInt,
                                                               Principal principal) throws IOException {
 
-        Optional<User> optionalUser = Optional.ofNullable(principal)
-                .map(UsernamePasswordAuthenticationToken.class::cast)
-                .map(UsernamePasswordAuthenticationToken::getPrincipal)
-                .filter(AuthenticatedUser.class::isInstance)
-                .map(AuthenticatedUser.class::cast)
-                .map(AuthenticatedUser::getUser);
         log.info("USER IS {}, CLIENT RAND INT IS {}", UserUtils.getAuthenticatedUser(), clientRandInt);
         if(clientRandIntChecker.checkDuplicate(clientRandInt)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate Request " + clientRandInt);
@@ -79,7 +73,7 @@ public class AccRptGenController {
         return taskSubmissionService.triage(
                     file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")),
                     file.getBytes(),
-                    optionalUser, clientRandInt);
+                    UserUtils.getUserFromPrincipal(principal), clientRandInt);
     }
 
     @GetMapping("/taskList")

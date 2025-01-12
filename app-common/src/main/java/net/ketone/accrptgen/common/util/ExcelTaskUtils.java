@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -72,7 +73,10 @@ public class ExcelTaskUtils {
                     .orElse(Boolean.FALSE)) {
                 evaluationResult = evaluator.evaluateFormulaCell(cell);
             } else {
-                evaluationResult = evaluator.evaluateInCell(cell).getCellType();
+                evaluationResult = Try.ofSupplier(() -> evaluator.evaluateInCell(cell).getCellType())
+                        .onFailure(err -> log.error(err.toString()))
+                        .getOrElse(CellType.ERROR);
+
             };
             if (evaluationResult.equals(CellType.ERROR)) {
                 exceptions.add(new EvaluationException(stage, cell));
@@ -121,5 +125,19 @@ public class ExcelTaskUtils {
         anchor.setRow1(position.getRow());
         Picture picture = drawing.createPicture(anchor, pictureIdx);
         picture.resize(sizeCellSpan._1,sizeCellSpan._2);
+    }
+
+    public static byte[] saveExcelToBytes(XSSFWorkbook wbToSave) throws IOException {
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
+            log.debug("writing template. os.size()=" + os.size());
+            wbToSave.write(os);
+            log.info("creating byte[] from template. os.size()=" + os.size());
+            byte [] result = os.toByteArray();
+            log.debug("closing template");
+            return result;
+        } finally {
+            wbToSave.close();
+        }
     }
 }

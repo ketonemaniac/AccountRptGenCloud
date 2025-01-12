@@ -2,8 +2,9 @@ package net.ketone.accrptgen.task.gen.auditprg;
 
 import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.store.StorageService;
+import net.ketone.accrptgen.common.util.ExcelTaskUtils;
 import net.ketone.accrptgen.task.gen.model.AuditProgrammeMapping;
-import org.apache.commons.io.FileUtils;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -67,12 +68,12 @@ public class AuditProgrammeProcessorTest {
                 .block();
 
         File template = new File(classLoader.getResource("auditPrgSrc.xlsx").getFile());
-        byte[] outBytes = processor.process(mappings, FileUtils.readFileToByteArray(template));
+        XSSFWorkbook outBytes = processor.process(mappings, ExcelTaskUtils.openExcelWorkbook(new FileInputStream(template)));
 
         // visiualize output
         File output= new File(TEST_OUTPUT);
         FileOutputStream out = new FileOutputStream(output);
-        out.write(outBytes);
+        out.write(ExcelTaskUtils.saveExcelToBytes(outBytes));
         out.close();
     }
 

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { Navbar, NavbarBrand, Nav, NavItem, NavLink, NavbarToggler, Collapse  } from 'reactstrap';
-import '../../styles/AppHeader.css';
+import '@/styles/AppHeader.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserAlt } from '@fortawesome/free-solid-svg-icons';
-import Endpoints from '../../api/Endpoints.js';
+import Endpoints from '@/api/Endpoints';
 
 class AppHeader extends Component {
 

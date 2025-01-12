@@ -70,11 +70,12 @@ public class ExcelExtractTask implements Runnable {
         try {
             byte[] workbookArr = tempStorage.load(inputFileName);
             properties.getMerge().setPreParseSheets(sheets(workbookArr));
-            byte[] preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
+            XSSFWorkbook preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
+            log.debug("start refreshing preParseOutput");
+            ExcelTaskUtils.evaluateAll("TemplateMergeProcessor", preParseOutput, properties.getMerge().getKeepFormulaColor());
 
             // parse and stringify contents
-            XSSFWorkbook stringifiedWorkbook = parsingService.postProcess(
-                    ExcelTaskUtils.openExcelWorkbook(preParseOutput), properties.getParse());
+            XSSFWorkbook stringifiedWorkbook = parsingService.postProcess(preParseOutput, properties.getParse());
 
             Map<String, String> cutColumnsMap = extractCutColumns(stringifiedWorkbook);
 

@@ -1,0 +1,22 @@
+.base {
+    flex: 1;
+    display: flex;
+    // flexDirection: 'column';
+    align-items: center;
+    padding: 20px;
+    width: 100%;
+    height: 500px;
+    border-width: 2;
+    border-radius: 20;
+    border-color: #eeeeee;
+    border-style: dashed;
+    background-color: #fafafa;
+    color: #bdbdbd;
+    outline: 10px;
+    transition: border .24s ease-in-out;
+}
+
+.focused {
+    @extend .base;
+    border-color: #2196f3;
+}
