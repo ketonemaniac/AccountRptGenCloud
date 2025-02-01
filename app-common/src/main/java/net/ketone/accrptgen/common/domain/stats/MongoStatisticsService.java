@@ -20,11 +20,11 @@ public class MongoStatisticsService implements StatisticsService {
     private final int retentionDays;
 
     @Override
-    public List<AccountJob> getRecentTasks(final String authenticatedUser) {
-        return repository.findTop10BySubmittedByOrderByGenerationTimeDesc(authenticatedUser)
+    public List<AccountJob> getRecentTasks(final String authenticatedUser, final String docType) {
+        return repository.findTop10BySubmittedByAndDocTypeOrderByGenerationTimeDesc(authenticatedUser, docType)
                 .stream()
-                .filter(job -> job.getGenerationTime().isAfter(LocalDateTime.now()
-                        .minus(retentionDays, ChronoUnit.DAYS)))
+//                .filter(job -> job.getGenerationTime().isAfter(LocalDateTime.now()
+//                        .minus(retentionDays, ChronoUnit.DAYS)))
                 .collect(Collectors.toList());
     }
 

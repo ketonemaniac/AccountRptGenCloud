@@ -1,3 +1,4 @@
+import AccountJob from '@/domain/AccountJob';
 import axios from 'axios';
 
 function get(path: string) {
@@ -93,8 +94,8 @@ export default {
     resetPassword(pass: any) {
         return post('/api/user/password', pass)
     },
-    listFiles() {
-        return get('/api/accrptgen/taskList')
+    listFiles(docType: string): Promise<AccountJob[]> {
+        return get('/api/accrptgen/taskList/' + docType)
     },
     uploadFile(file: any) {
         return post('/api/accrptgen/file', file)

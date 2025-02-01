@@ -42,7 +42,7 @@ class Frame extends Component {
     render() {
         
         return (
-            <div>
+            <div className={'body-main'}  style={{height:'100%', overflow: 'hidden'}}>
                 <AppHeader user={this.state.user} isAdmin={this.state.isAdmin} toggleUserModal={this.toggleUserModal.bind(this)}
                     toggleSidebar={this.toggleSidebar.bind(this)} />
                     {this.state.isAdmin ? (
@@ -51,7 +51,7 @@ class Frame extends Component {
                 <User user={this.state.user}
                     toggleUserModal={this.toggleUserModal.bind(this)} isUserModalOpen={this.state.isUserModalOpen}></User>
                 <ToastContainer className="myToast" />
-                <div style={{marginTop: '6rem'}}>
+                <div style={{marginTop: '6rem',height: '80%'}}>
                     <Outlet />
                 </div>                
             </div>

@@ -69,29 +69,19 @@ breakdown-tabs:
     template-file-property: xlsx.template.breakdownTabs.name
     pre-parse-sheets:
       - Control
-      - Dir info
       - B6.1
       - B6.2
     merge-cell-colors:
       - 4F81BD
   fix-sheets:
-    - Control
-    - Dir info
     - Content
     - B6.1
     - B6.2
     - B
     - C7
     - C7.1
-    - P1a
-    - P1b
-    - P1c
-    - P1.1
-    - P1.2
-    - P1.3
     - -->signing doc
     - Pro Clear
-    - Adj
     - B conf.
     - Audit conf. 3rd
   ban-sheets:
@@ -100,6 +90,18 @@ breakdown-tabs:
   schedule-sheet-column:
     B6.1: G
     B6.2: F
+  audit-sheets:
+    - Control
+    - Dir info
+    - Adj
+    - Section3
+    - Section4
+    - Section6
+    - auditPrg
+    - Version
+    - P1.*
+    - PTR.*
+    - RPT
   mail:
     template: 'job-template.html'
     subject-prefix: 'Accounting Breakdown Tabs Generation For '

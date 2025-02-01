@@ -1,0 +1,27 @@
+import { ColDef, themeBalham } from "ag-grid-community";
+import { AgGridReact } from "ag-grid-react";
+import * as React from "react";
+import { useFilesList } from "./useFilesList";
+
+interface FilesListProps {
+    docType: string;
+    loading: boolean;
+}
+
+
+const FilesList = (props: FilesListProps) => {
+
+    const {rowData,getRowData, colDefs} = useFilesList();
+
+    React.useEffect(() => {
+        getRowData(props.docType);
+    } ,[props.loading]);
+
+    return (
+        <>
+            <AgGridReact theme={themeBalham} rowData={rowData} columnDefs={colDefs}  />
+        </>
+    )
+}
+
+export default FilesList;

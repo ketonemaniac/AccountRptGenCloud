@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Mono<User> findByUsername(String username) {
         return Mono.fromCallable(() -> Optional.ofNullable(userRepository.findByUsername(username))
-                .orElse(User.builder().username("Anonymous")
+                .orElse(User.builder().username("anonymous")
                         .email("ketoneaussie@gmail.com")
                         .roles(Sets.newHashSet(Role.builder().name("Admin").build())).build()));
     }

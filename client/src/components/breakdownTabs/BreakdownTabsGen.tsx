@@ -2,8 +2,16 @@ import * as React from "react";
 import Container from '@mui/material/Container';
 import { useCallback, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
+import { toast } from 'react-toastify';
 import Endpoints from "@/api/Endpoints";
 import '@/styles/breakdownTabs/BreakdownTabs.scss';
+import { ClipLoader } from 'react-spinners';
+import { AgGridReact } from 'ag-grid-react';
+import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community'; 
+import FilesList from "../shared/FilesList";
+
+// Register all Community features
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 interface BreakdownTabsGenProps {
 
@@ -11,9 +19,16 @@ interface BreakdownTabsGenProps {
 
 const BreakdownTabsGen = (props: BreakdownTabsGenProps) => {
 
-    const onDrop = useCallback((acceptedFiles: File[]) => {
+    const [generatingTabs, setGeneratingTabs] = React.useState(false);
+
+    const onDrop = useCallback(async (acceptedFiles: File[]) => {
         console.log(acceptedFiles.map(file => file.name).join(', '));
-        Endpoints.generateTabs(acceptedFiles[0]);
+        setGeneratingTabs(true);
+        await Endpoints.generateTabs(acceptedFiles[0])
+                .then(res => {
+                    toast.info("Schedules Breakdown updated");
+                });
+        setGeneratingTabs(false);
     }, []);
     
     const {getRootProps, getInputProps, isDragActive,isFocused,
@@ -21,31 +36,35 @@ const BreakdownTabsGen = (props: BreakdownTabsGenProps) => {
         isDragReject} = useDropzone({onDrop});
 
 
-    const classsName = useMemo(() => {
+    const dropzoneClassName = useMemo(() => {
         if(isFocused) {
-            return 'focused';
+            return 'dropzone-canvas-focused';
         }
-        return 'base';
+        return 'dropzone-canvas-base';
     }, [isFocused,isDragAccept,isDragReject]);    
         
     return (
-        <Container>
+        <div className="container schedule-root" >
             <div>
-                <div className="container">
-                    <div>
-                        <div><h1>Breakdown Tabs Generation</h1></div>
-                    </div>
-                    <div {...getRootProps({className: classsName})}>
-                        <input {...getInputProps()} />
-                        {
-                            isDragActive ?
-                            <p>Drop the files here ...</p> :
-                            <p>Drag 'n' drop some files here, or click to select files</p>
-                        }
-                    </div>
+                <div><h2>Schedule Breakdown Generation</h2></div>
+            </div>
+            <div className="schedule-breakdown">
+                <div {...getRootProps({className: dropzoneClassName})}>
+                    <input {...getInputProps()} />
+                    {!generatingTabs && 
+                        (isDragActive ?
+                        <p>Drop the files here ...</p> :
+                        <p>Drag 'n' drop some files here, or click to select files</p>)}
+                    {generatingTabs && (<>
+                        <h1>Generating...</h1>
+                        <ClipLoader loading={generatingTabs} color="#bdbdbd" />
+                    </>)}
+                </div>
+                <div className="schedule-history">
+                    <FilesList docType={'BreakdownTabs'} loading={generatingTabs}/>
                 </div>
             </div>
-        </Container>
+        </div>
     );
 
 } 

@@ -81,7 +81,7 @@ public class TaskSubmissionService {
                                     final Optional<User> optionalUser, final Integer clientRandInt) throws Exception {
         tempStorage.store(fileBytes, clientRandInt + fileExtension);
         XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
-        String company = ExcelUtils.extractByTitleCellName(workbook, "Control", "Company's name", 3);
+        String company = ExcelUtils.extractByTitleCellName(workbook, "Content", "Company Name", 1);
         LocalDateTime generationTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("UTC+8")).toLocalDateTime();
         String filename = FileUtils.uniqueFilename(company, generationTime) + fileExtension;
         AccountJob accountJob = AccountJob.builder()
@@ -92,8 +92,7 @@ public class TaskSubmissionService {
                 .clientRandInt(clientRandInt)
                 .docType(Constants.DOCTYPE_BREAKDOWN_TABS)
                 .company(company)
-                .period(ExcelUtils.extractByTitleCellName(workbook, "Control", "To", 3).substring(0, 6))
-                .auditorName(ExcelUtils.extractByTitleCellName(workbook, "Control", "Auditor's name", 3))
+                .period(ExcelUtils.extractByTitleCellName(workbook, "Content", "Current Year/ period", 1).substring(0, 6))
                 .status(Constants.Status.GENERATING.name())
                 .generationTime(generationTime)
                 .build();

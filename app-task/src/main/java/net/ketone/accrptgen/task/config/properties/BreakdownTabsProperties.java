@@ -19,6 +19,8 @@ public class BreakdownTabsProperties {
 
     private List<String> banSheets;
 
+    private List<String> auditSheets;
+
     private Map<String, String> scheduleSheetColumn;
 
 }

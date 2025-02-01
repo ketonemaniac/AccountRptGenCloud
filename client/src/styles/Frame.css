@@ -1,3 +1,23 @@
 main {
     padding-top: 55px;
+    height: 100%;
+}
+
+.body-main {
+    background:
+	linear-gradient(
+		#fefefe,
+		transparent
+	),
+	linear-gradient(
+		-45deg,
+		#fafafa,
+		transparent
+	),
+	linear-gradient(
+		45deg,
+		#f8f8f8,
+		transparent
+	);
+    background-blend-mode: multiply;
 }

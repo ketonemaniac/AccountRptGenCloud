@@ -76,9 +76,9 @@ public class AccRptGenController {
                     UserUtils.getUserFromPrincipal(principal), clientRandInt);
     }
 
-    @GetMapping("/taskList")
-    public List<AccountJob> listFiles() {
-        return statisticsService.getRecentTasks(UserUtils.getAuthenticatedUser());
+    @GetMapping("/taskList/{docType}")
+    public List<AccountJob> listFiles(@PathVariable("docType") String docType) {
+        return statisticsService.getRecentTasks(UserUtils.getAuthenticatedUser(), docType);
     }
 
 }

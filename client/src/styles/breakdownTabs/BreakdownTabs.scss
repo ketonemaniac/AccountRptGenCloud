@@ -1,11 +1,28 @@
-.base {
-    flex: 1;
+.schedule-root {
+    height: 100%;
+}
+
+.schedule-breakdown {
     display: flex;
-    // flexDirection: 'column';
+    flex-direction: column;
+    gap: 20px;
+    align-content: stretch;
+    width: 100%;
+    height: 100%;
+}
+
+.schedule-history {
+    flex: 1 1 0px;
+    width: 100%;
+    height: 100%;
+}
+
+.dropzone-canvas-base {    
+    display: flex;
     align-items: center;
     padding: 20px;
     width: 100%;
-    height: 500px;
+    height: 300px;
     border-width: 2;
     border-radius: 20;
     border-color: #eeeeee;
@@ -16,7 +33,9 @@
     transition: border .24s ease-in-out;
 }
 
-.focused {
-    @extend .base;
+.dropzone-canvas-focused {
+    @extend .dropzone-canvas-base;
     border-color: #2196f3;
 }
+
+

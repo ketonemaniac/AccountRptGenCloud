@@ -35,7 +35,7 @@ class App extends Component {
   }
 
   getProgress() {
-    return Endpoints.listFiles()
+    return Endpoints.listFiles('ExcelExtract')
       .then(data => data.filter(company => company.status != null))
       .then(inProgress => {
         this.setState({ companies: inProgress })
