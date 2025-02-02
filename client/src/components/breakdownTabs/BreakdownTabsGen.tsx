@@ -24,10 +24,14 @@ const BreakdownTabsGen = (props: BreakdownTabsGenProps) => {
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         console.log(acceptedFiles.map(file => file.name).join(', '));
         setGeneratingTabs(true);
-        await Endpoints.generateTabs(acceptedFiles[0])
-                .then(res => {
-                    toast.info("Schedules Breakdown updated");
-                });
+        try {
+            await Endpoints.generateTabs(acceptedFiles[0])
+            .then(res => {
+                toast.info("Schedules Breakdown updated");
+            });
+        } catch (error) {
+            toast.error("Schedules Breakdown file error!" + error);
+        }
         setGeneratingTabs(false);
     }, []);
     

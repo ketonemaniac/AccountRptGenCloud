@@ -1,7 +1,15 @@
 import Endpoints from "@/api/Endpoints";
 import AccountJob from "@/domain/AccountJob";
-import { ColDef } from "ag-grid-community";
+import { CellStyleModule, ClientSideRowModelModule, ColDef, ICellRendererParams, ModuleRegistry, ValidationModule } from "ag-grid-community";
 import * as React from "react";
+import { Download } from '@mui/icons-material';
+
+ModuleRegistry.registerModules([
+    CellStyleModule,
+    ClientSideRowModelModule,
+    ValidationModule /* Development Only */,
+  ]);
+
 
 export const useFilesList = () => {
 
@@ -12,15 +20,13 @@ export const useFilesList = () => {
         setRowData(accountJobs);
     }
 
-
-    // const [rowData, setRowData] = React.useState([
-    //     { make: "Tesla", model: "Model Y", price: 64950, electric: true },
-    //     { make: "Ford", model: "F-Series", price: 33850, electric: false },
-    //     { make: "Toyota", model: "Corolla", price: 29600, electric: false },
-    // ]);
-
     // Column Definitions: Defines the columns to be displayed.
     const colDefs: ColDef[] = [
+        { field: "filename",
+            headerName: '',
+            width: 50,
+            cellRenderer: (params: any) => (<a href={"/api/accrptgen/file?file=" + params.value} ><Download /></a>)
+        },
         { field: "company", sortable: true, filter: true },        
         { field: "filename", sortable: true, filter: true },
         { field: "generationTime", sortable: true, filter: true },

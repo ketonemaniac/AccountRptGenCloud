@@ -9,6 +9,7 @@ function get(path: string) {
 
 function post(path: string, data?: any) {
     return axios.post(path, data)
+            .catch(error => { console.log(error); throw Error(error?.response?.data?.message) })
             .then(res => res.data);
 }
 

@@ -3,7 +3,9 @@ package net.ketone.accrptgen.task;
 import com.google.common.collect.Streams;
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
+import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.credentials.SettingsService;
+import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.common.mail.Attachment;
 import net.ketone.accrptgen.common.mail.EmailService;
 import net.ketone.accrptgen.common.model.AccountJob;
@@ -27,6 +29,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static net.ketone.accrptgen.common.util.ExcelUtils.colStrMap;
+import static net.ketone.accrptgen.common.util.SSEUtils.toSSE;
 
 /**
  * Generate tabs based on "Schedule" column of B6.1 B6.2 tabs
@@ -52,6 +55,9 @@ public class GenerateTabTask {
     private SettingsService configurationService;
     @Autowired
     private StorageService persistentStorage;
+    @Autowired
+    private StatisticsService statisticsService;
+
 
     private CellAddress findScheduleColumn(XSSFSheet sheet) {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(sheet.rowIterator(), Spliterator.ORDERED), false)
@@ -87,7 +93,26 @@ public class GenerateTabTask {
                 .collect(Collectors.toSet());
     }
 
-    public void run(AccountJob accountJob, byte[] workbookArr) throws Exception {
+    public void run(AccountJob accountJob, byte[] workbookArr) {
+        try {
+            doRun(accountJob, workbookArr);
+            accountJob.setStatus(Constants.Status.EMAIL_SENT.name());
+            log.info("Updating statistics for {}", accountJob.getFilename());
+            statisticsService.updateTask(accountJob);
+            log.info("Operation complete for {}", accountJob.getFilename());
+        } catch (Throwable e) {
+            log.warn("Generation failed", e);
+            accountJob.setStatus(Constants.Status.FAILED.name());
+            try {
+                accountJob.setErrorMsg(e.getMessage());
+                statisticsService.updateTask(accountJob);
+            } catch (Throwable e1) {
+                log.warn("History file write failed", e1);
+            }
+        }
+    }
+
+    public void doRun(AccountJob accountJob, byte[] workbookArr) throws Exception {
         XSSFWorkbook workbook  =templateMergeProcessor.process(workbookArr, properties.getMerge());
 
         Set<String> sheets = new TreeSet<>(properties.getFixSheets());
