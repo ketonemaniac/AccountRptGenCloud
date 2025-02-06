@@ -116,6 +116,6 @@ export default {
         const data = new FormData()
         data.append('file', file, file.name)
         data.append('seed', randInt.toString())
-        return post('/api/v2/accrptgen/file', data);
+        return post('/api/v2/accrptgen/file/BreakdownTabs', data);
     }
 }

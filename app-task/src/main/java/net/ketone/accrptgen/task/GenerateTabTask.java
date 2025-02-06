@@ -132,17 +132,7 @@ public class GenerateTabTask {
         }
         log.info("All sheets: {}", String.join(",", sheets));
 
-        List<String> auditSheets = Streams.stream(workbook.sheetIterator())
-                .filter(sheet -> {
-                    for(String auditSheetName : properties.getAuditSheets()) {
-                        var a = Pattern.compile(auditSheetName).matcher(sheet.getSheetName());
-                        if(a.find()) return true;
-                    }
-                    return false;
-                })
-                .map(Sheet::getSheetName)
-                .toList();
-        ;
+        List<String> auditSheets = ExcelTaskUtils.matchSheetsWithRegex(workbook, properties.getAuditSheets());
         for(String auditSheetName : auditSheets) {
             log.info("deep hiding sheet {}", auditSheetName);
             workbook.setSheetVisibility(workbook.getSheetIndex(auditSheetName), SheetVisibility.VERY_HIDDEN);

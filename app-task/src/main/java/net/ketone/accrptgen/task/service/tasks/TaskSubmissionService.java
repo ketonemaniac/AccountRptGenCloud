@@ -9,6 +9,7 @@ import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.common.util.FileUtils;
+import net.ketone.accrptgen.task.GenerateAFSTask;
 import net.ketone.accrptgen.task.GenerateTabTask;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -45,6 +46,8 @@ public class TaskSubmissionService {
     private ApplicationContext ctx;
     @Autowired
     private GenerateTabTask generateTabTask;
+    @Autowired
+    private GenerateAFSTask generateAFSTask;
 
 
     public Flux<ServerSentEvent<AccountJob>> triage(final String fileExtension, final byte[] fileBytes,
@@ -77,8 +80,8 @@ public class TaskSubmissionService {
         return sink.asFlux();
     }
 
-    public void submitTabGeneration(final String fileExtension, final byte[] fileBytes,
-                                    final Optional<User> optionalUser, final Integer clientRandInt) throws Exception {
+    public void triage(final String docType, final String fileExtension, final byte[] fileBytes,
+                       final Optional<User> optionalUser, final Integer clientRandInt) throws Exception {
         tempStorage.store(fileBytes, clientRandInt + fileExtension);
         XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
         String company = ExcelUtils.extractByTitleCellName(workbook, "Content", "Company Name", 1);
@@ -90,14 +93,22 @@ public class TaskSubmissionService {
                 .submittedBy(optionalUser.map(User::getUsername).orElse("anonymous"))
                 .noCCemail(optionalUser.map(User::getNoCCemail).orElse(Boolean.FALSE))
                 .clientRandInt(clientRandInt)
-                .docType(Constants.DOCTYPE_BREAKDOWN_TABS)
+                .docType(docType)
                 .company(company)
                 .period(ExcelUtils.extractByTitleCellName(workbook, "Content", "Current Year/ period", 1).substring(0, 6))
                 .status(Constants.Status.GENERATING.name())
                 .generationTime(generationTime)
                 .build();
         statisticsService.updateTask(accountJob);
-        generateTabTask.run(accountJob, fileBytes);
+
+        switch(docType) {
+            case Constants.DOCTYPE_BREAKDOWN_TABS:
+                generateTabTask.run(accountJob, fileBytes);
+                break;
+            case Constants.DOCTYPE_GENERATE_AFS:
+                generateAFSTask.run(accountJob, fileBytes);
+                break;
+        }
 
     }
 

@@ -31,4 +31,5 @@ public class Constants {
     public static final String DOCTYPE_EXCEL_EXTRACT = "ExcelExtract";
     public static final String DOCTYPE_ACCOUNT_RPT = "AccountRpt";
     public static final String DOCTYPE_BREAKDOWN_TABS = "BreakdownTabs";
+    public static final String DOCTYPE_GENERATE_AFS = "GenerateAFS";
 }

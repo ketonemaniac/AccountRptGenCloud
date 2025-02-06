@@ -17,11 +17,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 public class ExcelTaskUtils {
@@ -44,13 +45,18 @@ public class ExcelTaskUtils {
     }
 
     public static Flux<Cell> loopingEveryCell(final String location, XSSFWorkbook templateWb, Consumer<Cell> cellAction) {
+        return loopingCells(location, templateWb, cellAction, (ignore) -> true);
+    }
+
+    public static Flux<Cell> loopingCells(final String location, XSSFWorkbook templateWb, Consumer<Cell> cellAction,
+                                          final Function<String, Boolean> sheetFilter) {
         return Flux.fromIterable(IteratorUtils.toList(templateWb.sheetIterator()))
+                .filter(sheet -> sheetFilter.apply(sheet.getSheetName()))
                 .doOnNext(sheet -> log.info("{} in sheet={}", location, sheet.getSheetName()))
                 .concatMap(sheet -> Flux.fromIterable(IteratorUtils.toList(sheet.rowIterator())))
                 .concatMap(row -> Flux.fromIterable(IteratorUtils.toList(row.cellIterator())))
                 .doOnNext(cellAction);
     }
-
 
     /**
      * Loops and calculates/replaces formula contents with evaluated value, depending on whether the keepFormulaColor is matched
@@ -58,10 +64,15 @@ public class ExcelTaskUtils {
      * @param templateWb
      */
     public static void evaluateAll(final String stage, XSSFWorkbook templateWb, final String keepFormulaColor) {
+        evaluateSheets(stage, templateWb, keepFormulaColor, (ignore) -> true);
+    }
+
+    public static void evaluateSheets(final String stage, XSSFWorkbook templateWb, final String keepFormulaColor,
+                                      final Function<String, Boolean> sheetFilter) {
         FormulaEvaluator evaluator = templateWb.getCreationHelper().createFormulaEvaluator();
         evaluator.clearAllCachedResultValues();
         List<EvaluationException> exceptions = new ArrayList<>();
-        loopingEveryCell(stage, templateWb, cell -> {
+        loopingCells(stage, templateWb, cell -> {
             CellType evaluationResult;
             if (Optional.ofNullable(cell.getCellStyle())
                     .map(CellStyle::getFillForegroundColorColor)
@@ -81,12 +92,12 @@ public class ExcelTaskUtils {
             if (evaluationResult.equals(CellType.ERROR)) {
                 exceptions.add(new EvaluationException(stage, cell));
             }
-        })
+        }, sheetFilter)
                 .blockLast();
         if(!exceptions.isEmpty()) {
-             throw new RuntimeException(String.format("%s %s",
-                     "Cannot evaluate cells: ",
-                     exceptions.stream().map(EvaluationException::getLocation).collect(Collectors.joining(", "))));
+            throw new RuntimeException(String.format("%s %s",
+                    "Cannot evaluate cells: ",
+                    exceptions.stream().map(EvaluationException::getLocation).collect(Collectors.joining(", "))));
         }
     }
 
@@ -115,7 +126,7 @@ public class ExcelTaskUtils {
      */
     public static void insertImage(final Workbook workbook, final String sheetName,
                                    final CellReference position,
-                            final byte[] rawPng, final Tuple2<Double, Double> sizeCellSpan) {
+                                   final byte[] rawPng, final Tuple2<Double, Double> sizeCellSpan) {
         int pictureIdx = workbook.addPicture(rawPng, Workbook.PICTURE_TYPE_PNG);
         Sheet sheet = workbook.getSheet(sheetName);
         CreationHelper helper = workbook.getCreationHelper();
@@ -133,11 +144,26 @@ public class ExcelTaskUtils {
             log.debug("writing template. os.size()=" + os.size());
             wbToSave.write(os);
             log.info("creating byte[] from template. os.size()=" + os.size());
-            byte [] result = os.toByteArray();
+            byte[] result = os.toByteArray();
             log.debug("closing template");
             return result;
         } finally {
             wbToSave.close();
         }
+    }
+
+    public static List<String> matchSheetsWithRegex(XSSFWorkbook workbook, List<String> regexs) {
+        return StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(workbook.sheetIterator(), Spliterator.ORDERED),
+                false)
+                .filter(sheet -> {
+                    for(String auditSheetName : regexs) {
+                        var a = Pattern.compile(auditSheetName).matcher(sheet.getSheetName());
+                        if(a.find()) return true;
+                    }
+                    return false;
+                })
+                .map(Sheet::getSheetName)
+                .toList();
     }
 }
