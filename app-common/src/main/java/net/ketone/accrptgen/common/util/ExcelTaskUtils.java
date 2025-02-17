@@ -61,6 +61,7 @@ public class ExcelTaskUtils {
     /**
      * Loops and calculates/replaces formula contents with evaluated value, depending on whether the keepFormulaColor is matched
      * @see https://poi.apache.org/apidocs/3.17/org/apache/poi/ss/usermodel/FormulaEvaluator.html#evaluateInCell(org.apache.poi.ss.usermodel.Cell)
+     * If you want the cell replaced with the result of the formula, use evaluateInCell(Cell)
      * @param templateWb
      */
     public static void evaluateAll(final String stage, XSSFWorkbook templateWb, final String keepFormulaColor) {

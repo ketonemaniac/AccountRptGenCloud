@@ -12,7 +12,7 @@ public class Constants {
 
     // Status
     public enum Status {
-        PRELOADED, PENDING, GENERATING, EMAIL_SENT, FAILED
+        PRELOADED, PENDING, GENERATING, GENERATED_WITH_ERRORS, GENERATED, FAILED
     }
 
     // Files

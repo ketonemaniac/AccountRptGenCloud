@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class StorageServiceTest {
         AccountJob dto = AccountJob.builder()
                 .generationTime(LocalDateTime.now())
                 .company("ABC Company Limited")
-                .status(Constants.Status.EMAIL_SENT.name())
+                .status(Constants.Status.GENERATED.name())
                 .build();
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
         dto.setFilename("ABC-"+ df.format(dto.getGenerationTime()) + ".docx");

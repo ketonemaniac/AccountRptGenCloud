@@ -139,7 +139,7 @@ public class AccountRptTask implements Runnable {
             tempStorage.store(ZipUtils.zipFiles(zipInput), filename + ".zip");
 
             dto.setFilename(filename + ".zip");
-            dto.setStatus(Constants.Status.EMAIL_SENT.name());
+            dto.setStatus(Constants.Status.GENERATED.name());
             log.info("Updating statistics for " + filename);
             sink.tryEmitNext(toSSE(dto));
             statisticsService.updateTask(dto);

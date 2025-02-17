@@ -27,6 +27,10 @@ public class GenerateTabsController {
     @Autowired
     private StorageService tempStorage;
 
+    /**
+     * Generate with File
+     * @param docType BreakdownTabs or GenerateAFS
+     */
     @PostMapping(path = "/file/{docType}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public void generateTabs(@PathVariable String docType, @RequestParam("file") MultipartFile file,
                                                               @RequestParam("seed") Integer clientRandInt,

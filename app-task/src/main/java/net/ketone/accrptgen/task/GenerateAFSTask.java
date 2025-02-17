@@ -1,7 +1,6 @@
 package net.ketone.accrptgen.task;
 
 import com.google.common.collect.Streams;
-import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.credentials.SettingsService;
@@ -13,18 +12,12 @@ import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.common.util.ExcelTaskUtils;
 import net.ketone.accrptgen.task.config.properties.BreakdownTabsProperties;
 import net.ketone.accrptgen.task.gen.merge.TemplateMergeProcessor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellAddress;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Generate tabs based on "Schedule" column of B6.1 B6.2 tabs
@@ -56,7 +49,6 @@ public class GenerateAFSTask {
     public void run(AccountJob accountJob, byte[] workbookArr) {
         try {
             doRun(accountJob, workbookArr);
-            accountJob.setStatus(Constants.Status.EMAIL_SENT.name());
             log.info("Updating statistics for {}", accountJob.getFilename());
             statisticsService.updateTask(accountJob);
             log.info("Operation complete for {}", accountJob.getFilename());
@@ -73,6 +65,7 @@ public class GenerateAFSTask {
     }
 
     public void doRun(AccountJob accountJob, byte[] workbookArr) throws Exception {
+        boolean hasErrors = false;
         XSSFWorkbook workbook  = ExcelTaskUtils.openExcelWorkbook(workbookArr);
 
         List<String> auditSheets = ExcelTaskUtils.matchSheetsWithRegex(workbook, properties.getAuditSheets());
@@ -83,9 +76,14 @@ public class GenerateAFSTask {
         //- Only leave the 2nd gen tabs
         for(String auditSheetName : auditSheets) {
             log.info("revealing sheet {}", auditSheetName);
-            //- Clear all formulas
-
             workbook.setSheetVisibility(workbook.getSheetIndex(auditSheetName), SheetVisibility.VISIBLE);
+        }
+        //- Clear all formulas
+        try {
+            ExcelTaskUtils.evaluateAll("TemplateMergeProcessor", workbook, null);
+        } catch (RuntimeException e) {
+            hasErrors = true;
+            accountJob.setErrorMsg(e.getMessage());
         }
 
 
@@ -95,6 +93,7 @@ public class GenerateAFSTask {
         emailService.sendEmail(accountJob, attachments, properties.getMail());
 
         tempStorage.store(preParseOutput, accountJob.getFilename());
+        accountJob.setStatus(hasErrors ? Constants.Status.GENERATED_WITH_ERRORS.name() : Constants.Status.GENERATED.name());
     }
 
 }

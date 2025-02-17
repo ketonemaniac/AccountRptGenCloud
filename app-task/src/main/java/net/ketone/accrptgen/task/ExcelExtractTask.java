@@ -101,7 +101,7 @@ public class ExcelExtractTask implements Runnable {
             // store them in temp storage
             tempStorage.store(os.toByteArray(), outputFilename + fileExtension);
 
-            job.setStatus(Constants.Status.EMAIL_SENT.name());
+            job.setStatus(Constants.Status.GENERATED.name());
             job.setFilename(outputFilename + fileExtension);
             sink.tryEmitNext(toSSE(job));
             statisticsService.updateTask(job);

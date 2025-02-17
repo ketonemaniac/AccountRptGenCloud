@@ -21,15 +21,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import static net.ketone.accrptgen.common.util.ExcelUtils.colStrMap;
-import static net.ketone.accrptgen.common.util.SSEUtils.toSSE;
 
 /**
  * Generate tabs based on "Schedule" column of B6.1 B6.2 tabs
@@ -96,7 +91,7 @@ public class GenerateTabTask {
     public void run(AccountJob accountJob, byte[] workbookArr) {
         try {
             doRun(accountJob, workbookArr);
-            accountJob.setStatus(Constants.Status.EMAIL_SENT.name());
+            accountJob.setStatus(Constants.Status.GENERATED.name());
             log.info("Updating statistics for {}", accountJob.getFilename());
             statisticsService.updateTask(accountJob);
             log.info("Operation complete for {}", accountJob.getFilename());

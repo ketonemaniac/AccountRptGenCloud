@@ -6,6 +6,7 @@ import Settings from './settings/Settings'
 import Frame from './Frame.js';
 import Login from './login/Login';
 import BreakdownTabsGen from './breakdownTabs/BreakdownTabsGen';
+import AfsGen from './afsGen/AfsGen';
 
 
 const Routing = () => {
@@ -17,6 +18,7 @@ const Routing = () => {
                     <Route path="/app" element={<Frame />} >
                         <Route path="users" element={<UserAdmin />} />
                         <Route path="breakdown" element={<BreakdownTabsGen />} />
+                        <Route path="afsgen" element={<AfsGen />} />
                         <Route path="settings" element={<Settings />} />
                         <Route path="main" element={<App />} />
                     </Route>

@@ -292,7 +292,7 @@ class App extends Component {
 
   renderButton(company) {
     switch (company.status) {
-      case "EMAIL_SENT":
+      case "GENERATED":
         return (
           <Button onClick={this.handleDownload.bind(this, company)}
             color="primary" className="generate-button mr-2">Download</Button>

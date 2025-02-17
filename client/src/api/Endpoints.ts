@@ -110,12 +110,12 @@ export default {
     downloadTemplate(filename: any) {
         return download('/api/settings/file', filename)
     },
-    generateTabs(file: File) {
+    generateTabs(file: File, docType: string) {
         const randInt:number = Math.floor(Math.random() * 10000000);
         console.log("acceptedFile=" + file.name + " size=" + file.size);
         const data = new FormData()
         data.append('file', file, file.name)
         data.append('seed', randInt.toString())
-        return post('/api/v2/accrptgen/file/BreakdownTabs', data);
+        return post('/api/v2/accrptgen/file/' + docType, data);
     }
 }

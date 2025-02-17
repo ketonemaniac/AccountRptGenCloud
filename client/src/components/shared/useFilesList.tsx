@@ -11,7 +11,7 @@ ModuleRegistry.registerModules([
   ]);
 
 
-export const useFilesList = () => {
+export const useFilesList = (openModal: (msg: string) => void) => {
 
     const [rowData, setRowData] = React.useState<AccountJob[]>([]);
 
@@ -19,6 +19,15 @@ export const useFilesList = () => {
         const accountJobs : AccountJob[] = await Endpoints.listFiles(docType);
         setRowData(accountJobs);
     }
+
+    const CustomCellRenderer = (props: ICellRendererParams) => {
+        if(props.data.errorMsg) {
+            return <div onClick={openModal.bind(null, props.data.errorMsg)} className="error-cell">{props.value}</div>    
+        }else {
+            return <div>{props.value}</div>
+        }
+        ;
+      };
 
     // Column Definitions: Defines the columns to be displayed.
     const colDefs: ColDef[] = [
@@ -30,7 +39,9 @@ export const useFilesList = () => {
         { field: "company", sortable: true, filter: true },        
         { field: "filename", sortable: true, filter: true },
         { field: "generationTime", sortable: true, filter: true },
-        { field: "status", sortable: true, filter: true },
+        { field: "status", sortable: true, filter: true, 
+            cellRenderer: CustomCellRenderer
+        },
         { field: "referredBy", sortable: true, filter: true },
         { field: "submittedBy", sortable: true, filter: true },
         { field: "period", sortable: true, filter: true },

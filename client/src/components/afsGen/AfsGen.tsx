@@ -11,16 +11,17 @@ import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community';
 import FilesList from "@/components/shared/FilesList";
 import ErrorModal from "@/components/shared/ErrorModal";
 
+
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-interface BreakdownTabsGenProps {
+interface AfsGenProps {
 
 }
 
-const BreakdownTabsGen = (props: BreakdownTabsGenProps) => {
+const AfsGen = (props: AfsGenProps) => {
 
-    const [generatingTabs, setGeneratingTabs] = React.useState(false);
+    const [generating, setGenerating] = React.useState(false);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [modalMsg, setModalMsg] = React.useState("");
 
@@ -33,16 +34,16 @@ const BreakdownTabsGen = (props: BreakdownTabsGenProps) => {
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         console.log(acceptedFiles.map(file => file.name).join(', '));
-        setGeneratingTabs(true);
+        setGenerating(true);
         try {
-            await Endpoints.generateTabs(acceptedFiles[0], 'BreakdownTabs')
+            await Endpoints.generateTabs(acceptedFiles[0], 'GenerateAFS')
             .then(res => {
-                toast.info("Schedules Breakdown updated");
+                toast.info("AFS Sheets generated");
             });
         } catch (error) {
-            toast.error("Schedules Breakdown file error!" + error);
+            toast.error("AFS Sheets Generation error!" + error);
         }
-        setGeneratingTabs(false);
+        setGenerating(false);
     }, []);
     
     const {getRootProps, getInputProps, isDragActive,isFocused,
@@ -62,29 +63,28 @@ const BreakdownTabsGen = (props: BreakdownTabsGenProps) => {
             <ErrorModal isOpen={isModalOpen} closeModal={closeModal} msg={modalMsg} />
             <div className="container schedule-root" >
             <div>
-                <div><h2>Schedule Breakdown Generation</h2></div>
+                <div><h2>AFS Sheets Generation</h2></div>
             </div>
             <div className="schedule-breakdown">
                 <div {...getRootProps({className: dropzoneClassName})}>
                     <input {...getInputProps()} />
-                    {!generatingTabs && 
+                    {!generating && 
                         (isDragActive ?
                         <p>Drop the files here ...</p> :
                         <p>Drag 'n' drop some files here, or click to select files</p>)}
-                    {generatingTabs && (<>
+                    {generating && (<>
                         <h1>Generating...</h1>
-                        <ClipLoader loading={generatingTabs} color="#bdbdbd" />
+                        <ClipLoader loading={generating} color="#bdbdbd" />
                     </>)}
                 </div>
                 <div className="schedule-history">
-                    <FilesList docType={'BreakdownTabs'} loading={generatingTabs} openModal={openModal}/>
+                    <FilesList docType={'GenerateAFS'} loading={generating} openModal={openModal}/>
                 </div>
             </div>
         </div>
         </>
-        
     );
 
 } 
 
-export default BreakdownTabsGen;
+export default AfsGen;

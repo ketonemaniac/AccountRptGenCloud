@@ -6,12 +6,13 @@ import { useFilesList } from "./useFilesList";
 interface FilesListProps {
     docType: string;
     loading: boolean;
+    openModal?: (msg: string) => void;
 }
 
 
 const FilesList = (props: FilesListProps) => {
 
-    const {rowData,getRowData, colDefs} = useFilesList();
+    const {rowData,getRowData, colDefs} = useFilesList(props.openModal);
 
     React.useEffect(() => {
         getRowData(props.docType);

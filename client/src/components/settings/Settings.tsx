@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import TemplateList from './TemplateList.js'
 import { useState, useEffect } from 'react';
 import FileList from '@/domain/settings/FileList';
+import '@/styles/settings/Settings.scss';
 
 interface SettingFile {
     filename: string;
