@@ -34,12 +34,12 @@ class App extends Component {
     this.getProgress();
   }
 
-  getProgress() {
-    return Endpoints.listFiles('ExcelExtract')
-      .then(data => data.filter(company => company.status != null))
-      .then(inProgress => {
-        this.setState({ companies: inProgress })
-      });
+  async getProgress() {
+    const excelExtractJobs = await Endpoints.listFiles('ExcelExtract')
+      .then(data => data.filter(company => company.status != null));
+    const accountJobs = await Endpoints.listFiles('AccountRpt')
+    .then(data => data.filter(company => company.status != null));
+    this.setState({ companies: excelExtractJobs.concat(accountJobs) })
   }
 
   componentDidUpdate() {
@@ -170,7 +170,7 @@ class App extends Component {
     const dropzoneRef = React.createRef();
     const showAddDetail = this.state.companies.length > 0;
     return (
-      <React.Fragment>
+      <div className="outer-app">
         <div className="app">
           <Dropzone ref={dropzoneRef} onDrop={this.onDrop.bind(this)}>
             {({ getRootProps, getInputProps, isDragActive }) => {
@@ -200,7 +200,7 @@ class App extends Component {
               )
             }}
           </Dropzone>
-          <CardDeck className="px-5">
+          <CardDeck className="px-5 cards">
             {this.state.companies
               .map((c, i) => {
                 return (
@@ -263,7 +263,7 @@ class App extends Component {
 
 
         {this.uploadErrorModalAlert(this.state.uploadError)}
-      </React.Fragment>
+      </div>
     );
   }
 
