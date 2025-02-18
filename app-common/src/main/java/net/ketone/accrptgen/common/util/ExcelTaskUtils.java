@@ -167,4 +167,25 @@ public class ExcelTaskUtils {
                 .map(Sheet::getSheetName)
                 .toList();
     }
+
+    public static XSSFWorkbook deleteSheets(XSSFWorkbook wb, List<String> sheetsToDelete) {
+        for(String sheetName : sheetsToDelete) {
+            int i = wb.getSheetIndex(sheetName);
+            if(i != -1) {   // -1 = not exist
+                wb.removeSheetAt(i);
+            }
+        }
+        return wb;
+    }
+
+    public static XSSFWorkbook retainSheets(XSSFWorkbook wb, List<String> sheetsToRetain) {
+        List<String> sheetsToDelete = new ArrayList<>();
+        wb.sheetIterator().forEachRemaining(sheet -> {
+            if(!sheetsToRetain.contains(sheet.getSheetName())) {
+                sheetsToDelete.add(sheet.getSheetName());
+            }
+        });
+        return deleteSheets(wb, sheetsToDelete);
+    }
+
 }

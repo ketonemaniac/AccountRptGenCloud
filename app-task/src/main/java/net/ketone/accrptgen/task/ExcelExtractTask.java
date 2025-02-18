@@ -80,7 +80,7 @@ public class ExcelExtractTask implements Runnable {
             Map<String, String> cutColumnsMap = extractCutColumns(stringifiedWorkbook);
 
             // remove sheets according to cutColumnsMap
-            XSSFWorkbook finalOutput = parsingService.retainSheets(stringifiedWorkbook,
+            XSSFWorkbook finalOutput = ExcelTaskUtils.retainSheets(stringifiedWorkbook,
                                                     new ArrayList<>(cutColumnsMap.keySet()));
 
             // cut cells according to cutColumnsMap

@@ -19,7 +19,7 @@ import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 @Slf4j
-public class ExcelUtils {
+public class ExcelCellUtils {
 
     private static final String MISSING_INFO = "Please provide data(Col %s) with title(Col A) '%s' of sheet '%s'";
 
@@ -49,7 +49,7 @@ public class ExcelUtils {
         return Optional.ofNullable(workbook.getSheet(sheetName))
                 .map(sheet -> sheet.getRow(cr.getRow()))
                 .map(row -> row.getCell(cr.getCol()))
-                .map(ExcelUtils::getCellValue)
+                .map(ExcelCellUtils::getCellValue)
                 .map(cell -> {
                     switch (cell.getCellType()) {
                         case DATE:

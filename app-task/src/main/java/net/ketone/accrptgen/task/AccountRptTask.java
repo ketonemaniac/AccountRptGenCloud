@@ -110,7 +110,7 @@ public class AccountRptTask implements Runnable {
             XSSFWorkbook auditPrgTemplateWb = auditProgrammeProcessor.process(mappings, preParseOutput);
 
             // remove sheets and stringify contents
-            XSSFWorkbook allDocsFinal = parsingService.deleteSheets(
+            XSSFWorkbook allDocsFinal = ExcelTaskUtils.deleteSheets(
                 parsingService.postProcess(preParseOutput, properties.getParse())
             , Arrays.asList(
                         "metadata", "Cover", "Contents", "Control", "Dir info", "Doc list",

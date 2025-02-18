@@ -207,7 +207,7 @@ public class ParserITCase {
     public void testDeleteSheets() throws IOException {
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("deleteSheet.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(in);
-        Workbook outputWb = svc.deleteSheets(workbook, Arrays.asList("Sheet1", "Sheet2","Sheet4"));
+        Workbook outputWb = ExcelTaskUtils.deleteSheets(workbook, Arrays.asList("Sheet1", "Sheet2","Sheet4"));
         assertThat(outputWb.getNumberOfSheets()).isEqualTo(1);
         assertThat(outputWb.getSheet("Sheet3")).isNotNull();
     }

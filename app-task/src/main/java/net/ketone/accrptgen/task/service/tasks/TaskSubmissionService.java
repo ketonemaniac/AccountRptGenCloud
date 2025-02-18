@@ -3,7 +3,7 @@ package net.ketone.accrptgen.task.service.tasks;
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.model.auth.User;
-import net.ketone.accrptgen.common.util.ExcelUtils;
+import net.ketone.accrptgen.common.util.ExcelCellUtils;
 import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.store.StorageService;
@@ -84,7 +84,7 @@ public class TaskSubmissionService {
                        final Optional<User> optionalUser, final Integer clientRandInt) throws Exception {
         tempStorage.store(fileBytes, clientRandInt + fileExtension);
         XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
-        String company = ExcelUtils.extractByTitleCellName(workbook, "Content", "Company Name", 1);
+        String company = ExcelCellUtils.extractByTitleCellName(workbook, "Content", "Company Name", 1);
         LocalDateTime generationTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("UTC+8")).toLocalDateTime();
         String filename = FileUtils.uniqueFilename(company, generationTime) + fileExtension;
         AccountJob accountJob = AccountJob.builder()
@@ -95,7 +95,7 @@ public class TaskSubmissionService {
                 .clientRandInt(clientRandInt)
                 .docType(docType)
                 .company(company)
-                .period(ExcelUtils.extractByTitleCellName(workbook, "Content", "Current Year/ period", 1).substring(0, 6))
+                .period(ExcelCellUtils.extractByTitleCellName(workbook, "Content", "Current Year/ period", 1).substring(0, 6))
                 .status(Constants.Status.GENERATING.name())
                 .generationTime(generationTime)
                 .build();
@@ -116,15 +116,15 @@ public class TaskSubmissionService {
                                        final XSSFWorkbook workbook,
                                        final AccountJob.AccountJobBuilder jobBuilder) throws IOException {
         AccountJob accountJob = jobBuilder
-                .company(ExcelUtils.extractByTitleCellName(workbook, "Control", "Company's name", 3))
-                .period(ExcelUtils.extractByTitleCellName(workbook, "Control", "To", 3).substring(0, 6))
-                .auditorName(ExcelUtils.extractByTitleCellName(workbook, "Control", "Auditor's name", 3))
-                .referredBy(ExcelUtils.extractByTitleCellName(workbook, "Control", "Referrer", 3))
-                .inCharge(ExcelUtils.extractByTitleCellName(workbook, "Control", "In-Charge", 3))
+                .company(ExcelCellUtils.extractByTitleCellName(workbook, "Control", "Company's name", 3))
+                .period(ExcelCellUtils.extractByTitleCellName(workbook, "Control", "To", 3).substring(0, 6))
+                .auditorName(ExcelCellUtils.extractByTitleCellName(workbook, "Control", "Auditor's name", 3))
+                .referredBy(ExcelCellUtils.extractByTitleCellName(workbook, "Control", "Referrer", 3))
+                .inCharge(ExcelCellUtils.extractByTitleCellName(workbook, "Control", "In-Charge", 3))
                 .status(Constants.Status.PENDING.name())
                 .generationTime(ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("UTC+8")).toLocalDateTime())
                 .firstYear(Double.parseDouble(
-                        ExcelUtils.extractByTitleCellName(workbook, "Control", "First audit?", 3))
+                        ExcelCellUtils.extractByTitleCellName(workbook, "Control", "First audit?", 3))
                         == 1.0)
                 .build();
         sink.tryEmitNext(toSSE(accountJob));
@@ -136,13 +136,13 @@ public class TaskSubmissionService {
             final XSSFWorkbook workbook,
             final AccountJob.AccountJobBuilder jobBuilder) throws IOException {
         AccountJob job = jobBuilder
-                .company(ExcelUtils.extractByTitleCellName(workbook, "Control", "Company name", 1))
-                .period(ExcelUtils.extractByTitleCellName(workbook, "Control", "Period from", 1).substring(0, 6))
-                .auditorName(ExcelUtils.extractByTitleCellName(workbook, "Control", "Auditor's name",1))
-                .referredBy(ExcelUtils.extractByTitleCellName(workbook, "Control", "Referrer", 1))
-                .fundingType(ExcelUtils.extractByTitleCellName(workbook, "Control",
+                .company(ExcelCellUtils.extractByTitleCellName(workbook, "Control", "Company name", 1))
+                .period(ExcelCellUtils.extractByTitleCellName(workbook, "Control", "Period from", 1).substring(0, 6))
+                .auditorName(ExcelCellUtils.extractByTitleCellName(workbook, "Control", "Auditor's name",1))
+                .referredBy(ExcelCellUtils.extractByTitleCellName(workbook, "Control", "Referrer", 1))
+                .fundingType(ExcelCellUtils.extractByTitleCellName(workbook, "Control",
                         "Funding type (D-biz, TVP, Bud)", 1))
-                .inCharge(ExcelUtils.extractByTitleCellName(workbook, "Control", "In-Charge", 1))
+                .inCharge(ExcelCellUtils.extractByTitleCellName(workbook, "Control", "In-Charge", 1))
                 .status(Constants.Status.PENDING.name())
                 .generationTime(ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("UTC+8")).toLocalDateTime())
                 .build();

@@ -69,23 +69,23 @@ public class GenerateAFSTask {
         XSSFWorkbook workbook  = ExcelTaskUtils.openExcelWorkbook(workbookArr);
 
         List<String> auditSheets = ExcelTaskUtils.matchSheetsWithRegex(workbook, properties.getAuditSheets());
-        Streams.stream(workbook.sheetIterator())
-                .filter(sheet -> !auditSheets.contains(sheet.getSheetName()))
-                .forEach(sheet -> workbook.setSheetVisibility(workbook.getSheetIndex(sheet), SheetVisibility.VERY_HIDDEN));
+
+        //- Clear all formulas. Only recalculate visible sheets
+        try {
+            ExcelTaskUtils.evaluateSheets("GenerateAFSTask", workbook, null,
+                    auditSheets::contains);
+        } catch (RuntimeException e) {
+            hasErrors = true;
+            accountJob.setErrorMsg(e.getMessage());
+        }
 
         //- Only leave the 2nd gen tabs
         for(String auditSheetName : auditSheets) {
             log.info("revealing sheet {}", auditSheetName);
             workbook.setSheetVisibility(workbook.getSheetIndex(auditSheetName), SheetVisibility.VISIBLE);
         }
-        //- Clear all formulas
-        try {
-            ExcelTaskUtils.evaluateAll("TemplateMergeProcessor", workbook, null);
-        } catch (RuntimeException e) {
-            hasErrors = true;
-            accountJob.setErrorMsg(e.getMessage());
-        }
 
+        workbook = ExcelTaskUtils.retainSheets(workbook, auditSheets);
 
         byte[] preParseOutput = ExcelTaskUtils.saveExcelToBytes(workbook);
 
