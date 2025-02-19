@@ -90,7 +90,7 @@ public class GenerateAFSTask {
         byte[] preParseOutput = ExcelTaskUtils.saveExcelToBytes(workbook);
 
         List<Attachment> attachments = List.of(new Attachment(accountJob.getFilename(), preParseOutput));
-        emailService.sendEmail(accountJob, attachments, properties.getMail());
+        emailService.sendEmail(accountJob, attachments, properties.getMail().toBuilder().subjectPrefix("AFS Sheets Generation").build());
 
         tempStorage.store(preParseOutput, accountJob.getFilename());
         accountJob.setStatus(hasErrors ? Constants.Status.GENERATED_WITH_ERRORS.name() : Constants.Status.GENERATED.name());
