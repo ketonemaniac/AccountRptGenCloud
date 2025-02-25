@@ -21,13 +21,11 @@ class AppHeader extends Component {
     return (
       <Navbar className="fixed-top" color="faded" light>
         <Nav>
-          {this.props.isAdmin ? (
-            <NavbarToggler onClick={this.props.toggleSidebar} className="mr-2"/>
-          ) : ""}
-        <NavbarBrand href="/">
-          <span className="logo">Account Report Generator</span>
-          <span><small className="text-sm font-weight-light">{this.state.info.version}</small></span>
-        </NavbarBrand>
+          <NavbarToggler onClick={this.props.toggleSidebar} className="mr-2"/>
+          <NavbarBrand href="/">
+            <span className="logo">Account Report Generator</span>
+            <span><small className="text-sm font-weight-light">{this.state.info.version}</small></span>
+          </NavbarBrand>
         </Nav>
         <Nav>
           <NavItem>

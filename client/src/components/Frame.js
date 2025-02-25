@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import AppHeader from './header/AppHeader.js';
-import SideBar from './SideBar.js'
+import SideBar from './SideBar'
 import User from './header/User.js';
 import '@/styles/Frame.css'
 import { ToastContainer, toast } from 'react-toastify';
@@ -45,9 +45,8 @@ class Frame extends Component {
             <div className={'body-main'}  style={{height:'100%', overflow: 'hidden'}}>
                 <AppHeader user={this.state.user} isAdmin={this.state.isAdmin} toggleUserModal={this.toggleUserModal.bind(this)}
                     toggleSidebar={this.toggleSidebar.bind(this)} />
-                    {this.state.isAdmin ? (
-                        <SideBar isSideBarCollapsed={this.state.isSideBarCollapsed} toggleSidebar={this.toggleSidebar.bind(this)}></SideBar>
-                    ) : ""}
+                <SideBar isSideBarCollapsed={this.state.isSideBarCollapsed} toggleSidebar={this.toggleSidebar.bind(this)}
+                    isAdmin={this.state.isAdmin}></SideBar>
                 <User user={this.state.user}
                     toggleUserModal={this.toggleUserModal.bind(this)} isUserModalOpen={this.state.isUserModalOpen}></User>
                 <ToastContainer className="myToast" />
