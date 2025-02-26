@@ -73,7 +73,7 @@ public class GenerateAFSTask {
         //- Clear all formulas. Only recalculate visible sheets
         try {
             ExcelTaskUtils.evaluateSheets("GenerateAFSTask", workbook, null,
-                    auditSheets::contains);
+                    auditSheets::contains, true);
         } catch (RuntimeException e) {
             hasErrors = true;
             accountJob.setErrorMsg(e.getMessage());

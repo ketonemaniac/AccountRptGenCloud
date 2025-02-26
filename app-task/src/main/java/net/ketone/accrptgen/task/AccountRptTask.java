@@ -90,7 +90,7 @@ public class AccountRptTask implements Runnable {
             byte[] workbookArr = tempStorage.load(inputFileName);
             XSSFWorkbook preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
             log.debug("start refreshing preParseOutput");
-            ExcelTaskUtils.evaluateAll("TemplateMergeProcessor", preParseOutput, properties.getMerge().getKeepFormulaColor());
+            ExcelTaskUtils.evaluateAll("TemplateMergeProcessor", preParseOutput, properties.getMerge().getKeepFormulaColor(), false);
 
             List<AuditProgrammeMapping> mappings = auditProgrammeMappingExtract.process();
 
@@ -122,7 +122,7 @@ public class AccountRptTask implements Runnable {
             log.info("Generated doc. " + generatedDoc.length + "_bytes");
 
             log.debug("start refreshing auditPrgTemplateWb");
-            ExcelTaskUtils.evaluateAll("AuditProgrammeProcessor", auditPrgTemplateWb);
+            ExcelTaskUtils.evaluateAll("AuditProgrammeProcessor", auditPrgTemplateWb, false);
             log.info("auditPrgTemplateWb refreshed. Writing to stream");
             byte[] generatedAuditProgramme = ExcelTaskUtils.saveExcelToBytes(auditPrgTemplateWb);
 

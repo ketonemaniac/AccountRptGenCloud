@@ -133,18 +133,27 @@ public class GenerateTabTask {
             workbook.setSheetVisibility(workbook.getSheetIndex(auditSheetName), SheetVisibility.VERY_HIDDEN);
         }
 
-        // unused sheet after X----->
-        workbook.setSheetOrder("X------>", workbook.getNumberOfSheets()-1);
+        // unused sheet after Not in use-------->
+        workbook.setSheetOrder("Not in use-------->", workbook.getNumberOfSheets()-1);
 
         for(String sheetName : Streams.stream(workbook.sheetIterator())
                 .map(Sheet::getSheetName)
                 .filter(sheetName -> !sheets.contains(sheetName))
                 .filter(sheetName -> !auditSheets.contains(sheetName))
-                .filter(sheetName -> !"X------>".equals(sheetName))
+                .filter(sheetName -> !"Not in use-------->".equals(sheetName))
                 .toList()) {
                     log.info("putting sheet at back {}", sheetName);
                     workbook.setSheetOrder(sheetName, workbook.getNumberOfSheets()-1);
         };
+
+        // X------> is the last of the last
+        workbook.setSheetOrder("X------>", workbook.getNumberOfSheets()-1);
+
+        try {
+            ExcelTaskUtils.evaluateAll("GenerateTabTask", workbook, null, true);
+        } catch (RuntimeException e) {
+            accountJob.setErrorMsg(e.getMessage());
+        }
 
         byte[] preParseOutput = ExcelTaskUtils.saveExcelToBytes(workbook);
 

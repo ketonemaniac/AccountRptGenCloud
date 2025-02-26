@@ -166,7 +166,7 @@ public class ParserITCase {
     public void testStringifyContents() throws IOException {
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("formulaToText.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(in);
-        ExcelTaskUtils.evaluateAll("test", workbook); // svc.postProcess(workbook, new ParseProperties());
+        ExcelTaskUtils.evaluateAll("test", workbook, false); // svc.postProcess(workbook, new ParseProperties());
         // number
         Cell c = workbook.getSheet("Sheet1").getRow(0).getCell(0);
         assertThat(c.getCellType()).isEqualTo(CellType.NUMERIC);

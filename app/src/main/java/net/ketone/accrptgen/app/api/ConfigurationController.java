@@ -81,7 +81,7 @@ public class ConfigurationController {
                                                @RequestParam("file") MultipartFile file) throws IOException {
         byte[] fileBytes = file.getBytes();
         if(ALLDOCS.equalsIgnoreCase(fileType)) {
-            Try.run(() -> ExcelTaskUtils.evaluateAll("templateFileUpload", ExcelTaskUtils.openExcelWorkbook(fileBytes)))
+            Try.run(() -> ExcelTaskUtils.evaluateAll("templateFileUpload", ExcelTaskUtils.openExcelWorkbook(fileBytes), true))
             .getOrElseThrow(ex -> {
                 log.error("Error uploading template file", ex);
                 return new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());

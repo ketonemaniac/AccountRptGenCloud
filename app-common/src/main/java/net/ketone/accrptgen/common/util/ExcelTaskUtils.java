@@ -40,8 +40,8 @@ public class ExcelTaskUtils {
     }
 
 
-    public static void evaluateAll(final String stage, XSSFWorkbook templateWb) {
-        evaluateAll(stage, templateWb, null);
+    public static void evaluateAll(final String stage, XSSFWorkbook templateWb, final boolean isDefaultKeepFormula) {
+        evaluateAll(stage, templateWb, null, isDefaultKeepFormula);
     }
 
     public static Flux<Cell> loopingEveryCell(final String location, XSSFWorkbook templateWb, Consumer<Cell> cellAction) {
@@ -64,16 +64,18 @@ public class ExcelTaskUtils {
      * If you want the cell replaced with the result of the formula, use evaluateInCell(Cell)
      * @param templateWb
      */
-    public static void evaluateAll(final String stage, XSSFWorkbook templateWb, final String keepFormulaColor) {
-        evaluateSheets(stage, templateWb, keepFormulaColor, (ignore) -> true);
+    public static void evaluateAll(final String stage, XSSFWorkbook templateWb, final String keepFormulaColor,
+                                   final boolean isDefaultKeepFormula) {
+        evaluateSheets(stage, templateWb, keepFormulaColor, (ignore) -> true, isDefaultKeepFormula);
     }
 
     public static void evaluateSheets(final String stage, XSSFWorkbook templateWb, final String keepFormulaColor,
-                                      final Function<String, Boolean> sheetFilter) {
+                                      final Function<String, Boolean> sheetFilter, final boolean isDefaultKeepFormula) {
         FormulaEvaluator evaluator = templateWb.getCreationHelper().createFormulaEvaluator();
         evaluator.clearAllCachedResultValues();
         List<EvaluationException> exceptions = new ArrayList<>();
         loopingCells(stage, templateWb, cell -> {
+            if(cell.getCellType() != CellType.FORMULA) return;      // no need to evaluate non-formula cells
             CellType evaluationResult;
             if (Optional.ofNullable(cell.getCellStyle())
                     .map(CellStyle::getFillForegroundColorColor)
@@ -82,9 +84,13 @@ public class ExcelTaskUtils {
                     .map(hex -> hex.substring(2))
                     .flatMap(color -> Optional.ofNullable(keepFormulaColor)
                             .map(color::equalsIgnoreCase))
-                    .orElse(Boolean.FALSE)) {
+                    .orElse(isDefaultKeepFormula)) {
+                // The type of the formula result, i.e. -1 if the cell is not a formula, or one of CellType.NUMERIC, CellType.STRING, CellType.BOOLEAN, CellType.ERROR
+                // Note: the cell's type remains as CellType.FORMULA however
                 evaluationResult = evaluator.evaluateFormulaCell(cell);
             } else {
+                // If cell contains formula, it evaluates the formula, and puts the formula result back into the cell, in place of the old formula.
+                // Be aware that your cell value will be changed to hold the result of the formula.
                 evaluationResult = Try.ofSupplier(() -> evaluator.evaluateInCell(cell).getCellType())
                         .onFailure(err -> log.error(err.toString()))
                         .getOrElse(CellType.ERROR);
