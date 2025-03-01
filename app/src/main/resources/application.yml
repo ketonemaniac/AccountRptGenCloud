@@ -105,7 +105,23 @@ breakdown-tabs:
     - RPT
   mail:
     template: 'job-template.html'
-    subject-prefix: 'Accounting Breakdown Tabs Generation For '
+    subject-prefix: 'Accounting Breakdown Tabs Generation For'
+generate-afs:
+  audit-sheets:
+    - Control
+    - Dir info
+    - Adj$
+    - Section3
+    - Section4
+    - Section6
+    - auditPrg
+    - Version
+    - P1[a-z]+
+    - P1\..*
+    - PTR.*
+  mail:
+    template: 'job-template.html'
+    subject-prefix: 'AFS Sheets Generation For'
 server:
   error:
     include-message: always

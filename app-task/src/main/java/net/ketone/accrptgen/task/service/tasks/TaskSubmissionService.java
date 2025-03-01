@@ -86,10 +86,9 @@ public class TaskSubmissionService {
         XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(fileBytes));
         String company = ExcelCellUtils.extractByTitleCellName(workbook, "Content", "Company Name", 1);
         LocalDateTime generationTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("UTC+8")).toLocalDateTime();
-        String filename = FileUtils.uniqueFilename(company, generationTime) + fileExtension;
-        AccountJob accountJob = AccountJob.builder()
+        String filename = FileUtils.uniqueFilename(company, generationTime);
+        AccountJob.AccountJobBuilder accountJobBuilder = AccountJob.builder()
                 .id(UUID.randomUUID())
-                .filename(filename)
                 .submittedBy(optionalUser.map(User::getUsername).orElse("anonymous"))
                 .noCCemail(optionalUser.map(User::getNoCCemail).orElse(Boolean.FALSE))
                 .clientRandInt(clientRandInt)
@@ -97,15 +96,20 @@ public class TaskSubmissionService {
                 .company(company)
                 .period(ExcelCellUtils.extractByTitleCellName(workbook, "Content", "Current Year/ period", 1).substring(0, 6))
                 .status(Constants.Status.GENERATING.name())
-                .generationTime(generationTime)
-                .build();
-        statisticsService.updateTask(accountJob);
+                .generationTime(generationTime);
+        AccountJob accountJob = null;
 
         switch(docType) {
             case Constants.DOCTYPE_BREAKDOWN_TABS:
+                filename += " - working"  + fileExtension;
+                accountJob = accountJobBuilder.filename(filename).build();
+                statisticsService.updateTask(accountJob);
                 generateTabTask.run(accountJob, fileBytes);
                 break;
             case Constants.DOCTYPE_GENERATE_AFS:
+                filename += " - AFS & Tax"  + fileExtension;
+                accountJob = accountJobBuilder.filename(filename).build();
+                statisticsService.updateTask(accountJob);
                 generateAFSTask.run(accountJob, fileBytes);
                 break;
         }

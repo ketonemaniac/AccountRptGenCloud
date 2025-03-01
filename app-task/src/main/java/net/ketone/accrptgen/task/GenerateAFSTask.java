@@ -1,6 +1,5 @@
 package net.ketone.accrptgen.task;
 
-import com.google.common.collect.Streams;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.credentials.SettingsService;
@@ -10,7 +9,7 @@ import net.ketone.accrptgen.common.mail.EmailService;
 import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.common.util.ExcelTaskUtils;
-import net.ketone.accrptgen.task.config.properties.BreakdownTabsProperties;
+import net.ketone.accrptgen.task.config.properties.GenerateAFSProperties;
 import net.ketone.accrptgen.task.gen.merge.TemplateMergeProcessor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -36,7 +35,7 @@ public class GenerateAFSTask {
     @Autowired
     private TemplateMergeProcessor templateMergeProcessor;
     @Autowired
-    private BreakdownTabsProperties properties;
+    private GenerateAFSProperties properties;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -73,7 +72,7 @@ public class GenerateAFSTask {
         //- Clear all formulas. Only recalculate visible sheets
         try {
             ExcelTaskUtils.evaluateSheets("GenerateAFSTask", workbook, null,
-                    auditSheets::contains, true);
+                    auditSheets::contains, false);
         } catch (RuntimeException e) {
             hasErrors = true;
             accountJob.setErrorMsg(e.getMessage());
