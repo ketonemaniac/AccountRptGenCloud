@@ -87,6 +87,7 @@ public class TaskSubmissionService {
         String company = ExcelCellUtils.extractByTitleCellName(workbook, "Content", "Company Name", 1);
         LocalDateTime generationTime = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("UTC+8")).toLocalDateTime();
         String filename = FileUtils.uniqueFilename(company, generationTime);
+        String period = ExcelCellUtils.extractByTitleCellName(workbook, "Content", "Current Year/ period", 1).substring(0, 6);
         AccountJob.AccountJobBuilder accountJobBuilder = AccountJob.builder()
                 .id(UUID.randomUUID())
                 .submittedBy(optionalUser.map(User::getUsername).orElse("anonymous"))
@@ -94,20 +95,20 @@ public class TaskSubmissionService {
                 .clientRandInt(clientRandInt)
                 .docType(docType)
                 .company(company)
-                .period(ExcelCellUtils.extractByTitleCellName(workbook, "Content", "Current Year/ period", 1).substring(0, 6))
+                .period(period)
                 .status(Constants.Status.GENERATING.name())
                 .generationTime(generationTime);
         AccountJob accountJob = null;
 
         switch(docType) {
             case Constants.DOCTYPE_BREAKDOWN_TABS:
-                filename += " - working"  + fileExtension;
+                filename += "-" + period + " - working"  + fileExtension;
                 accountJob = accountJobBuilder.filename(filename).build();
                 statisticsService.updateTask(accountJob);
                 generateTabTask.run(accountJob, fileBytes);
                 break;
             case Constants.DOCTYPE_GENERATE_AFS:
-                filename += " - AFS & Tax"  + fileExtension;
+                filename += "-" + period + " - AFS & Tax"  + fileExtension;
                 accountJob = accountJobBuilder.filename(filename).build();
                 statisticsService.updateTask(accountJob);
                 generateAFSTask.run(accountJob, fileBytes);

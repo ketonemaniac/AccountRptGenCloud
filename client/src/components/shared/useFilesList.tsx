@@ -34,7 +34,7 @@ export const useFilesList = (openModal: (msg: string) => void) => {
         { field: "filename",
             headerName: '',
             width: 50,
-            cellRenderer: (params: any) => (<a href={"/api/accrptgen/file?file=" + params.value} ><Download /></a>)
+            cellRenderer: (params: any) => (<a href={"/api/accrptgen/file?file=" + encodeURIComponent(params.value)} ><Download /></a>)
         },
         { field: "company", sortable: true, filter: true },        
         { field: "filename", sortable: true, filter: true },

@@ -72,7 +72,7 @@ public class GenerateAFSTask {
         //- Clear all formulas. Only recalculate visible sheets
         try {
             ExcelTaskUtils.evaluateSheets("GenerateAFSTask", workbook, null,
-                    auditSheets::contains, false);
+                    auditSheets::contains, true);
         } catch (RuntimeException e) {
             hasErrors = true;
             accountJob.setErrorMsg(e.getMessage());
@@ -84,7 +84,14 @@ public class GenerateAFSTask {
             workbook.setSheetVisibility(workbook.getSheetIndex(auditSheetName), SheetVisibility.VISIBLE);
         }
 
-        workbook = ExcelTaskUtils.retainSheets(workbook, auditSheets);
+        // hide all other sheets
+        workbook.sheetIterator().forEachRemaining(sheet -> {
+            if(!auditSheets.contains(sheet.getSheetName())) {
+                log.info("deep hiding sheet {}", sheet.getSheetName());
+                workbook.setSheetVisibility(workbook.getSheetIndex(sheet.getSheetName()), SheetVisibility.VERY_HIDDEN);
+            }
+        });
+
 
         byte[] preParseOutput = ExcelTaskUtils.saveExcelToBytes(workbook);
 
