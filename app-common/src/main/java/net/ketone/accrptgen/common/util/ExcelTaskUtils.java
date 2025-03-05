@@ -87,7 +87,9 @@ public class ExcelTaskUtils {
                     .orElse(isDefaultKeepFormula)) {
                 // The type of the formula result, i.e. -1 if the cell is not a formula, or one of CellType.NUMERIC, CellType.STRING, CellType.BOOLEAN, CellType.ERROR
                 // Note: the cell's type remains as CellType.FORMULA however
-                evaluationResult = evaluator.evaluateFormulaCell(cell);
+                evaluationResult = Try.ofSupplier(() -> evaluator.evaluateFormulaCell(cell))
+                        .onFailure(err -> log.error(err.toString()))
+                        .getOrElse(CellType.ERROR);
             } else {
                 // If cell contains formula, it evaluates the formula, and puts the formula result back into the cell, in place of the old formula.
                 // Be aware that your cell value will be changed to hold the result of the formula.
