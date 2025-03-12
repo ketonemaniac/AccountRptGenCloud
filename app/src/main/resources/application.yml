@@ -76,15 +76,15 @@ breakdown-tabs:
       - 4F81BD
   fix-sheets:
     - Content
-    - B6.1
-    - B6.2
+    - B6\.1
+    - B6\.2
     - B
     - C7
-    - C7.1
+    - C7\.1
     - -->signing doc
     - Pro Clear
-    - B conf.
-    - Audit conf. 3rd
+    - B conf.*
+    - Audit conf\. 3rd
   ban-sheets:
     - β
     - P/L

@@ -110,14 +110,14 @@ public class GenerateTabTask {
     public void doRun(AccountJob accountJob, byte[] workbookArr) throws Exception {
         XSSFWorkbook workbook  =templateMergeProcessor.process(workbookArr, properties.getMerge());
 
-        Set<String> sheets = new TreeSet<>(properties.getFixSheets());
+        Set<String> sheets = new TreeSet<>(ExcelTaskUtils.matchSheetsWithRegex(workbook, properties.getFixSheets()));
 
         for (String scheduleSheetGroup : getScheduleSheetNames(workbook)) {
             // When it says like "QI1", sub-sheets also need to be cloned, like "QI1.1, QI1.2, QI1.3..... etc"
             // sheetsInCategory gives all sub-sheets in QI:
             List<Sheet> sheetsInCategory = Streams.stream(workbook.sheetIterator())
                     .filter(sheet -> !properties.getBanSheets().contains(sheet.getSheetName()))
-                    .filter(sheet -> !properties.getFixSheets().contains(sheet.getSheetName()))
+                    .filter(sheet -> !ExcelTaskUtils.matchRegexs(sheet.getSheetName(), properties.getFixSheets()))
                     .filter(sheet -> {
                         var a = Pattern.compile("^([A-Z]+[0-9]+)").matcher(sheet.getSheetName());
                         return a.find() && a.group().equals(scheduleSheetGroup);

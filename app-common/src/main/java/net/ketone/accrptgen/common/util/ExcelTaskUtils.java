@@ -161,17 +161,19 @@ public class ExcelTaskUtils {
         }
     }
 
+    public static boolean matchRegexs(String name, List<String> regexs) {
+        for(String auditSheetName : regexs) {
+            var a = Pattern.compile(auditSheetName).matcher(name);
+            if(a.find()) return true;
+        }
+        return false;
+    }
+
     public static List<String> matchSheetsWithRegex(XSSFWorkbook workbook, List<String> regexs) {
         return StreamSupport.stream(
                 Spliterators.spliteratorUnknownSize(workbook.sheetIterator(), Spliterator.ORDERED),
                 false)
-                .filter(sheet -> {
-                    for(String auditSheetName : regexs) {
-                        var a = Pattern.compile(auditSheetName).matcher(sheet.getSheetName());
-                        if(a.find()) return true;
-                    }
-                    return false;
-                })
+                .filter(sheet -> matchRegexs(sheet.getSheetName(), regexs))
                 .map(Sheet::getSheetName)
                 .toList();
     }
