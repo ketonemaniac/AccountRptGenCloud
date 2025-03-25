@@ -76,6 +76,7 @@ public class CustomWebSecurityConfigurerAdapter {
                         var secu = authz
                                 .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
                                 .requestMatchers(antMatcher("/static/**")).permitAll()
+                                .requestMatchers(antMatcher("/assets/**")).permitAll()
                                 .requestMatchers("/main.bundle.js").permitAll()
                                 .requestMatchers("/_ah/**").permitAll()
                                 .requestMatchers(GEN_QUEUE_ENDPOINT).permitAll()

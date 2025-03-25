@@ -1,33 +1,49 @@
 import * as React from 'react';
-import { Container, Form, FormGroup, Label, Input, Button, Alert } from 'reactstrap';
 import '@/styles/login/Login.scss';
-import { useLocation } from 'react-router-dom';
-import * as H from 'history';
+import { Container, TextField, Button, Box, Typography, Paper } from "@mui/material";
+// @ts-ignore
+import backgroundImage from "@/assets/background.jpg";
 
 const Login = (props: any) => {
-    const location: H.Location = useLocation();
-    console.log(location);
-    const err = location.search === "?error=true"
-    return (<Container className="login">
-                <h1 className="logo">Accounting Report Generator</h1>
-                <Container className="login-form">
-                    {err ? ( <Alert color="danger">
-                            Invalid Login. Please try again.
-                        </Alert>
-                        ) : (<span></span>)}
-                    <Form name='f' action="perform_login" method='POST'>
-                        <FormGroup className="login-field">
-                            <Label>User:</Label>
-                            <Input type='text' name='username'/>
-                        </FormGroup>
-                        <FormGroup className="login-field">
-                            <Label>Password:</Label>
-                            <Input type='password' name='password' />
-                        </FormGroup>
-                        <Button className="login-field login-submit">Login</Button>
-                    </Form>
-                </Container>
-            </Container>)
+
+    return (
+    <Box sx={{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}>
+    <Container maxWidth="xs">
+        <Paper elevation={3} sx={{ p: 4, mt: 8, textAlign: "center" }}>
+          <Typography variant="h5" gutterBottom sx={{ fontFamily: 'Roboto, sans-serif', fontWeight: 'bold', letterSpacing: 1 }}>
+            Accounting Report Generator
+          </Typography>
+          <Box component="form" action="perform_login" method="POST">
+            <TextField
+              fullWidth
+              label="Username"
+              name="username"
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              name="password"
+              margin="normal"
+              required
+            />
+            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+              Login
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
+      </Box>)
 }
 
 export default Login;
