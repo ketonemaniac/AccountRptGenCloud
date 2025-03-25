@@ -2,11 +2,17 @@ import React, { Component } from 'react';
 import AppHeader from './header/AppHeader.js';
 import SideBar from './SideBar'
 import User from './header/User.js';
-import '@/styles/Frame.css'
+import '@/styles/Frame.scss'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Endpoints from '@/api/Endpoints';
 import { Outlet } from 'react-router-dom';
+import { AllCommunityModule, ClientSideRowModelModule, EventApiModule,   CellStyleModule,
+    ValidationModule, ModuleRegistry } from 'ag-grid-community'; 
+
+// Register all community features
+ModuleRegistry.registerModules([AllCommunityModule, ClientSideRowModelModule, EventApiModule,   CellStyleModule,
+    ValidationModule /* Development Only */,]);
 
 class Frame extends Component {
 

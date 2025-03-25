@@ -53,17 +53,14 @@ public class ExcelExtractTask implements Runnable {
     private static List<String> CONTROL_SHEETS = Arrays.asList("metadata", "Control");
 
     private AccountJob job;
-    private Sinks.Many<ServerSentEvent<AccountJob>> sink;
 
-    public ExcelExtractTask(final AccountJob job, final Sinks.Many<ServerSentEvent<AccountJob>> sink) {
+    public ExcelExtractTask(final AccountJob job) {
         this.job = job;
-        this.sink = sink;
     }
 
     @Override
     public void run() {
-        sink.tryEmitNext(toSSE(job.toBuilder().status(Constants.Status.GENERATING.name()).build()));
-        String inputFileName = job.getFilename();
+         String inputFileName = job.getClientRandInt() + job.getFilename().substring(job.getFilename().lastIndexOf("."));
         log.info("Opening file: " + inputFileName);
         String outputFilename = FileUtils.uniqueFilename(job.getCompany(), job.getGenerationTime());
         String fileExtension = inputFileName.substring(inputFileName.lastIndexOf("."));
@@ -103,8 +100,7 @@ public class ExcelExtractTask implements Runnable {
 
             job.setStatus(Constants.Status.GENERATED.name());
             job.setFilename(outputFilename + fileExtension);
-            sink.tryEmitNext(toSSE(job));
-            statisticsService.updateTask(job);
+           statisticsService.updateTask(job);
             log.info("Operation complete");
 
         } catch (Exception e) {
@@ -113,13 +109,10 @@ public class ExcelExtractTask implements Runnable {
             job.setStatus(Constants.Status.FAILED.name());
             try {
                 job.setErrorMsg(e.getMessage());
-                sink.tryEmitNext(toSSE(job));
                 statisticsService.updateTask(job);
             } catch (Throwable e1) {
                 log.warn("History file write failed", e1);
             }
-        } finally {
-            sink.tryEmitComplete();
         }
     }
 

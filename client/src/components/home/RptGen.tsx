@@ -4,23 +4,20 @@ import { useCallback, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from 'react-toastify';
 import Endpoints from "@/api/Endpoints";
-import '@/styles/breakdownTabs/BreakdownTabs.scss';
+import '@/styles/home/RptGen.scss';
 import { ClipLoader } from 'react-spinners';
-import { AgGridReact } from 'ag-grid-react';
-import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community'; 
 import FilesList from "@/components/shared/FilesList";
 import ErrorModal from "@/components/shared/ErrorModal";
 
-// Register all Community features
-ModuleRegistry.registerModules([AllCommunityModule]);
-
-interface BreakdownTabsGenProps {
-
+interface RptGenProps {
+    title: string;
+    docType: string;
+    docTypeString: string;
 }
 
-const BreakdownTabsGen = (props: BreakdownTabsGenProps) => {
+const RptGen = (props: RptGenProps) => {
 
-    const [generatingTabs, setGeneratingTabs] = React.useState(false);
+    const [generating, setGenerating] = React.useState(false);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [modalMsg, setModalMsg] = React.useState("");
 
@@ -33,17 +30,19 @@ const BreakdownTabsGen = (props: BreakdownTabsGenProps) => {
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         console.log(acceptedFiles.map(file => file.name).join(', '));
-        setGeneratingTabs(true);
+        setGenerating(true);
         try {
-            await Endpoints.generateTabs(acceptedFiles[0], 'BreakdownTabs')
+            await Endpoints.generate(acceptedFiles[0], props.docType)
             .then(res => {
-                toast.info("Schedules Breakdown updated");
+                toast.info(props.docTypeString + " generated");
             });
         } catch (error) {
-            toast.error("Schedules Breakdown file error!" + error);
+            toast.error(props.docTypeString + " Generation error!" + error, {
+                autoClose: false
+            });
         }
-        setGeneratingTabs(false);
-    }, []);
+        setGenerating(false);
+    }, [props.docType]);
     
     const {getRootProps, getInputProps, isDragActive,isFocused,
         isDragAccept,
@@ -60,31 +59,30 @@ const BreakdownTabsGen = (props: BreakdownTabsGenProps) => {
     return (
         <>
             <ErrorModal isOpen={isModalOpen} closeModal={closeModal} msg={modalMsg} />
-            <div className="container schedule-root" >
+            <Container className="schedule-root" maxWidth={false} >
             <div>
-                <div><h2>Schedule Breakdown Generation</h2></div>
+                <div><h2>{props.title}</h2></div>
             </div>
             <div className="schedule-breakdown">
                 <div {...getRootProps({className: dropzoneClassName})}>
                     <input {...getInputProps()} />
-                    {!generatingTabs && 
+                    {!generating && 
                         (isDragActive ?
                         <p>Drop the files here ...</p> :
                         <p>Drag 'n' drop some files here, or click to select files</p>)}
-                    {generatingTabs && (<>
+                    {generating && (<>
                         <h1>Generating...</h1>
-                        <ClipLoader loading={generatingTabs} color="#bdbdbd" />
+                        <ClipLoader loading={generating} color="#bdbdbd" />
                     </>)}
                 </div>
                 <div className="schedule-history">
-                    <FilesList docType={'BreakdownTabs'} loading={generatingTabs} openModal={openModal}/>
+                    <FilesList docType={props.docType} loading={generating} openModal={openModal}/>
                 </div>
             </div>
-        </div>
+        </Container>
         </>
-        
     );
 
 } 
 
-export default BreakdownTabsGen;
+export default RptGen;

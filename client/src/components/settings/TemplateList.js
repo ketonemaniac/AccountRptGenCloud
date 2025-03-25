@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import '@/styles/settings/TemplateList.scss';
-import { themeAlpine, ClientSideRowModelModule, EventApiModule, ModuleRegistry, provideGlobalGridOptions, AllCommunityModule } from 'ag-grid-community';
+import { themeBalham, ClientSideRowModelModule, EventApiModule, ModuleRegistry, provideGlobalGridOptions, AllCommunityModule } from 'ag-grid-community';
 import Endpoints from '@/api/Endpoints';
 import StarFillIcon from '@/assets/star-fill.svg'
 import { toast } from 'react-toastify';
@@ -74,9 +74,6 @@ const TemplateList = (props) => {
                 }));
     };
 
-    // Register all community features
-    ModuleRegistry.registerModules([AllCommunityModule, ClientSideRowModelModule, EventApiModule]);
-
     const columnDefs = [{sortable: true,
          filter: true,
          resizable: true,
@@ -118,11 +115,11 @@ const TemplateList = (props) => {
                     <Button className="template-excel-action-button" color="danger" 
                         onClick={handleDeleteTemplate}
                         disabled={selected.inUse === undefined || selected.inUse === null || selected.inUse} outline>Delete</Button>
-                    <div style={{ height: (rowData?.length + 1) * 50, width: '100%' }}>
+                    <div style={{ height: (rowData?.length + 1) * 35, width: '100%' }}>
                         <AgGridReact rowData={rowData} 
                                         onGridReady={onGridReady}
                                         onRowSelected={onSelectionChanged}
-                                        theme={themeAlpine}
+                                        theme={themeBalham}
                                         columnDefs={columnDefs}
                                         rowSelection={rowSelection}
                                         >                            

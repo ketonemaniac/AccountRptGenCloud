@@ -67,12 +67,10 @@ public class AccountRptTask implements Runnable {
     private String filename;
     private String cacheFilename;
     private AccountJob dto;
-    private Sinks.Many<ServerSentEvent<AccountJob>> sink;
 
-    public AccountRptTask(final AccountJob dto, final Sinks.Many<ServerSentEvent<AccountJob>> sink) {
-        this.cacheFilename = String.valueOf(dto.getFilename());
+    public AccountRptTask(final AccountJob dto) {
+        this.cacheFilename = dto.getClientRandInt() + dto.getFilename().substring(dto.getFilename().lastIndexOf("."));
         this.dto = dto;
-        this.sink = sink;
     }
 
     /**
@@ -81,7 +79,6 @@ public class AccountRptTask implements Runnable {
      */
     @Override
     public void run() {
-        sink.tryEmitNext(toSSE(dto.toBuilder().status(Constants.Status.GENERATING.name()).build()));
         String inputFileName = cacheFilename;
         log.info("Opening file: " + inputFileName);
         try {
@@ -141,8 +138,7 @@ public class AccountRptTask implements Runnable {
             dto.setFilename(filename + ".zip");
             dto.setStatus(Constants.Status.GENERATED.name());
             log.info("Updating statistics for " + filename);
-            sink.tryEmitNext(toSSE(dto));
-            statisticsService.updateTask(dto);
+             statisticsService.updateTask(dto);
             log.info("Operation complete for " + filename);
 
         } catch (Throwable e) {
@@ -151,13 +147,10 @@ public class AccountRptTask implements Runnable {
             dto.setStatus(Constants.Status.FAILED.name());
             try {
                 dto.setErrorMsg(e.getMessage());
-                sink.tryEmitNext(toSSE(dto));
                 statisticsService.updateTask(dto);
             } catch (Throwable e1) {
                 log.warn("History file write failed", e1);
             }
-        } finally {
-            sink.tryEmitComplete();
         }
     }
 

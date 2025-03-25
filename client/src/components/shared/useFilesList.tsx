@@ -4,12 +4,6 @@ import { CellStyleModule, ClientSideRowModelModule, ColDef, ICellRendererParams,
 import * as React from "react";
 import { Download } from '@mui/icons-material';
 
-ModuleRegistry.registerModules([
-    CellStyleModule,
-    ClientSideRowModelModule,
-    ValidationModule /* Development Only */,
-  ]);
-
 
 export const useFilesList = (openModal: (msg: string) => void) => {
 
@@ -36,16 +30,15 @@ export const useFilesList = (openModal: (msg: string) => void) => {
             width: 50,
             cellRenderer: (params: any) => (<a href={"/api/accrptgen/file?file=" + encodeURIComponent(params.value)} ><Download /></a>)
         },
-        { field: "company", sortable: true, filter: true },        
-        { field: "filename", sortable: true, filter: true },
+        { field: "company", sortable: true, filter: true, flex: 1 },        
+        { field: "period", sortable: true, filter: true },
+        { field: "filename", sortable: true, filter: true, flex: 1  },
         { field: "generationTime", sortable: true, filter: true },
         { field: "status", sortable: true, filter: true, 
             cellRenderer: CustomCellRenderer
         },
         { field: "referredBy", sortable: true, filter: true },
         { field: "submittedBy", sortable: true, filter: true },
-        { field: "period", sortable: true, filter: true },
-        { field: "docType", sortable: true, filter: true }
     ];
     
     return {

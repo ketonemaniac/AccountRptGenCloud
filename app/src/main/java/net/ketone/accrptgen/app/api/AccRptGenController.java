@@ -39,12 +39,6 @@ public class AccRptGenController {
     private StorageService tempStorage;
     @Autowired
     private StatisticsService statisticsService;
-    @Autowired
-    private TasksService tasksService;
-    @Autowired
-    private TaskSubmissionService taskSubmissionService;
-    @Autowired
-    private ClientRandIntChecker clientRandIntChecker;
 
     @GetMapping("/file")
     public ResponseEntity<Resource> downloadFile(@RequestParam("file") String fileName) throws IOException {
@@ -57,24 +51,6 @@ public class AccRptGenController {
                 "attachment; filename=\"" + fileName + "\"").body(resource);
     }
 
-//    @CrossOrigin
-    @PostMapping(path = "/file", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file,
-                                                              @RequestParam("seed") Integer clientRandInt,
-                                                              Principal principal) throws IOException {
-
-        log.info("USER IS {}, CLIENT RAND INT IS {}", UserUtils.getAuthenticatedUser(), clientRandInt);
-        if(clientRandIntChecker.checkDuplicate(clientRandInt)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate Request " + clientRandInt);
-        };
-        if(file.getOriginalFilename().lastIndexOf(".") == -1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file extension found");
-        }
-        return taskSubmissionService.triage(
-                    file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")),
-                    file.getBytes(),
-                    UserUtils.getUserFromPrincipal(principal), clientRandInt);
-    }
 
     @GetMapping("/taskList/{docType}")
     public List<AccountJob> listFiles(@PathVariable("docType") String docType) {

@@ -19,7 +19,7 @@ public class UserUtils {
                 .filter(User.class::isInstance)
                 .map(User.class::cast)
                 .map(User::getUsername)
-                .orElse("anonymous");
+                .orElse("Anonymous");
     }
 
     public static Optional<net.ketone.accrptgen.common.model.auth.User> getUserFromPrincipal(Principal principal) {

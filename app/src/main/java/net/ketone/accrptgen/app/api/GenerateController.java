@@ -3,7 +3,6 @@ package net.ketone.accrptgen.app.api;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.app.service.ClientRandIntChecker;
 import net.ketone.accrptgen.app.util.UserUtils;
-import net.ketone.accrptgen.common.constants.Constants;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.task.service.tasks.TaskSubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/api/v2/accrptgen")
 @Slf4j
-public class GenerateTabsController {
+public class GenerateController {
 
     @Autowired
     private TaskSubmissionService taskSubmissionService;
@@ -32,7 +31,7 @@ public class GenerateTabsController {
      * @param docType BreakdownTabs or GenerateAFS
      */
     @PostMapping(path = "/file/{docType}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public void generateTabs(@PathVariable String docType, @RequestParam("file") MultipartFile file,
+    public void generate(@PathVariable String docType, @RequestParam("file") MultipartFile file,
                                                               @RequestParam("seed") Integer clientRandInt,
                                                               Principal principal) throws Exception {
 

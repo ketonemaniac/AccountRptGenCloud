@@ -101,16 +101,13 @@ export default {
     uploadFile(file: any) {
         return post('/api/accrptgen/file', file)
     },
-    generate(accountJob: any) {
-        return post('/api/accrptgen/startGeneration', accountJob)
-    },
     downloadGeneratedZip(filename: any) {
         return download('/api/accrptgen/file', filename)
     },
     downloadTemplate(filename: any) {
         return download('/api/settings/file', filename)
     },
-    generateTabs(file: File, docType: string) {
+    generate(file: File, docType: string) {
         const randInt:number = Math.floor(Math.random() * 10000000);
         console.log("acceptedFile=" + file.name + " size=" + file.size);
         const data = new FormData()

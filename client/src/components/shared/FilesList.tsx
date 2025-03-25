@@ -16,7 +16,7 @@ const FilesList = (props: FilesListProps) => {
 
     React.useEffect(() => {
         getRowData(props.docType);
-    } ,[props.loading]);
+    } ,[props.loading, props.docType]);
 
     return (
         <>
