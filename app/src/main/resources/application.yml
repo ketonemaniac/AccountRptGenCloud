@@ -100,7 +100,8 @@ breakdown-tabs:
     - Section6
     - auditPrg
     - Version
-    - P1.*
+    - P1[a-z]+
+    - P1\..*
     - PTR.*
     - RPT
   mail:
