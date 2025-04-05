@@ -4,7 +4,6 @@ import com.google.common.collect.Streams;
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.constants.Constants;
-import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.common.mail.Attachment;
 import net.ketone.accrptgen.common.mail.EmailService;
@@ -46,10 +45,6 @@ public class GenerateTabTask {
     private BreakdownTabsProperties properties;
     @Autowired
     private EmailService emailService;
-    @Autowired
-    private SettingsService configurationService;
-    @Autowired
-    private StorageService persistentStorage;
     @Autowired
     private StatisticsService statisticsService;
 
@@ -160,62 +155,7 @@ public class GenerateTabTask {
         List<Attachment> attachments = List.of(new Attachment(accountJob.getFilename(), preParseOutput));
         emailService.sendEmail(accountJob, attachments, properties.getMail());
 
-        // zip files and store them just in case needed
-//        Map<String, byte[]> zipInput = attachments.stream()
-//                .collect(Collectors.toMap(Attachment::getAttachmentName, Attachment::getData));
         tempStorage.store(preParseOutput, accountJob.getFilename());
     }
 
-//    /**
-//     * TODO: remove
-//     */
-//    private void oldCloneSheetLogic(byte[] workbookArr) throws IOException {
-//        XSSFWorkbook workbook  =templateMergeProcessor.process(workbookArr, properties.getMerge());
-//        Set<String> sheets = new TreeSet<>(properties.getFixSheets());
-//
-//        // get the schedules which need to be cloned
-//        // unused logic: multiple schedules of the same category could exist.
-//        // e.g. "QI1", "QI2" all belong to "QI" (key) with List("QI1", "QI2") (value) to be cloned as
-//        // "QI1.1, QI1.2, QI1.3", "QI2.1, QI2.2, QI2.3"
-//        Map<String, List<String>> scheduleCategories = getScheduleSheetNames(workbook).stream()
-//                .filter(scheduleName -> !properties.getBanSheets().contains(scheduleName))
-//                .collect(Collectors.groupingBy(scheduleName -> {
-//                    var a = Pattern.compile("^([A-Z]+)").matcher(scheduleName);
-//                    return a.find() ? a.group() : scheduleName;
-//                }));
-//
-//        for (Map.Entry<String, List<String>> set : scheduleCategories.entrySet()) {
-//            // When it says like "QI1", sub-sheets also need to be cloned, like "QI1.1, QI1.2, QI1.3..... etc"
-//            // sheetsInCategory gives all sub-sheets in QI:
-//            List<Sheet> sheetsInCategory = Streams.stream(workbook.sheetIterator())
-//                    .filter(sheet -> !properties.getBanSheets().contains(sheet.getSheetName()))
-//                    .filter(sheet -> !properties.getFixSheets().contains(sheet.getSheetName()))
-//                    .filter(sheet -> {
-//                        var a = Pattern.compile("^([A-Z]+)").matcher(sheet.getSheetName());
-//                        return a.find() && a.group().equals(set.getKey());
-//                    })
-//                    .toList();
-//            for (int i = 2; i <= set.getValue().size(); i++) {
-//                final int sheetNum = i;
-//                // we need to clone extra sheets
-//                sheetsInCategory.forEach(sheet -> {
-//                    // see https://medium.com/stackera/java-regex-part-6-group-and-subgroup-2985dc2d42d4
-//                    // with 1 find(), group(0) is the implicit entire pattern, group (1+) are the explicit (bracketed) patterns
-//                    var namePattern = Pattern.compile("([A-Z]{1,})[0-9]*(.*)").matcher(sheet.getSheetName());
-//                    if(namePattern.find()) {
-//                        String newSheetName =
-//                                String.format("%s%d%s", namePattern.group(1), sheetNum, namePattern.group(2));
-//                        log.info("cloning sheet {} as {}", sheet.getSheetName(), newSheetName);
-//                        workbook.cloneSheet(workbook.getSheetIndex(sheet), newSheetName);
-//                        workbook.setSheetOrder(newSheetName, workbook.getSheetIndex(sheet.getSheetName()) + set.getValue().size());
-//                        sheets.add(newSheetName);
-//                    } else {
-//                        log.warn("sheet naming problem, not cloned: {}", sheet.getSheetName());
-//                    }
-//                });
-//            }
-//            sheets.addAll(sheetsInCategory.stream().map(Sheet::getSheetName).toList());
-//        }
-//        log.info("All sheets: {}", String.join(",", sheets));
-//    }
 }

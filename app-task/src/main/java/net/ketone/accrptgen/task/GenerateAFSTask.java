@@ -2,7 +2,6 @@ package net.ketone.accrptgen.task;
 
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.constants.Constants;
-import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.common.mail.Attachment;
 import net.ketone.accrptgen.common.mail.EmailService;
@@ -10,7 +9,6 @@ import net.ketone.accrptgen.common.model.AccountJob;
 import net.ketone.accrptgen.common.store.StorageService;
 import net.ketone.accrptgen.common.util.ExcelTaskUtils;
 import net.ketone.accrptgen.task.config.properties.GenerateAFSProperties;
-import net.ketone.accrptgen.task.gen.merge.TemplateMergeProcessor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +31,9 @@ public class GenerateAFSTask {
     @Autowired
     private StorageService tempStorage;
     @Autowired
-    private TemplateMergeProcessor templateMergeProcessor;
-    @Autowired
     private GenerateAFSProperties properties;
     @Autowired
     private EmailService emailService;
-    @Autowired
-    private SettingsService configurationService;
-    @Autowired
-    private StorageService persistentStorage;
     @Autowired
     private StatisticsService statisticsService;
 
@@ -64,19 +56,9 @@ public class GenerateAFSTask {
     }
 
     public void doRun(AccountJob accountJob, byte[] workbookArr) throws Exception {
-        boolean hasErrors = false;
         XSSFWorkbook workbook  = ExcelTaskUtils.openExcelWorkbook(workbookArr);
 
         List<String> auditSheets = ExcelTaskUtils.matchSheetsWithRegex(workbook, properties.getAuditSheets());
-
-        //- Clear all formulas. Only recalculate visible sheets
-        try {
-            ExcelTaskUtils.evaluateSheets("GenerateAFSTask", workbook, null,
-                    auditSheets::contains, true);
-        } catch (RuntimeException e) {
-            hasErrors = true;
-            accountJob.setErrorMsg(e.getMessage());
-        }
 
         //- Only leave the 2nd gen tabs
         for(String auditSheetName : auditSheets) {
@@ -99,7 +81,7 @@ public class GenerateAFSTask {
         emailService.sendEmail(accountJob, attachments, properties.getMail().toBuilder().subjectPrefix("AFS Sheets Generation").build());
 
         tempStorage.store(preParseOutput, accountJob.getFilename());
-        accountJob.setStatus(hasErrors ? Constants.Status.GENERATED_WITH_ERRORS.name() : Constants.Status.GENERATED.name());
+        accountJob.setStatus(Constants.Status.GENERATED.name());
     }
 
 }
