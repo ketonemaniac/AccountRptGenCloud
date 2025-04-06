@@ -102,7 +102,7 @@ public class TaskSubmissionService {
     private AccountJob accountJobForBreakdownAndAFS(AccountJob.AccountJobBuilder accountJobBuilder, XSSFWorkbook workbook,
                                                     BiFunction<String, String, String> fileNameFn) throws IOException {
         String company = ExcelCellUtils.extractByTitleCellName(workbook, "Content", "Company Name", 1);
-        String period = ExcelCellUtils.extractByTitleCellName(workbook, "Content", "Current Year/ period", 1).substring(0, 6);
+        String period = ExcelCellUtils.extractByTitleCellName(workbook, "Content", "Current Year/ period", 3).substring(0, 6);
         AccountJob accountJob = accountJobBuilder.filename(fileNameFn.apply(company, period))
                 .company(company)
                 .period(period)
