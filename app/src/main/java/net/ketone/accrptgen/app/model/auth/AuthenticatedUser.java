@@ -1,6 +1,7 @@
-package net.ketone.accrptgen.common.model.auth;
+package net.ketone.accrptgen.app.model.auth;
 
 import lombok.Getter;
+import net.ketone.accrptgen.common.model.auth.User;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;

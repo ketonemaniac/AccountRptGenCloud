@@ -2,6 +2,7 @@ package net.ketone.accrptgen.app.api;
 
 import net.ketone.accrptgen.common.model.auth.User;
 import net.ketone.accrptgen.common.domain.user.UserService;
+import net.ketone.accrptgen.common.mail.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +16,25 @@ public class UserAdminController {
     @Autowired
     private UserService userService;
     @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private EmailService emailService;
+
+    // @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping("password/reset")
     public Mono<User> resetPassword(@RequestBody User user) throws Exception {
-        return userService.resetPassword(user);
-    }
+        return userService.resetPassword(user)
+                .doOnNext(u -> {
+                    try {
+                        emailService.sendResetPasswordEmail(u);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }})
+                .map(u -> {
+                    u.setPassword(null);
+                    return u;
+                });
+    };
 
     @PutMapping
     public Mono<User> updateUser(@RequestBody User updatedUser) {

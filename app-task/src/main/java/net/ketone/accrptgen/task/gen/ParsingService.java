@@ -8,7 +8,7 @@ import net.ketone.accrptgen.task.config.properties.ParseProperties;
 import net.ketone.accrptgen.task.gen.generate.BannerService;
 import net.ketone.accrptgen.common.util.ExcelTaskUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -36,32 +36,12 @@ public class ParsingService {
     }
 
     private void removeColors(Cell cell) {
-        if(cell.getCellStyle() != null && cell.getCellStyle().getFillPatternEnum() != FillPatternType.NO_FILL) {
+        if(cell.getCellStyle() != null && cell.getCellStyle().getFillPattern() != FillPatternType.NO_FILL) {
             cell.getCellStyle().setFillPattern(FillPatternType.NO_FILL);
             cell.getCellStyle().setFillForegroundColor(IndexedColors.AUTOMATIC.getIndex());
         }
     }
 
-
-    public XSSFWorkbook deleteSheets(XSSFWorkbook wb, List<String> sheetsToDelete) {
-        for(String sheetName : sheetsToDelete) {
-            int i = wb.getSheetIndex(sheetName);
-            if(i != -1) {   // -1 = not exist
-                wb.removeSheetAt(i);
-            }
-        }
-        return wb;
-    }
-
-    public XSSFWorkbook retainSheets(XSSFWorkbook wb, List<String> sheetsToRetain) {
-        List<String> sheetsToDelete = new ArrayList<>();
-        wb.sheetIterator().forEachRemaining(sheet -> {
-            if(!sheetsToRetain.contains(sheet.getSheetName())) {
-                sheetsToDelete.add(sheet.getSheetName());
-            }
-        });
-        return deleteSheets(wb, sheetsToDelete);
-    }
 
     public XSSFWorkbook cutCells(final XSSFWorkbook wb, Map<String, String> cutCellsMap) {
         wb.sheetIterator().forEachRemaining(sheet -> {

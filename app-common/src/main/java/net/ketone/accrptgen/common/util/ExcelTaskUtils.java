@@ -14,13 +14,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 public class ExcelTaskUtils {
@@ -38,29 +40,42 @@ public class ExcelTaskUtils {
     }
 
 
-    public static void evaluateAll(final String stage, XSSFWorkbook templateWb) {
-        evaluateAll(stage, templateWb, null);
+    public static void evaluateAll(final String stage, XSSFWorkbook templateWb, final boolean isDefaultKeepFormula) {
+        evaluateAll(stage, templateWb, null, isDefaultKeepFormula);
     }
 
     public static Flux<Cell> loopingEveryCell(final String location, XSSFWorkbook templateWb, Consumer<Cell> cellAction) {
+        return loopingCells(location, templateWb, cellAction, (ignore) -> true);
+    }
+
+    public static Flux<Cell> loopingCells(final String location, XSSFWorkbook templateWb, Consumer<Cell> cellAction,
+                                          final Function<String, Boolean> sheetFilter) {
         return Flux.fromIterable(IteratorUtils.toList(templateWb.sheetIterator()))
+                .filter(sheet -> sheetFilter.apply(sheet.getSheetName()))
                 .doOnNext(sheet -> log.info("{} in sheet={}", location, sheet.getSheetName()))
                 .concatMap(sheet -> Flux.fromIterable(IteratorUtils.toList(sheet.rowIterator())))
                 .concatMap(row -> Flux.fromIterable(IteratorUtils.toList(row.cellIterator())))
                 .doOnNext(cellAction);
     }
 
-
     /**
      * Loops and calculates/replaces formula contents with evaluated value, depending on whether the keepFormulaColor is matched
      * @see https://poi.apache.org/apidocs/3.17/org/apache/poi/ss/usermodel/FormulaEvaluator.html#evaluateInCell(org.apache.poi.ss.usermodel.Cell)
+     * If you want the cell replaced with the result of the formula, use evaluateInCell(Cell)
      * @param templateWb
      */
-    public static void evaluateAll(final String stage, XSSFWorkbook templateWb, final String keepFormulaColor) {
+    public static void evaluateAll(final String stage, XSSFWorkbook templateWb, final String keepFormulaColor,
+                                   final boolean isDefaultKeepFormula) {
+        evaluateSheets(stage, templateWb, keepFormulaColor, (ignore) -> true, isDefaultKeepFormula);
+    }
+
+    public static void evaluateSheets(final String stage, XSSFWorkbook templateWb, final String keepFormulaColor,
+                                      final Function<String, Boolean> sheetFilter, final boolean isDefaultKeepFormula) {
         FormulaEvaluator evaluator = templateWb.getCreationHelper().createFormulaEvaluator();
         evaluator.clearAllCachedResultValues();
         List<EvaluationException> exceptions = new ArrayList<>();
-        loopingEveryCell(stage, templateWb, cell -> {
+        loopingCells(stage, templateWb, cell -> {
+            if(cell.getCellType() != CellType.FORMULA) return;      // no need to evaluate non-formula cells
             CellType evaluationResult;
             if (Optional.ofNullable(cell.getCellStyle())
                     .map(CellStyle::getFillForegroundColorColor)
@@ -69,20 +84,29 @@ public class ExcelTaskUtils {
                     .map(hex -> hex.substring(2))
                     .flatMap(color -> Optional.ofNullable(keepFormulaColor)
                             .map(color::equalsIgnoreCase))
-                    .orElse(Boolean.FALSE)) {
-                evaluationResult = evaluator.evaluateFormulaCellEnum(cell);
+                    .orElse(isDefaultKeepFormula)) {
+                // The type of the formula result, i.e. -1 if the cell is not a formula, or one of CellType.NUMERIC, CellType.STRING, CellType.BOOLEAN, CellType.ERROR
+                // Note: the cell's type remains as CellType.FORMULA however
+                evaluationResult = Try.ofSupplier(() -> evaluator.evaluateFormulaCell(cell))
+                        .onFailure(err -> log.error(err.toString()))
+                        .getOrElse(CellType.ERROR);
             } else {
-                evaluationResult = evaluator.evaluateInCell(cell).getCellTypeEnum();
+                // If cell contains formula, it evaluates the formula, and puts the formula result back into the cell, in place of the old formula.
+                // Be aware that your cell value will be changed to hold the result of the formula.
+                evaluationResult = Try.ofSupplier(() -> evaluator.evaluateInCell(cell).getCellType())
+                        .onFailure(err -> log.error(err.toString()))
+                        .getOrElse(CellType.ERROR);
+
             };
             if (evaluationResult.equals(CellType.ERROR)) {
                 exceptions.add(new EvaluationException(stage, cell));
             }
-        })
+        }, sheetFilter)
                 .blockLast();
         if(!exceptions.isEmpty()) {
-             throw new RuntimeException(String.format("%s %s",
-                     "Cannot evaluate cells: ",
-                     exceptions.stream().map(EvaluationException::getLocation).collect(Collectors.joining(", "))));
+            throw new RuntimeException(String.format("%s %s",
+                    "Cannot evaluate cells: ",
+                    exceptions.stream().map(EvaluationException::getLocation).collect(Collectors.joining(", "))));
         }
     }
 
@@ -111,7 +135,7 @@ public class ExcelTaskUtils {
      */
     public static void insertImage(final Workbook workbook, final String sheetName,
                                    final CellReference position,
-                            final byte[] rawPng, final Tuple2<Double, Double> sizeCellSpan) {
+                                   final byte[] rawPng, final Tuple2<Double, Double> sizeCellSpan) {
         int pictureIdx = workbook.addPicture(rawPng, Workbook.PICTURE_TYPE_PNG);
         Sheet sheet = workbook.getSheet(sheetName);
         CreationHelper helper = workbook.getCreationHelper();
@@ -122,4 +146,56 @@ public class ExcelTaskUtils {
         Picture picture = drawing.createPicture(anchor, pictureIdx);
         picture.resize(sizeCellSpan._1,sizeCellSpan._2);
     }
+
+    public static byte[] saveExcelToBytes(XSSFWorkbook wbToSave) throws IOException {
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
+            log.debug("writing template. os.size()=" + os.size());
+            wbToSave.write(os);
+            log.info("creating byte[] from template. os.size()=" + os.size());
+            byte[] result = os.toByteArray();
+            log.debug("closing template");
+            return result;
+        } finally {
+            wbToSave.close();
+        }
+    }
+
+    public static boolean matchRegexs(String name, List<String> regexs) {
+        for(String auditSheetName : regexs) {
+            var a = Pattern.compile(auditSheetName).matcher(name);
+            if(a.find()) return true;
+        }
+        return false;
+    }
+
+    public static List<String> matchSheetsWithRegex(XSSFWorkbook workbook, List<String> regexs) {
+        return StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(workbook.sheetIterator(), Spliterator.ORDERED),
+                false)
+                .filter(sheet -> matchRegexs(sheet.getSheetName(), regexs))
+                .map(Sheet::getSheetName)
+                .toList();
+    }
+
+    public static XSSFWorkbook deleteSheets(XSSFWorkbook wb, List<String> sheetsToDelete) {
+        for(String sheetName : sheetsToDelete) {
+            int i = wb.getSheetIndex(sheetName);
+            if(i != -1) {   // -1 = not exist
+                wb.removeSheetAt(i);
+            }
+        }
+        return wb;
+    }
+
+    public static XSSFWorkbook retainSheets(XSSFWorkbook wb, List<String> sheetsToRetain) {
+        List<String> sheetsToDelete = new ArrayList<>();
+        wb.sheetIterator().forEachRemaining(sheet -> {
+            if(!sheetsToRetain.contains(sheet.getSheetName())) {
+                sheetsToDelete.add(sheet.getSheetName());
+            }
+        });
+        return deleteSheets(wb, sheetsToDelete);
+    }
+
 }

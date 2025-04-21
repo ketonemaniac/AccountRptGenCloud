@@ -4,18 +4,16 @@ import io.vavr.Tuple;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.credentials.SettingsService;
 import net.ketone.accrptgen.common.store.StorageService;
-import net.ketone.accrptgen.common.util.ExcelUtils;
+import net.ketone.accrptgen.common.util.ExcelCellUtils;
 import net.ketone.accrptgen.task.gen.model.AuditProgrammeMapping;
 import net.ketone.accrptgen.common.util.ExcelTaskUtils;
-import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -30,10 +28,8 @@ public class AuditProgrammeProcessor {
     @Autowired
     private StorageService persistentStorage;
 
-    public byte[] process(final List<AuditProgrammeMapping> mappingList, byte[] preParseOutput) throws IOException {
+    public XSSFWorkbook process(final List<AuditProgrammeMapping> mappingList, XSSFWorkbook allDocs) throws IOException {
 
-        XSSFWorkbook allDocs = new XSSFWorkbook(new ByteArrayInputStream(preParseOutput));
-        
         String auditPrgTemplateName = configurationService.getSettings().getProperty(
                 SettingsService.PREPARSE_AUIDTPRG_TEMPLATE_PROP);
         log.info("starting fetch audit programme template " + auditPrgTemplateName);
@@ -47,7 +43,7 @@ public class AuditProgrammeProcessor {
                             CellReference cr = new CellReference(mappingCell.getCell());
                             Cell c = allDocs.getSheet(mappingCell.getSheet()).getRow(cr.getRow())
                                     .getCell(cr.getCol());
-                            return ExcelUtils.getCellValue(c);
+                            return ExcelCellUtils.getCellValue(c);
                         }).get(), mapping.getDestCell()))
                 .doOnNext(tuple2 -> {
                     CellReference cr = new CellReference(tuple2._2.getCell());
@@ -63,17 +59,7 @@ public class AuditProgrammeProcessor {
                     }
                 }).blockLast();
 
-        log.debug("start refreshing auditPrgTemplateWb");
-        ExcelTaskUtils.evaluateAll("AuditProgrammeProcessor", auditPrgTemplateWb);
-        log.info("auditPrgTemplateWb refreshed. Writing to stream");
-        ByteArrayOutputStream os = new ByteArrayOutputStream(1000000);
-        log.debug("writing template. os.size()=" + os.size());
-        auditPrgTemplateWb.write(os);
-        byte [] result = os.toByteArray();
-        log.debug("closing template");
-        auditPrgTemplateWb.close();
-
-        return result;
+        return auditPrgTemplateWb;
     }
 
 }

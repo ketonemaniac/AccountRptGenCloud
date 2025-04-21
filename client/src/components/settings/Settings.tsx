@@ -1,24 +1,34 @@
+import * as React from 'react';
 import { Container ,Button, Form, FormGroup, Label, Input, Row, Col } from 'reactstrap';
-import Endpoints from '../../api/Endpoints.js';
+import Endpoints from '@/api/Endpoints';
 import { toast } from 'react-toastify';
 import TemplateList from './TemplateList.js'
-import React, { useState, useEffect } from 'react';
-import '../../styles/settings/Settings.scss';
+import { useState, useEffect } from 'react';
+import FileList from '@/domain/settings/FileList';
+import '@/styles/settings/Settings.scss';
 
-const Settings = (props) => {
+interface SettingFile {
+    filename: string;
+    inUse: boolean;
+}
+
+
+const Settings = (props: any) => {
 
     const [mailString, setMailString] = useState("default");
-    const [allDocsData, setAllDocsData] = useState([]);
-    const [auditPrgData, setAuditPrgData] = useState([]);
-    const [dBizFundingData, setDBizFundingData] = useState([]);
+    const [allDocsData, setAllDocsData] = useState<SettingFile[]>([]);
+    const [auditPrgData, setAuditPrgData] = useState<SettingFile[]>([]);
+    const [dBizFundingData, setDBizFundingData] = useState<SettingFile[]>([]);
+    const [breakdownTabsData, setBreakdownTabsData] = useState<SettingFile[]>([]);
 
     async function init() {
-        const resp = await Endpoints.getFileList()
+        const resp: FileList = await Endpoints.getFileList()
         const configs = await Endpoints.getAllSettings()
 
-        setAllDocsData(resp.allDocs.map(filename => ({"filename" : filename, "inUse" : filename == configs.allDocs})))
-        setAuditPrgData(resp.auditPrg.map(filename => ({"filename" : filename, "inUse" : filename == configs.auditPrg})))
-        setDBizFundingData(resp?.dBizFunding?.map(filename => ({"filename" : filename, "inUse" : filename == configs?.dBizFunding})))
+        setAllDocsData(resp.allDocs.map(filename => ({filename: filename, inUse: filename == configs.allDocs})))
+        setAuditPrgData(resp.auditPrg.map(filename => ({filename : filename, inUse : filename == configs.auditPrg})))
+        setDBizFundingData(resp.dBizFunding.map(filename => ({filename: filename, inUse : filename == configs?.dBizFunding})))
+        setBreakdownTabsData(resp?.breakdownTabs?.map(filename => ({filename : filename, inUse : filename == configs?.breakdownTabs})))
         setMailString(configs.sendTo)
     }
 
@@ -26,11 +36,11 @@ const Settings = (props) => {
         init();    
     }, [])
 
-    const handleMailStringChange = (event) => {
+    const handleMailStringChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setMailString(event.target.value);
     }
 
-    const submitMailChange = (event) => {
+    const submitMailChange = (event: React.MouseEvent<HTMLButtonElement>) => {
         if(mailString == null) {
             toast.error("Mailing string has not been changed")
             return;
@@ -54,7 +64,8 @@ const Settings = (props) => {
                         <Input type="text" name="text" id="mailingList" value={mailString} onChange={handleMailStringChange} />
                     </FormGroup>
                     <Button color="primary" onClick={submitMailChange}>Update</Button>
-                </Form>             
+                </Form>  
+                <TemplateList rowData={breakdownTabsData} init={init} fileType={"breakdownTabs"} title={"Breakdown Tabs Excel"}/>
                 <TemplateList rowData={allDocsData} init={init} fileType={"allDocs"} title={"Template Excel"}/>
                 <TemplateList rowData={auditPrgData} init={init} fileType={"auditPrg"} title={"Audit Programme Excel"}/>
                 <TemplateList rowData={dBizFundingData} init={init} fileType={"dBizFunding"} title={"Funding Excel"}/>

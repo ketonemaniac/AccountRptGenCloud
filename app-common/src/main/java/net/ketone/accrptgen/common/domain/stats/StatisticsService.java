@@ -8,7 +8,7 @@ import java.util.Map;
 
 public interface StatisticsService {
 
-    List<AccountJob> getRecentTasks(String authenticatedUser);
+    List<AccountJob> getRecentTasks(String authenticatedUser, String docType);
 
     /**
      *

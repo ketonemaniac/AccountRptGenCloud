@@ -4,6 +4,9 @@ metadata:
   name: acctrptgen
 spec:
   template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: 1
     spec:
       containers:
         - image: asia-east1-docker.pkg.dev/accountrptgen-hk/accountrptgen/app:latest
@@ -15,3 +18,4 @@ spec:
           resources:
             limits:
               memory: 1G
+              cpu: 2

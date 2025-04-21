@@ -15,7 +15,8 @@ public class DefaultProcessor implements CellTypeProcessor {
 
     @Override
     public void visit(final CellInfo sourceCell, final CellInfo targetCell) {
-        log.info("TYPE:" + sourceCell.getCell().getCellTypeEnum().name());
+        log.info("TYPE:" + sourceCell.getCell().getCellType().name());
+        targetCell.getCell().setBlank();
     }
 
 }

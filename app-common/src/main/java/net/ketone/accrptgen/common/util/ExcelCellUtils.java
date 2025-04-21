@@ -4,7 +4,7 @@ import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.common.model.CellValueHolder;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -19,11 +19,11 @@ import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 @Slf4j
-public class ExcelUtils {
+public class ExcelCellUtils {
 
     private static final String MISSING_INFO = "Please provide data(Col %s) with title(Col A) '%s' of sheet '%s'";
 
-    private static final String colStrMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public static final String colStrMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     public static String extractByTitleCellName(final XSSFWorkbook workbook, final String sheetName,
                                                     final String titleCellName, final int dataColumn) {
@@ -49,7 +49,7 @@ public class ExcelUtils {
         return Optional.ofNullable(workbook.getSheet(sheetName))
                 .map(sheet -> sheet.getRow(cr.getRow()))
                 .map(row -> row.getCell(cr.getCol()))
-                .map(ExcelUtils::getCellValue)
+                .map(ExcelCellUtils::getCellValue)
                 .map(cell -> {
                     switch (cell.getCellType()) {
                         case DATE:
@@ -68,7 +68,7 @@ public class ExcelUtils {
     public static CellValueHolder getCellValue(Cell c) {
         String dataFormatStr = Optional.ofNullable(c.getCellStyle()).map(CellStyle::getDataFormatString)
                 .orElse(StringUtils.EMPTY);
-        if(CellType.NUMERIC.equals(c.getCellTypeEnum()) &&
+        if(CellType.NUMERIC.equals(c.getCellType()) &&
                 dataFormatStr.contains("y") && dataFormatStr.contains("m") && dataFormatStr.contains("d")) {
             // this should be a date type
             return CellValueHolder.builder()

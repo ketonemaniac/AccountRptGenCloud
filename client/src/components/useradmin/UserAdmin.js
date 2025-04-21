@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Table, Container ,Button, Row, Col } from 'reactstrap';
-import Endpoints from '../../api/Endpoints.js';
+import Endpoints from '@/api/Endpoints';
 import UserEditModal from './UserEditModal.js'
 import UserDeleteModal from './UserDeleteModal.js'
 import PasswordResetModal from './PasswordResetModal.js'

@@ -2,12 +2,12 @@ package net.ketone.accrptgen.app.api;
 
 import lombok.extern.slf4j.Slf4j;
 import net.ketone.accrptgen.app.service.ClientRandIntChecker;
-import net.ketone.accrptgen.app.service.tasks.TaskSubmissionService;
-import net.ketone.accrptgen.app.service.tasks.TasksService;
+import net.ketone.accrptgen.task.service.tasks.TaskSubmissionService;
+import net.ketone.accrptgen.task.service.tasks.TasksService;
 import net.ketone.accrptgen.app.util.UserUtils;
 import net.ketone.accrptgen.common.domain.stats.StatisticsService;
 import net.ketone.accrptgen.common.model.AccountJob;
-import net.ketone.accrptgen.common.model.auth.AuthenticatedUser;
+import net.ketone.accrptgen.app.model.auth.AuthenticatedUser;
 import net.ketone.accrptgen.common.model.auth.User;
 import net.ketone.accrptgen.common.store.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +39,6 @@ public class AccRptGenController {
     private StorageService tempStorage;
     @Autowired
     private StatisticsService statisticsService;
-    @Autowired
-    private TasksService tasksService;
-    @Autowired
-    private TaskSubmissionService taskSubmissionService;
-    @Autowired
-    private ClientRandIntChecker clientRandIntChecker;
 
     @GetMapping("/file")
     public ResponseEntity<Resource> downloadFile(@RequestParam("file") String fileName) throws IOException {
@@ -57,34 +51,10 @@ public class AccRptGenController {
                 "attachment; filename=\"" + fileName + "\"").body(resource);
     }
 
-//    @CrossOrigin
-    @PostMapping(path = "/file", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<AccountJob>> handleFileUpload(@RequestParam("file") MultipartFile file,
-                                                              @RequestParam("seed") Integer clientRandInt,
-                                                              Principal principal) throws IOException {
 
-        Optional<User> optionalUser = Optional.ofNullable(principal)
-                .map(UsernamePasswordAuthenticationToken.class::cast)
-                .map(UsernamePasswordAuthenticationToken::getPrincipal)
-                .filter(AuthenticatedUser.class::isInstance)
-                .map(AuthenticatedUser.class::cast)
-                .map(AuthenticatedUser::getUser);
-        log.info("USER IS {}, CLIENT RAND INT IS {}", UserUtils.getAuthenticatedUser(), clientRandInt);
-        if(clientRandIntChecker.checkDuplicate(clientRandInt)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate Request " + clientRandInt);
-        };
-        if(file.getOriginalFilename().lastIndexOf(".") == -1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file extension found");
-        }
-        return taskSubmissionService.triage(
-                    file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")),
-                    file.getBytes(),
-                    optionalUser, clientRandInt);
-    }
-
-    @GetMapping("/taskList")
-    public List<AccountJob> listFiles() {
-        return statisticsService.getRecentTasks(UserUtils.getAuthenticatedUser());
+    @GetMapping("/taskList/{docType}")
+    public List<AccountJob> listFiles(@PathVariable("docType") String docType) {
+        return statisticsService.getRecentTasks(UserUtils.getAuthenticatedUser(), docType);
     }
 
 }

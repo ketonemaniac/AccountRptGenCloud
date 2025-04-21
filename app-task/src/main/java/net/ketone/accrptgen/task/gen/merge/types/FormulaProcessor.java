@@ -29,14 +29,14 @@ public class FormulaProcessor implements CellTypeProcessor {
         // templateCell.setCellFormula(cell.getCellFormula());
         try {
             CellValue cellValue = sourceCell.getEvaluator().evaluate(sourceCell.getCell());
-            switch(cellValue.getCellTypeEnum()) {
+            switch(cellValue.getCellType()) {
                 case NUMERIC:
                     targetCell.getCell().setCellType(CellType.NUMERIC);
                     targetCell.getCell().setCellValue(cellValue.getNumberValue());
                     mergeUtils.setNumericCellStyle(targetCell.getWorkbook(), targetCell.getCell(),
                             sourceCell.getCell().getCellStyle());
                     log.info("input cell with formula: " + sourceCell.getCell().getCellFormula() + " is now: "
-                            + targetCell.getCell().getNumericCellValue() + " of type " + cellValue.getCellTypeEnum().name());
+                            + targetCell.getCell().getNumericCellValue() + " of type " + cellValue.getCellType().name());
                     targetCell.getCell().setCellFormula(null);
                     break;
                 default:
@@ -48,7 +48,7 @@ public class FormulaProcessor implements CellTypeProcessor {
                         targetCell.getCell().setCellFormula(null);
                 break;
             }
-            if(CellType.ERROR.equals(cellValue.getCellTypeEnum())) {
+            if(CellType.ERROR.equals(cellValue.getCellType())) {
                 throw new RuntimeException();
             }
         } catch (Exception err) {

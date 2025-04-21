@@ -19,6 +19,19 @@ Submitting locally but running the task in App Engine
 * VM options: `-Dspring.profiles.active=staging,gCloudStandard`
 * Put in Environment variable GOOGLE_APPLICATION_CREDENTIALS for access to different buckets
 
+## Build ##
+
+### Github Build ###
+.github/workflows/maven.yml
+https://github.com/ketonemaniac/AccountRptGenCloud/actions/runs
+
+### Cloud Build ###
+`cloud-build/staging/cloudbuild.yaml`, which points to `Dockerfile`
+
+
+
+
+
 ## Deploy ##
 * set project: `gcloud config set project accountrptgen-hk-test`
 * Run `mvn validate appengine:deploy -Dapp.stage.appEngineDirectory=src/main/appengine/staging` in app folder

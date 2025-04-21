@@ -1,11 +1,11 @@
-FROM node:14.10.1-buster-slim AS npmBuild
+FROM node:20-buster-slim AS npmBuild
 COPY client /client
 WORKDIR /client
 RUN npm --version
 RUN npm install
 RUN npm run build
 
-FROM maven:3.8.1-jdk-11-slim AS build
+FROM maven:3.9.9-amazoncorretto-21 AS build
 COPY pom.xml .
 COPY app /app/
 COPY app-common/ /app-common/
@@ -17,7 +17,7 @@ COPY --from=npmBuild client/assembly.xml /client/assembly.xml
 # skip exec stage -- do not call npm build again in client since node is not available here.
 RUN mvn -e -X -Dexec.skip clean package
 
-FROM amazoncorretto:11.0.18
+FROM amazoncorretto:21.0.5-al2023-headless
 COPY --from=build app/target/accrptgen.jar accrptgen.jar
 EXPOSE 8080
 # $0, or ${0}, is the name of the script being executed

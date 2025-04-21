@@ -53,33 +53,31 @@ public class ExcelExtractTask implements Runnable {
     private static List<String> CONTROL_SHEETS = Arrays.asList("metadata", "Control");
 
     private AccountJob job;
-    private Sinks.Many<ServerSentEvent<AccountJob>> sink;
 
-    public ExcelExtractTask(final AccountJob job, final Sinks.Many<ServerSentEvent<AccountJob>> sink) {
+    public ExcelExtractTask(final AccountJob job) {
         this.job = job;
-        this.sink = sink;
     }
 
     @Override
     public void run() {
-        sink.tryEmitNext(toSSE(job.toBuilder().status(Constants.Status.GENERATING.name()).build()));
-        String inputFileName = job.getFilename();
+         String inputFileName = job.getClientRandInt() + job.getFilename().substring(job.getFilename().lastIndexOf("."));
         log.info("Opening file: " + inputFileName);
         String outputFilename = FileUtils.uniqueFilename(job.getCompany(), job.getGenerationTime());
         String fileExtension = inputFileName.substring(inputFileName.lastIndexOf("."));
         try {
             byte[] workbookArr = tempStorage.load(inputFileName);
             properties.getMerge().setPreParseSheets(sheets(workbookArr));
-            byte[] preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
+            XSSFWorkbook preParseOutput = templateMergeProcessor.process(workbookArr, properties.getMerge());
+            log.debug("start refreshing preParseOutput");
+            ExcelTaskUtils.evaluateAll("TemplateMergeProcessor", preParseOutput, properties.getMerge().getKeepFormulaColor(), false);
 
             // parse and stringify contents
-            XSSFWorkbook stringifiedWorkbook = parsingService.postProcess(
-                    ExcelTaskUtils.openExcelWorkbook(preParseOutput), properties.getParse());
+            XSSFWorkbook stringifiedWorkbook = parsingService.postProcess(preParseOutput, properties.getParse());
 
             Map<String, String> cutColumnsMap = extractCutColumns(stringifiedWorkbook);
 
             // remove sheets according to cutColumnsMap
-            XSSFWorkbook finalOutput = parsingService.retainSheets(stringifiedWorkbook,
+            XSSFWorkbook finalOutput = ExcelTaskUtils.retainSheets(stringifiedWorkbook,
                                                     new ArrayList<>(cutColumnsMap.keySet()));
 
             // cut cells according to cutColumnsMap
@@ -100,10 +98,9 @@ public class ExcelExtractTask implements Runnable {
             // store them in temp storage
             tempStorage.store(os.toByteArray(), outputFilename + fileExtension);
 
-            job.setStatus(Constants.Status.EMAIL_SENT.name());
+            job.setStatus(Constants.Status.GENERATED.name());
             job.setFilename(outputFilename + fileExtension);
-            sink.tryEmitNext(toSSE(job));
-            statisticsService.updateTask(job);
+           statisticsService.updateTask(job);
             log.info("Operation complete");
 
         } catch (Exception e) {
@@ -112,13 +109,10 @@ public class ExcelExtractTask implements Runnable {
             job.setStatus(Constants.Status.FAILED.name());
             try {
                 job.setErrorMsg(e.getMessage());
-                sink.tryEmitNext(toSSE(job));
                 statisticsService.updateTask(job);
             } catch (Throwable e1) {
                 log.warn("History file write failed", e1);
             }
-        } finally {
-            sink.tryEmitComplete();
         }
     }
 

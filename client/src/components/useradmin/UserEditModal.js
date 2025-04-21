@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Modal, ModalBody, ModalHeader, Form, FormGroup, Label, Input, Button, Alert } from 'reactstrap';
-import Endpoints from '../../api/Endpoints.js';
+import Endpoints from '@/api/Endpoints';
 import { toast } from 'react-toastify';
 
 class UserEditModal extends Component {
@@ -95,7 +95,7 @@ class UserEditModal extends Component {
                         </FormGroup>
                         <FormGroup className="mx-5">
                             <Label for="email">Email</Label>
-                            <Input type="email" name="email" id="email" type="email"
+                            <Input type="email" name="email" id="email"
                                 defaultValue={this.props.isEdit ? 
                                   this.props.selectedUser?.email : ""} required />
                             <div className="invalid-feedback">
@@ -112,7 +112,7 @@ class UserEditModal extends Component {
                                     defaultValue={element}
                                     required                             
                                   />
-                                  <Button outline outline onClick={() => this.delCc(index)}>-</Button> 
+                                  <Button outline onClick={() => this.delCc(index)}>-</Button> 
                                 </div>                                
                           ))}
                           <div className="d-flex justify-content-end">

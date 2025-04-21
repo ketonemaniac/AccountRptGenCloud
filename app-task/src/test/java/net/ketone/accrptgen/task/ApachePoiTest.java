@@ -3,6 +3,7 @@ package net.ketone.accrptgen.task;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.assertj.core.api.Assertions;
@@ -77,6 +78,18 @@ public class ApachePoiTest {
             output = myFormatter.format(tgt.getNumericCellValue());
         }
         Assertions.assertThat(output).isEqualTo("20%");
+    }
+
+    @Test
+    public void testHideSheet() throws IOException {
+        InputStream inputStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("hideSheet.xlsm");
+        XSSFWorkbook wb = new XSSFWorkbook(inputStream);
+        wb.setSheetVisibility(wb.getSheetIndex("Sheet2"), SheetVisibility.VISIBLE);
+        wb.setSheetVisibility(wb.getSheetIndex("Sheet3"), SheetVisibility.VERY_HIDDEN);
+        // check using Excel
+        FileOutputStream os = new FileOutputStream("target/hideSheet-out.xlsm");
+        wb.write(os);
     }
 
 }

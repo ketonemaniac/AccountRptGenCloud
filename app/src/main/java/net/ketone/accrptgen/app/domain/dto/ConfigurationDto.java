@@ -17,6 +17,8 @@ public class ConfigurationDto {
     @JsonProperty("dBizFunding")
     private String dBizFunding;
 
+    private String breakdownTabs;
+
     private List<String> sendTo;
 
     private List<AuditorDto> auditors;

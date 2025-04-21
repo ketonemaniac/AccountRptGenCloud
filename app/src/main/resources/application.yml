@@ -63,6 +63,69 @@ excel-extract:
     merge-cell-colors:
       - 5B9BD5
     keep-formula-color: 92D050
+breakdown-tabs:
+  merge:
+    template-path: breakdownTabs
+    template-file-property: xlsx.template.breakdownTabs.name
+    pre-parse-sheets:
+      - Control
+      - B6.1
+      - B6.2
+      - Content
+    merge-cell-colors:
+      - 4F81BD
+  fix-sheets:
+    - Content
+    - B6\.1
+    - B6\.2
+    - B
+    - C7
+    - C7\.1
+    - -->signing doc
+    - Pro Clear
+    - B conf.*
+    - Audit conf\. 3rd
+  ban-sheets:
+    - β
+    - P/L
+  schedule-sheet-column:
+    B6.1: G
+    B6.2: F
+  audit-sheets:
+    - Control
+    - Dir info
+    - Adj
+    - Section3
+    - Section4
+    - Section6
+    - auditPrg
+    - Version
+    - P1[a-z]+
+    - P1\..*
+    - PTR.*
+    - RPT
+  mail:
+    template: 'job-template.html'
+    subject-prefix: 'Accounting Breakdown Tabs Generation For'
+generate-afs:
+  audit-sheets:
+    - Control
+    - Dir info
+    - Adj$
+    - Section3
+    - Section4
+    - Section6
+    - auditPrg
+    - Version
+    - P1[a-z]+
+    - P1\..*
+    - PTR.*
+  mail:
+    template: 'job-template.html'
+    subject-prefix: 'AFS Sheets Generation For'
 server:
   error:
     include-message: always
+springdoc:
+  api-docs:
+    path: /api-docs

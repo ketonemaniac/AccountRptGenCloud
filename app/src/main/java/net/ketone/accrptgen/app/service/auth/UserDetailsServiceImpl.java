@@ -1,6 +1,6 @@
 package net.ketone.accrptgen.app.service.auth;
 
-import net.ketone.accrptgen.common.model.auth.AuthenticatedUser;
+import net.ketone.accrptgen.app.model.auth.AuthenticatedUser;
 import net.ketone.accrptgen.common.model.auth.Role;
 import net.ketone.accrptgen.common.model.auth.User;
 import net.ketone.accrptgen.common.repo.UserRepository;
@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService{
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;

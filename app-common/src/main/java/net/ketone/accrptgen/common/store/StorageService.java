@@ -11,6 +11,7 @@ public interface StorageService {
     String AUDIT_PRG_PATH = "auditPrg" + File.separator;
     String DBIZ_FUNDING_PATH = "dBizFunding" + File.separator;
     String BANNER_PATH = "banner" + File.separator;
+    String BREAKDOWN_TABS_PATH = "breakdownTabs" + File.separator;
 
     /**
      * Write the doc

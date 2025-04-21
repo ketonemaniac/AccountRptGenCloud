@@ -10,6 +10,7 @@ public interface SettingsService {
     String PREPARSE_TEMPLATE_PROP = "xlsx.template.name";
     String PREPARSE_AUIDTPRG_TEMPLATE_PROP = "xlsx.template.auditprg.name";
     String PREPARSE_DBIZ_FUNDING_TEMPLATE_PROP = "xlsx.template.dBizFunding.name";
+    String PREPARSE_BREAKDOWN_TABS_TEMPLATE_PROP = "xlsx.template.breakdownTabs.name";
     String MONGODB_PASS = "mongodb.password";
 
     Properties getSettings();
