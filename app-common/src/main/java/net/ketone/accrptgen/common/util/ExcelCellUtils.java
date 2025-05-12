@@ -66,9 +66,10 @@ public class ExcelCellUtils {
     }
 
     public static CellValueHolder getCellValue(Cell c) {
+        CellType cellType = c.getCellType().equals(CellType.FORMULA) ? c.getCachedFormulaResultType() : c.getCellType();
         String dataFormatStr = Optional.ofNullable(c.getCellStyle()).map(CellStyle::getDataFormatString)
                 .orElse(StringUtils.EMPTY);
-        if(CellType.NUMERIC.equals(c.getCellType()) &&
+        if(CellType.NUMERIC.equals(cellType) &&
                 dataFormatStr.contains("y") && dataFormatStr.contains("m") && dataFormatStr.contains("d")) {
             // this should be a date type
             return CellValueHolder.builder()
