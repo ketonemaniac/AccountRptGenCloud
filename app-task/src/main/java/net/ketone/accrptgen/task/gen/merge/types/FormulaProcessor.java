@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Copy the evaluated source cell to the target cell.
+ * Copy the source cell to the target cell.
+ * NO EVALUATION -- assume user opens the Excel and saves calculated formulae
  */
 @Component
 @Slf4j
@@ -28,29 +29,29 @@ public class FormulaProcessor implements CellTypeProcessor {
                 " Cell=" + sourceCell.getCell().getAddress().formatAsString());
         // templateCell.setCellFormula(cell.getCellFormula());
         try {
-            CellValue cellValue = sourceCell.getEvaluator().evaluate(sourceCell.getCell());
-            switch(cellValue.getCellType()) {
+//            CellValue cellValue = sourceCell.getEvaluator().evaluate(sourceCell.getCell());
+            switch(sourceCell.getCell().getCachedFormulaResultType()) {
                 case NUMERIC:
                     targetCell.getCell().setCellType(CellType.NUMERIC);
-                    targetCell.getCell().setCellValue(cellValue.getNumberValue());
+                    targetCell.getCell().setCellValue(sourceCell.getCell().getNumericCellValue());
                     mergeUtils.setNumericCellStyle(targetCell.getWorkbook(), targetCell.getCell(),
                             sourceCell.getCell().getCellStyle());
                     log.info("input cell with formula: " + sourceCell.getCell().getCellFormula() + " is now: "
-                            + targetCell.getCell().getNumericCellValue() + " of type " + cellValue.getCellType().name());
+                            + targetCell.getCell().getNumericCellValue() + " of type NUMERIC");
                     targetCell.getCell().setCellFormula(null);
                     break;
                 default:
                         // try String for anything else
                         targetCell.getCell().setCellType(CellType.STRING);
-                        targetCell.getCell().setCellValue(cellValue.getStringValue());
+                        targetCell.getCell().setCellValue(sourceCell.getCell().getStringCellValue());
                         log.info("input cell with formula: " + sourceCell.getCell().getCellFormula() + " is now: "
                                 + targetCell.getCell().getStringCellValue() + " of type STRING.");
                         targetCell.getCell().setCellFormula(null);
                 break;
             }
-            if(CellType.ERROR.equals(cellValue.getCellType())) {
-                throw new RuntimeException();
-            }
+//            if(CellType.ERROR.equals(cellValue.getCellType())) {
+//                throw new RuntimeException();
+//            }
         } catch (Exception err) {
             throw new EvaluationException("FormulaProcessor",sourceCell.getCell());
         }

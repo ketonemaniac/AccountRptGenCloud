@@ -143,6 +143,8 @@ public class ExcelTaskUtils {
         ClientAnchor anchor = helper.createClientAnchor();
         anchor.setCol1(position.getCol());
         anchor.setRow1(position.getRow());
+        anchor.setCol2(position.getCol()+1);
+        anchor.setRow2(position.getRow()+1);
         Picture picture = drawing.createPicture(anchor, pictureIdx);
         picture.resize(sizeCellSpan._1,sizeCellSpan._2);
     }
